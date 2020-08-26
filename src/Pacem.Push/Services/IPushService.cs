@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace Pacem.Push.Services
 {
     interface IPushService
-    {/// <summary>
-     /// Defines a service to manage Push subscriptions and send Push notifications
-     /// </summary>
+    {
+        /// <summary>
+        /// Defines a service to manage Push subscriptions and send Push notifications
+        /// </summary>
         public interface IPushService
         {
             /// <summary>

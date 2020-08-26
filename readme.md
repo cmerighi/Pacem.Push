@@ -16,3 +16,7 @@ This WebApi should be accessible only by authorized clients (_Apps_).
 Authorized clients may subscribe/unsubscribe users and send relevant notifications.
   
 Clients should authenticate using `OAuth2` protocol.
+
+### Credits
+Thanks to [this repo](https://github.com/MicrosoftEdge/pushnotifications-demo-aspnetcore) for
+providing a viable start point.
