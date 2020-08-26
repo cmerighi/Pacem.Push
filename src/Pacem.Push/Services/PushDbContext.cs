@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Pacem.Push.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Pacem.Push.Data
 {
@@ -13,6 +8,7 @@ namespace Pacem.Push.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // nothing to declare (yet)
             base.OnModelCreating(modelBuilder);
         }
     }

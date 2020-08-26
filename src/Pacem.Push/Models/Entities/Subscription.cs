@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Pacem.Push.Entities
+namespace Pacem.Push
 {
     [Table("Subscriptions", Schema ="Push")]
     public class Subscription
