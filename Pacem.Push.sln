@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pacem.Push", "src\Pacem.Push\Pacem.Push.csproj", "{6BD0FB19-5C3D-430C-B243-40C38FBE9244}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE202752-7E94-467D-B809-EE71462994A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{4AD34C9D-90D2-45C2-A947-AFE82E4613F5}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		readme.md = readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{C286D685-A356-4FEA-B3AB-6808968B2397}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Pacem.Push.SqlServer", "data\Pacem.Push.SqlServer\Pacem.Push.SqlServer.sqlproj", "{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BD0FB19-5C3D-430C-B243-40C38FBE9244}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD0FB19-5C3D-430C-B243-40C38FBE9244}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD0FB19-5C3D-430C-B243-40C38FBE9244}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD0FB19-5C3D-430C-B243-40C38FBE9244}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6BD0FB19-5C3D-430C-B243-40C38FBE9244} = {CE202752-7E94-467D-B809-EE71462994A8}
+		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411} = {C286D685-A356-4FEA-B3AB-6808968B2397}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86679EE4-6D0E-4B18-85AA-BFDBB2B29697}
+	EndGlobalSection
+EndGlobal
