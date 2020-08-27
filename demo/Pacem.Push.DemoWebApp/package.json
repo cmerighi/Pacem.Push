@@ -3,13 +3,15 @@
   "name": "asp.net",
   "private": true,
   "scripts": {
-    "vapid": "node vapid.js"
+    "vapid": "node vapid.js",
+    "build-sw": "tsc -p client/serviceWorker/tsconfig.json"
   },
   "devDependencies": {
-    "web-push": "3.4.4"
+    "web-push": "3.4.4",
+    "typescript": "4.0.2"
   },
   "dependencies": {
-    "pacem": "0.10.0-erbil",
-    "pacem-less": "0.10.0-erbil"
+    "pacem": "0.10.0-heliopolis",
+    "pacem-less": "0.10.0-heliopolis"
   }
 }

@@ -13,12 +13,12 @@ namespace Pacem.Push.Services
     public class SqlServerPushService : IPushService
     {
         private readonly PushDbContext _db;
-        private readonly IVapidDataProvider _vapid;
+        private readonly IVapidDetailsStore _vapid;
         private readonly IMapper _mapper;
         private readonly WebPush.WebPushClient _client;
         private readonly ILogger<SqlServerPushService> _logger;
 
-        public SqlServerPushService(PushDbContext db, IMapper mapper, IVapidDataProvider vapid, ILogger<SqlServerPushService> logger)
+        public SqlServerPushService(PushDbContext db, IMapper mapper, IVapidDetailsStore vapid, ILogger<SqlServerPushService> logger)
         {
             _db = db;
             _vapid = vapid;

@@ -13,9 +13,9 @@ namespace Pacem.Push.Controllers
     {
         private readonly ILogger<PushController> _logger;
         private readonly IPushService _push;
-        private readonly IVapidDataProvider _vapid;
+        private readonly IVapidDetailsStore _vapid;
 
-        public PushController(IPushService push, IVapidDataProvider vapid, ILogger<PushController> logger)
+        public PushController(IPushService push, IVapidDetailsStore vapid, ILogger<PushController> logger)
         {
             _push = push;
             _vapid = vapid;

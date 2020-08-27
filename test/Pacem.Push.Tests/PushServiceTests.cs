@@ -22,17 +22,14 @@ namespace Pacem.Push.Tests
             {
                 using (var client = server.CreateClient())
                 {
-                    var vapid = server.Services.GetRequiredService<IVapidDataProvider>();
-                    var vapidDetails = await vapid.GetVapidDataAsync();
-
                     HttpContent payload = new StringContent(System.Text.Json.JsonSerializer.Serialize(
                         new PushSubscription
                         {
                             Endpoint = "https://foo.baz/push/...",
                             Keys = new Dictionary<string, string>
                              {
-                                 { PushSubscriptionKeyNames.P256Dh, vapidDetails.PublicKey },
-                                 { PushSubscriptionKeyNames.Auth, vapidDetails.PrivateKey }
+                                 { PushSubscriptionKeyNames.P256Dh, "P256DH" },
+                                 { PushSubscriptionKeyNames.Auth, "AUTH" }
                              }
                         }, Pacem.Push.Serialization.JsonSerializer.JsonSerializerOptions)
                     , Encoding.UTF8, "application/json");

@@ -14,4 +14,8 @@
     <PackageReference Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="4.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\index.html" />
+  </ItemGroup>
+
 </Project>

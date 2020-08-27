@@ -8,6 +8,7 @@ using AutoMapper.EquivalencyExpression;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,7 @@ namespace Pacem.Push
             }, Assembly.GetExecutingAssembly());
 
             // OAuth2
+            services.AddDistributedMemoryCache();
             services.AddAuthentication("Bearer")
                 .AddOAuth2Introspection(options =>
                 {
@@ -91,9 +93,12 @@ namespace Pacem.Push
                 app.UseHttpsRedirection();
             }
 
+
             app.UseCors();
 
             app.UseAuthentication();
+
+            app.UseDefaultFiles().UseStaticFiles();
 
             app.UseRouting();
 

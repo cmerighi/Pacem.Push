@@ -4,13 +4,13 @@ using Microsoft.Extensions.Configuration;
 namespace Pacem.Push.Services
 {
     /// <summary>
-    /// Implements <see cref="IVapidDataProvider"/> exploiting the environment configuration.
+    /// Implements <see cref="IVapidDetailsStore"/> exploiting the environment configuration.
     /// </summary>
-    public class DefaultVapidDataProvider : IVapidDataProvider
+    public class DefaultVapidDetailStore : IVapidDetailsStore
     {
         private readonly IConfiguration _configuration;
 
-        public DefaultVapidDataProvider(IConfiguration configuration)
+        public DefaultVapidDetailStore(IConfiguration configuration)
         {
             _configuration = configuration;
         }
