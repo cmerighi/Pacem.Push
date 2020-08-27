@@ -5,20 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Pacem.Push
+namespace Pacem.Push.Entities
 {
     [Table("Subscriptions", Schema ="Push")]
     public class Subscription
     {
-        public Subscription() { }
-
         [Key, Column, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         /// <summary>
         /// The user identifier.
         /// </summary>
-        [Required, Column]
+        [Column]
         public string UserId { get; set; }
 
         /// <summary>

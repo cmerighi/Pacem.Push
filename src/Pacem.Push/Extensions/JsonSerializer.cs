@@ -25,5 +25,4 @@ namespace Pacem.Push.Serialization
 
         public static JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions();
     }
-
 }

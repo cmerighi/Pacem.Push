@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pacem.Push", "src\Pacem.Pus
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE202752-7E94-467D-B809-EE71462994A8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{4AD34C9D-90D2-45C2-A947-AFE82E4613F5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_root", "_root", "{4AD34C9D-90D2-45C2-A947-AFE82E4613F5}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		readme.md = readme.md
@@ -16,6 +16,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{C286D685-A356-4FEA-B3AB-6808968B2397}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Pacem.Push.SqlServer", "data\Pacem.Push.SqlServer\Pacem.Push.SqlServer.sqlproj", "{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{3D4FEBEE-B709-414B-AA21-A037552BFC3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{EEAE1772-4F49-4EE2-A16E-38DD0FE5C3BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pacem.Push.DemoWebApp", "demo\Pacem.Push.DemoWebApp\Pacem.Push.DemoWebApp.csproj", "{4C67A217-BCA9-4C53-9935-0999137CA508}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pacem.Push.Tests", "test\Pacem.Push.Tests\Pacem.Push.Tests.csproj", "{CD634ECA-44CB-4194-AD6E-E37F6969A0B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +41,14 @@ Global
 		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4C67A217-BCA9-4C53-9935-0999137CA508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C67A217-BCA9-4C53-9935-0999137CA508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C67A217-BCA9-4C53-9935-0999137CA508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C67A217-BCA9-4C53-9935-0999137CA508}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD634ECA-44CB-4194-AD6E-E37F6969A0B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD634ECA-44CB-4194-AD6E-E37F6969A0B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD634ECA-44CB-4194-AD6E-E37F6969A0B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD634ECA-44CB-4194-AD6E-E37F6969A0B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -40,6 +56,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6BD0FB19-5C3D-430C-B243-40C38FBE9244} = {CE202752-7E94-467D-B809-EE71462994A8}
 		{BAC2CB07-5AE8-4747-8D4F-52D11FACF411} = {C286D685-A356-4FEA-B3AB-6808968B2397}
+		{4C67A217-BCA9-4C53-9935-0999137CA508} = {3D4FEBEE-B709-414B-AA21-A037552BFC3B}
+		{CD634ECA-44CB-4194-AD6E-E37F6969A0B1} = {EEAE1772-4F49-4EE2-A16E-38DD0FE5C3BB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {86679EE4-6D0E-4B18-85AA-BFDBB2B29697}

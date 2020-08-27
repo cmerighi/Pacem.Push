@@ -11,20 +11,19 @@ namespace Pacem.Push.Services
         /// Registers a push subscription.
         /// </summary>
         /// <param name="subscription">Push subscription.</param>
-        Task<Subscription> SubscribeAsync(Subscription subscription);
+        Task<PushSubscription> SubscribeAsync(PushSubscription subscription);
 
         /// <summary>
         /// Un-registers a push subscription.
         /// </summary>
         /// <param name="subscription">Push subscription.</param>
-        Task UnsubscribeAsync(Subscription subscription);
+        Task UnsubscribeAsync(PushSubscription subscription);
         
         /// <summary>
         /// Sends a push notification to a user.
         /// </summary>
         /// <param name="userId">Target user identifier.</param>
-        /// <param name="endpoint">The subscription endpoint.</param>
         /// <param name="notification">The notification itself.</param>
-        Task SendAsync(string userId, string endpoint, Notification notification);
+        Task SendAsync(string userId, Notification notification);
     }
 }

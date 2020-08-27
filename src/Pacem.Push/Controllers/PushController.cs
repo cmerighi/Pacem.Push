@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Pacem.Push.Entities;
 using Pacem.Push.Services;
+using System.Threading.Tasks;
 
 namespace Pacem.Push.Controllers
 {
@@ -24,7 +22,7 @@ namespace Pacem.Push.Controllers
             _logger = logger;
         }
 
-        [HttpPost("vapidpublickey")]
+        [HttpGet("vapidpublickey")]
         public async Task<ActionResult> VapidPublicKeyAsync()
         {
             var vapid = await _vapid.GetVapidDataAsync();
@@ -39,23 +37,25 @@ namespace Pacem.Push.Controllers
         }
 
         [HttpPost("subscribe")]
-        public async Task<ActionResult<Subscription>> SubscribeAsync([FromBody] Subscription subscription)
+        public async Task<ActionResult<PushSubscription>> SubscribeAsync([FromBody] PushSubscription subscription)
         {
-            // TODO: replace with actual subscription request structure.
-            // https://blog.mozilla.org/services/2016/08/23/sending-vapid-identified-webpush-notifications-via-mozillas-push-service/#receive
             return await _push.SubscribeAsync(subscription);
         }
 
-        [HttpPost("unsubscribe")]
-        public async Task UnsubscribeAsync()
+        [HttpDelete("unsubscribe")]
+        public async Task<ActionResult> UnsubscribeAsync([FromBody] PushSubscription subscription)
         {
-
+            await _push.UnsubscribeAsync(subscription);
+            return NoContent();
         }
 
+        // 'send' endpoint has protected access (oauth2 protocol) 
+        [Authorize]
         [HttpPost("send/{userId}")]
-        public async Task SendAsync([FromRoute] string userId, [FromBody] Notification notification)
+        public async Task<ActionResult> SendAsync([FromRoute] string userId, [FromBody] Notification notification)
         {
-
+            await _push.SendAsync(userId, notification);
+            return Accepted();
         }
     }
 }

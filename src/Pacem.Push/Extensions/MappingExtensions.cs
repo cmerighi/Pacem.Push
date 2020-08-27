@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class MappingExtensions
     {
-        public static void AddsMappings(this IMapperConfigurationExpression config)
+        public static void AddPacemWebPushMappings(this IMapperConfigurationExpression config)
         {
             config.CreateMap<VapidData, WebPush.VapidDetails>();
 
@@ -16,6 +16,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 .ForMember(s => s.Expires, p => p.Ignore())
                 .ForMember(s => s.Id, p => p.Ignore())
                 .ForMember(s => s.UserId, p => p.Ignore())
+                ;
+
+            config.CreateMap<PushSubscription, Subscription>()
+                .ForMember(s => s.Auth, c => c.MapFrom(i => i.Auth()))
+                .ForMember(s => s.Expires, c => c.MapFrom(i => i.ExpirationTime))
+                .ForMember(s => s.P256Dh, c => c.MapFrom(i => i.P256Dh()))
+                .ForMember(s => s.UserId, c => c.MapFrom(i => i.UserId ?? Pacem.KeyGenerator.GetRandomString(16)))
+                .ForMember(s => s.Id, c => c.Ignore())
+                .ReverseMap()
                 ;
         }
     }

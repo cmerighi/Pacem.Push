@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "scripts": {
+    "vapid": "node vapid.js"
+  },
+  "devDependencies": {
+    "web-push": "3.4.4"
+  },
+  "dependencies": {
+    "pacem": "0.10.0-erbil",
+    "pacem-less": "0.10.0-erbil"
+  }
+}
