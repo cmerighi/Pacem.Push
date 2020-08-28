@@ -1,3 +1,3 @@
 ﻿'use strict'
 
-// self.addEventListener('n')
+// no need to do anything

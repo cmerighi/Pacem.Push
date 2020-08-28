@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pacem.Push.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PushController : ControllerBase
@@ -49,8 +50,6 @@ namespace Pacem.Push.Controllers
             return NoContent();
         }
 
-        // 'send' endpoint has protected access (oauth2 protocol) 
-        [Authorize]
         [HttpPost("send/{userId}")]
         public async Task<ActionResult> SendAsync([FromRoute] string userId, [FromBody] Notification notification)
         {

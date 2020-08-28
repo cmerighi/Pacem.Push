@@ -20,6 +20,12 @@ namespace Pacem.Push.Entities
         public string UserId { get; set; }
 
         /// <summary>
+        /// The client app identifier.
+        /// </summary>
+        [Column]
+        public string ClientId { get; set; }
+
+        /// <summary>
         /// The subscription's endpoint.
         /// </summary>
         [Required, Column]

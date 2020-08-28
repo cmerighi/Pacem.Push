@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .ForMember(s => s.Expires, p => p.Ignore())
                 .ForMember(s => s.Id, p => p.Ignore())
                 .ForMember(s => s.UserId, p => p.Ignore())
+                .ForMember(s => s.ClientId, p => p.Ignore())
                 ;
 
             config.CreateMap<PushSubscription, Subscription>()

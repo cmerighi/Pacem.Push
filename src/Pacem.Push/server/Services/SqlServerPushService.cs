@@ -27,11 +27,19 @@ namespace Pacem.Push.Services
             _logger = logger;
         }
 
-        public async Task SendAsync(string userId, Notification notification)
+        public Task SendAsync(string clientId, Notification notification)
+            => SendAsync(clientId, default, notification);
+
+        public async Task SendAsync(string clientId, string userId, Notification notification)
         {
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentNullException(nameof(clientId));
+            }
+
             var subscriptions = await _db.SubscriptionSet
                 .AsNoTracking()
-                .Where(s => s.UserId == userId)
+                .Where(s => s.ClientId == clientId && (string.IsNullOrEmpty(userId) || s.UserId == userId))
                 .ProjectTo<WebPush.PushSubscription>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
@@ -62,24 +70,28 @@ namespace Pacem.Push.Services
             }
         }
 
-        public async Task<PushSubscription> SubscribeAsync(PushSubscription subscription)
+        public async Task<PushSubscription> SubscribeAsync(string clientId, PushSubscription subscription)
         {
-            string p256dh = subscription.P256Dh();
+            Subscription stored = null;
 
-            // retrieve existing, if any
-            var stored = await _db.SubscriptionSet.Where(i => i.P256Dh == p256dh).FirstOrDefaultAsync();
-
-            // expired?
-            if (stored?.Expires.HasValue == true && DateTimeOffset.FromUnixTimeMilliseconds(stored.Expires.Value) < DateTimeOffset.UtcNow)
+            if (!string.IsNullOrEmpty(subscription.UserId))
             {
-                _db.Remove(stored);
-                stored = null;
+                // retrieve existing, if any
+                stored = await _db.SubscriptionSet.Where(i => i.ClientId == clientId && i.UserId == subscription.UserId).FirstOrDefaultAsync();
+
+                // expired?
+                if (stored?.Expires.HasValue == true && DateTimeOffset.FromUnixTimeMilliseconds(stored.Expires.Value) < DateTimeOffset.UtcNow)
+                {
+                    _db.Remove(stored);
+                    stored = null;
+                }
             }
 
             // (re)new
             if (stored == null)
             {
                 stored = _mapper.Map<Subscription>(subscription);
+                stored.ClientId = clientId;
                 await _db.AddAsync(stored);
                 await _db.SaveChangesAsync(true);
             }

@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <LangVersion>Latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="client\serviceWorker\sw.ts" />
+    <Content Remove="wwwroot\index.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="client\serviceWorker\sw.ts" />
+    <None Include="wwwroot\index.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Pacem.Extensions.Http" Version="0.6.0" />
   </ItemGroup>
 
 </Project>
