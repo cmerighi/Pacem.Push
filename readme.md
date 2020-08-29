@@ -1,6 +1,6 @@
 # Pacem.Push
 Ongoing implementation of 
-a [VAPID](https://tools.ietf.org/id/draft-ietf-webpush-vapid-03.html) 
+a [`VAPID`](https://tools.ietf.org/id/draft-ietf-webpush-vapid-03.html) 
 web push server, written in ASP.Net Core 3.1+.
 
 ### The Big Picture
@@ -12,7 +12,15 @@ that your _push-notification_-enabled _App_ would need:
 - `send notifications`.
 
 ### Push Notifications as a Service
-This WebApi should be accessible only by authorized clients (_Apps_).  
+This WebApi should be accessible only by authorized clients (_Apps_).
+
+> Each client application is associated to specific `VAPID` details.
+
 Authorized clients may subscribe/unsubscribe users and send relevant notifications.
   
-Clients should authenticate using `OAuth2` protocol.
+Clients should authenticate via `OAuth2 Introspection` protocol.  
+(The implementation of the relevant _IdentityServer_ is not provided.)
+
+### Implementation
+This implementation lean on a SqlServer store and uses
+EF Core as a driver.

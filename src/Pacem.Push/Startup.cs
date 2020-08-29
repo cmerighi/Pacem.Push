@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.EquivalencyExpression;
+using IdentityModel.AspNetCore.OAuth2Introspection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,11 +32,55 @@ namespace Pacem.Push
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<PushDbContext>(options =>
+            string sqlConnectionString = Configuration.GetConnectionString("Database");
+
+            // Subscription storage
+            services.AddSqlServerPushService(sqlConnectionString);
+
+            // VapidDetails retriever
+            services.AddSqlServerVapidDataProvider(sqlConnectionString);
+
+            // AutoMapper
+            services.AddAutoMapper(config =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("Database"));
+                config.AddCollectionMappers();
+
+                // specific mappings here
+                config.AddPacemWebPushMappings();
+
+            }, Assembly.GetExecutingAssembly());
+
+            // OAuth2
+            services.AddDistributedMemoryCache();
+            services.AddAuthentication("Bearer")
+                .AddOAuth2Introspection(options =>
+                {
+                    options.Authority = Configuration.GetValue<string>("OAuth2:Authority");
+                    options.ClientId = Configuration.GetValue<string>("OAuth2:ClientId");
+                    options.ClientSecret = Configuration.GetValue<string>("OAuth2:ClientSecret");
+                    options.CacheDuration = TimeSpan.FromMinutes(5D);
+                    options.EnableCaching = true;
+                    options.TokenRetriever = (request) => TokenRetrieval.FromAuthorizationHeader()(request) ?? /* querystring fallback */ TokenRetrieval.FromQueryString()(request);
+                    options.NameClaimType = "name";
+                    options.DiscoveryPolicy.RequireHttps = false;
+                });
+
+            // Controllers and output formatting
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                Pacem.Push.Serialization.JsonSerializer.Configure(options.JsonSerializerOptions);
             });
-            services.AddControllers();
+
+            // CORS
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(cors =>
+                {
+                    cors.AllowAnyMethod();
+                    cors.AllowAnyOrigin();
+                    cors.AllowAnyHeader();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,8 +90,17 @@ namespace Pacem.Push
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHttpsRedirection();
+            }
 
-            app.UseHttpsRedirection();
+
+            app.UseCors();
+
+            app.UseAuthentication();
+
+            app.UseDefaultFiles().UseStaticFiles();
 
             app.UseRouting();
 
