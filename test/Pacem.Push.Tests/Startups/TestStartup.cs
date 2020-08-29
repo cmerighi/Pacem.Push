@@ -28,7 +28,7 @@ namespace Pacem.Push.Tests
         public void ConfigureServices(IServiceCollection services)
         {
             // VapidDetails retriever
-            services.AddDefaultVapidDataProvider();
+            services.AddSqlServerVapidDataProvider();
 
             services.AddDbContext<PushDbContext>(options =>
             {

@@ -32,11 +32,13 @@ namespace Pacem.Push
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string sqlConnectionString = Configuration.GetConnectionString("Database");
+
             // Subscription storage
-            services.AddSqlServerPushService(Configuration.GetConnectionString("Database"));
+            services.AddSqlServerPushService(sqlConnectionString);
 
             // VapidDetails retriever
-            services.AddDefaultVapidDataProvider();
+            services.AddSqlServerVapidDataProvider(sqlConnectionString);
 
             // AutoMapper
             services.AddAutoMapper(config =>

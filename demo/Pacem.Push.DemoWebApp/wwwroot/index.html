@@ -20,7 +20,8 @@
                 <pacem-data model="{{ !$pacem.isNull(#sw.pushSubscription) }}" id="subscribed"></pacem-data>
 
                 <pacem-button class="button"
-                              on-click="#sw.subscribe('BBiX2bJACEi3mDu58vOTFnhN5o59vZeryi4MHhLyNDXKtoemvD3qDS6ZYSBwKn5bqUcunv1TBcNmCpt52q-aoYc')"
+                              disabled="{{ $pacem.isNullOrEmpty(#vapid.result) }}"
+                              on-click="#subscribed.model ? #sw.unsubscribe() : #sw.subscribe(#vapid.result)"
                               css-class="{{ { 'button-primary': !#subscribed.model } }}"
                               icon-glyph="{{ #subscribed.model ? 'notifications_active' : 'notifications_paused' }}">
                     <pacem-text text="{{ #subscribed.model ? 'Click to unsubscribe' : 'Click to subscribe' }}"></pacem-text>
@@ -33,11 +34,12 @@
         </div>
     </pacem-panel>
 
+    <pacem-fetch url="/api/push/vapidpublic" id="vapid" as="text"></pacem-fetch>
     <pacem-fetch url="/api/push/subscribe" method="POST" id="subscribe" autofetch="false"></pacem-fetch>
     <pacem-fetch url="/api/push/unsubscribe" method="POST" id="unsubscribe" autofetch="false"></pacem-fetch>
-    <pacem-serviceworker-proxy src="/sw.js" id="sw" 
-                               on-unsubscribe="#subscribe.parameters = $event.detail; #unsubscribe.fetch()"
-                               on-subscribe="#subscribe.parameters = $event.detail; #subscribe.fetch()"></pacem-serviceworker-proxy>
+    <pacem-serviceworker-proxy src="/sw.js" id="sw"
+                               on-unsubscribe="#unsubscribe.parameters = $event.detail.toJSON(); #unsubscribe.fetch()"
+                               on-subscribe="console.log($event.detail.toJSON()); #subscribe.parameters = $event.detail.toJSON(); #subscribe.fetch()"></pacem-serviceworker-proxy>
 
     <script src="/js/pacem-foundation.js"></script>
     <script src="/js/pacem-core.js"></script>

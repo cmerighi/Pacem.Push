@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pacem.Push.Entities;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Pacem.Push.Controllers
 {
-    [Authorize]
+    [Authorize] // <- OAuth2 introspection
     [ApiController]
     [Route("api/[controller]")]
     public class PushController : ControllerBase
@@ -26,7 +27,13 @@ namespace Pacem.Push.Controllers
         [HttpGet("vapidpublickey")]
         public async Task<ActionResult> VapidPublicKeyAsync()
         {
-            var vapid = await _vapid.GetVapidDataAsync();
+            string clientId = User.FindFirst(JwtClaimTypes.ClientId)?.Value;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                return Unauthorized();
+            }
+
+            var vapid = await _vapid.GetVapidDetailsAsync(clientId);
             string publicKey = vapid?.PublicKey;
 
             if (string.IsNullOrEmpty(publicKey))
@@ -40,20 +47,38 @@ namespace Pacem.Push.Controllers
         [HttpPost("subscribe")]
         public async Task<ActionResult<PushSubscription>> SubscribeAsync([FromBody] PushSubscription subscription)
         {
-            return await _push.SubscribeAsync(subscription);
+            string clientId = User.FindFirst(JwtClaimTypes.ClientId)?.Value;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                return Unauthorized();
+            }
+
+            return await _push.SubscribeAsync(clientId, subscription);
         }
 
-        [HttpDelete("unsubscribe")]
+        [HttpPost("unsubscribe")]
         public async Task<ActionResult> UnsubscribeAsync([FromBody] PushSubscription subscription)
         {
-            await _push.UnsubscribeAsync(subscription);
+            string clientId = User.FindFirst(JwtClaimTypes.ClientId)?.Value;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                return Unauthorized();
+            }
+
+            await _push.UnsubscribeAsync(clientId, subscription);
             return NoContent();
         }
 
-        [HttpPost("send/{userId}")]
+        [HttpPost("send/{userId?}")]
         public async Task<ActionResult> SendAsync([FromRoute] string userId, [FromBody] Notification notification)
         {
-            await _push.SendAsync(userId, notification);
+            string clientId = User.FindFirst(JwtClaimTypes.ClientId)?.Value;
+            if (string.IsNullOrEmpty(clientId))
+            {
+                return Unauthorized();
+            }
+
+            await _push.SendAsync(clientId, userId, notification);
             return Accepted();
         }
     }

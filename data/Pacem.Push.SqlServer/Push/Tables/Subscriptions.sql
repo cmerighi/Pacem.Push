@@ -10,7 +10,8 @@
 
 	[Endpoint] varchar(511) NOT NULL,
 	[Auth] varchar(31) NOT NULL,
-	[Expires] bigint NULL,
+	[Expires] bigint NULL, 
+    CONSTRAINT [FK_Subscriptions_Clients] FOREIGN KEY ([ClientId]) REFERENCES [Push].[Clients]([ClientId]) ON UPDATE CASCADE,
 )
 
 GO

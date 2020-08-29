@@ -11,6 +11,7 @@ namespace Pacem.Push.Data
         }
 
         public DbSet<Subscription> SubscriptionSet { get; set; }
+        public DbSet<Client> ClientSet { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

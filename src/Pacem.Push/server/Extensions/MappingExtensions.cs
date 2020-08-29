@@ -8,7 +8,13 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static void AddPacemWebPushMappings(this IMapperConfigurationExpression config)
         {
-            config.CreateMap<VapidData, WebPush.VapidDetails>();
+            config.CreateMap<VapidDetails, WebPush.VapidDetails>();
+
+            config.CreateMap<Client, VapidDetails>()
+                .ForMember(v => v.PublicKey, e => e.MapFrom(c => c.VapidPublicKey))
+                .ForMember(v => v.PrivateKey, e => e.MapFrom(c => c.VapidPrivateKey))
+                .ForMember(v => v.Subject, e => e.MapFrom(c => c.VapidSubject))
+                ;
 
             config.CreateMap<Subscription, WebPush.PushSubscription>()
                 .ForMember(p => p.P256DH, c => c.MapFrom(i => i.P256Dh))

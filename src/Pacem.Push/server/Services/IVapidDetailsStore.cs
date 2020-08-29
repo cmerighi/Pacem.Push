@@ -10,6 +10,6 @@ namespace Pacem.Push.Services
         /// <summary>
         /// Retrieves the VAPID details.
         /// </summary>
-        Task<VapidData> GetVapidDataAsync();
+        Task<VapidDetails> GetVapidDetailsAsync(string clientId);
     }
 }
