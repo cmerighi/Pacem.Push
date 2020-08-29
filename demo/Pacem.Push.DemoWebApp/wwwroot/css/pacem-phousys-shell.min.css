@@ -1,5 +1,5 @@
 /**
- * pacem v0.10.0-jericho (https://js.pacem.it)
+ * pacem v0.10.0 (https://js.pacem.it)
  * Copyright 2020 Pacem (https://pacem.it)
  * Licensed under MIT
  */

@@ -13,7 +13,7 @@
     "copyfiles": "2.3.0"
   },
   "dependencies": {
-    "pacem": "0.10.0-jericho",
-    "pacem-less": "0.10.0-jericho"
+    "pacem": "0.10.0",
+    "pacem-less": "0.10.0"
   }
 }
