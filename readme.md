@@ -1,5 +1,5 @@
 # Pacem.Push
-Ongoing implementation of 
+Implementation of 
 a [`VAPID`](https://tools.ietf.org/id/draft-ietf-webpush-vapid-03.html) 
 web push server, written in ASP.Net Core 3.1+.
 
