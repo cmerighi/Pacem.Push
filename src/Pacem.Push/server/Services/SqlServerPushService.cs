@@ -53,7 +53,7 @@ namespace Pacem.Push.Services
                 return;
             }
 
-            string jsonNotification = System.Text.Json.JsonSerializer.Serialize(notification);
+            string jsonNotification = System.Text.Json.JsonSerializer.Serialize(notification, Pacem.Push.Serialization.JsonSerializer.JsonSerializerOptions);
 
             VapidDetails vapidData = await _vapid.GetVapidDetailsAsync(clientId);
             WebPush.VapidDetails vapid = _mapper.Map<WebPush.VapidDetails>(vapidData);
@@ -62,7 +62,9 @@ namespace Pacem.Push.Services
             {
                 try
                 {
+                    _logger.LogInformation("Sending {p256dh} subscription to encrypt message:\n{message}...", subscription.P256DH, jsonNotification);
                     _client.SendNotification(subscription, jsonNotification, vapid);
+                    _logger.LogInformation("...sent!");
                 }
                 catch (WebPush.WebPushException exc)
                 {

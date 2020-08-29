@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using IdentityModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +8,10 @@ using Pacem.Push.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 

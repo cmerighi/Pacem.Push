@@ -9,6 +9,7 @@ using Org.BouncyCastle.Crypto.Tls;
 using Pacem.Push.Services;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -24,6 +25,8 @@ namespace Pacem.Push.Tests
             {
                 using (var client = server.CreateClient())
                 {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
+
                     var response = await client.GetAsync("/api/push/vapidpublickey");
                     response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
                     string publicKey = await response.Content.ReadAsStringAsync();

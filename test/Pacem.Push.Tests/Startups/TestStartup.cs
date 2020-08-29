@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.EquivalencyExpression;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -27,16 +28,18 @@ namespace Pacem.Push.Tests
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // VapidDetails retriever
-            services.AddSqlServerVapidDataProvider();
-
             services.AddDbContext<PushDbContext>(options =>
             {
                 options.UseInMemoryDatabase("PushDatabase");
             });
             services.AddScoped<IPushService, SqlServerPushService>();
+            services.AddScoped<IVapidDetailsStore, SqlServerVapidDetailStore>();
 
             var testedAssembly = typeof(Push.Controllers.PushController).Assembly;
+
+            services.AddAuthentication("Test")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                    "Test", options => { });
 
             // AutoMapper
             services.AddAutoMapper(config =>
@@ -59,7 +62,9 @@ namespace Pacem.Push.Tests
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            app.UseAuthentication();
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
