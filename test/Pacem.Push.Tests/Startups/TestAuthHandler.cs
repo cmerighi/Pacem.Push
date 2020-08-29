@@ -22,7 +22,7 @@ namespace Pacem.Push.Tests
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[] { new Claim(JwtClaimTypes.ClientId, "Test.Client") };
+            var claims = new[] { new Claim(JwtClaimTypes.ClientId, Utils.CLIENT_ID) };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "Test");
