@@ -56,7 +56,7 @@
 
     <pacem-serviceworker-proxy src="/sw.js" id="sw"
                                on-unsubscribe="#unsubscribe.parameters = $event.detail.toJSON(); #unsubscribe.fetch()"
-                               on-subscribe="console.log($event.detail.toJSON()); #subscribe.parameters = $event.detail.toJSON(); #subscribe.fetch()"></pacem-serviceworker-proxy>
+                               on-subscribe="console.log($event.detail.toJSON()); #subscribe.parameters = Pacem.Utils.extend({ userId: #pushUserId.model }, $event.detail.toJSON()); #subscribe.fetch()"></pacem-serviceworker-proxy>
 
     <script src="/js/pacem-foundation.js"></script>
     <script src="/js/pacem-core.js"></script>
