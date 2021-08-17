@@ -75,7 +75,7 @@ namespace Pacem.Push.DemoWebApp.Controllers
         [HttpPost("send/{userId}")]
         public Task PushNotification(string userId)
         {
-            return GetAuthorizedClient().PostAsync("api/push/send/"+userId, new
+            return GetAuthorizedClient().PostAsync("api/push/send/" + userId, new
             {
                 title = "Demo App Notification!"
             });
