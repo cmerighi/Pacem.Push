@@ -1,7 +1,7 @@
 # Pacem.Push
 Ongoing implementation of 
 a [VAPID](https://tools.ietf.org/id/draft-ietf-webpush-vapid-03.html) 
-web push server, written in ASP.Net Core 3.1+.
+web push server, written in ASP.Net 5+.
 
 ### The Big Picture
 This WebApi aims to provide all the endpoints and functionalities
