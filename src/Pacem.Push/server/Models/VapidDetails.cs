@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Pacem.Push
 {
-    public class VapidData
+    public class VapidDetails
     {
         public string Subject { get; set; }
         public string PublicKey { get; set; }

@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.BouncyCastle.Crypto.Tls;
+using Pacem.Push.Data;
 using Pacem.Push.Services;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -22,6 +24,9 @@ namespace Pacem.Push.Tests
         {
             using (var server = Utils.CreateTestServer())
             {
+                var db = server.Services.GetRequiredService<PushDbContext>();
+                Utils.SeedPushDbContext(db);
+
                 using (var client = server.CreateClient())
                 {
                     var response = await client.GetAsync("/api/push/vapidpublickey");

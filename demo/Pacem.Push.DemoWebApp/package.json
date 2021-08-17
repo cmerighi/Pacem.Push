@@ -4,14 +4,16 @@
   "private": true,
   "scripts": {
     "vapid": "node vapid.js",
-    "build-sw": "tsc -p client/serviceWorker/tsconfig.json"
+    "build-sw": "tsc -p client/serviceWorker/tsconfig.json",
+    "copyfiles": "copyfiles -f node_modules/pacem/dist/js/*.js wwwroot/js && copyfiles -f node_modules/pacem/dist/css/*.css wwwroot/css"
   },
   "devDependencies": {
     "web-push": "3.4.4",
-    "typescript": "4.0.2"
+    "typescript": "4.0.2",
+    "copyfiles": "2.3.0"
   },
   "dependencies": {
-    "pacem": "0.10.0-heliopolis",
-    "pacem-less": "0.10.0-heliopolis"
+    "pacem": "0.10.0",
+    "pacem-less": "0.10.0"
   }
 }

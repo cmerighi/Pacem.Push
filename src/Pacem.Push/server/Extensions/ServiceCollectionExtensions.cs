@@ -12,8 +12,12 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddDefaultVapidDataProvider(this IServiceCollection services)
-            => services.AddSingleton<IVapidDetailsStore, DefaultVapidDetailStore>();
+        public static IServiceCollection AddSqlServerVapidDataProvider(this IServiceCollection services, string connectionString)
+            => services
+            .AddDbContextPool<PushDbContext>(options =>
+            {
+                options.UseSqlServer(connectionString);
+            }).AddScoped<IVapidDetailsStore, SqlServerVapidDetailStore>();
 
         public static IServiceCollection AddSqlServerPushService(this IServiceCollection services, string connectionString)
             => services

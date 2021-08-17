@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Push Notification Server - Pacem</title>
+    <link href="/css/pacem-phousys-shell.min.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- preloader -->
+    <pacem-panel class="pacem-preloader loader-pacem" id="preloader" hide="{{ #style.cssReady }}">
+        <pacem-loader active="{{ !#style.cssReady }}" class="loader-full loader-primary"></pacem-loader>
+    </pacem-panel>
+
+    <pacem-panel hidden hide="{{ !#style.cssReady }}"
+                 css="{{ { opacity: (#style.cssReady ? '1': '0') } }}"
+                 class="pacem-body pacem-animations pacem-animatable" header footer>
+        <div class="pacem-grid">
+            <div class="pacem-cell cols-md-6 cols-xl-4">
+
+
+                <div class="pacem-buttonset">
+                    <div class="buttonset-left">
+
+                        <pacem-button class="button"
+                                      disabled="{{ $pacem.isNullOrEmpty(#vapid.result) }}"
+                                      on-click="#subscribed.model ? #sw.unsubscribe() : #sw.subscribe(#vapid.result)"
+                                      css-class="{{ { 'button-primary': !#subscribed.model } }}"
+                                      icon-glyph="{{ #subscribed.model ? 'notifications_active' : 'notifications_paused' }}">
+                            <pacem-text text="{{ #subscribed.model ? 'Click to unsubscribe' : 'Click to subscribe' }}"></pacem-text>
+                        </pacem-button>
+
+                        <pacem-button class="button button-accent"
+                                      disabled="{{ $pacem.isNullOrEmpty(#pushUserId.model) }}"
+                                      icon-glyph="send"
+                                      on-click="#sendpush.fetch()">
+                            Send Push Notification
+                        </pacem-button>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="pacem-cell cols-md-6 cols-xl-8">
+
+            </div>
+        </div>
+    </pacem-panel>
+
+    <pacem-data model="{{ !$pacem.isNull(#sw.pushSubscription) }}" id="subscribed"></pacem-data>
+    <pacem-data persist-as="push-user-id" id="pushUserId"></pacem-data>
+
+    <pacem-fetch url="/api/push/vapidpublic" id="vapid" as="text"></pacem-fetch>
+    <pacem-fetch url="/api/push/subscribe" method="POST" id="subscribe" autofetch="false" on-fetchresult="console.log('subscribed as \''+ $event.detail.userId +'\''); #pushUserId.model = $event.detail.userId"></pacem-fetch>
+    <pacem-fetch url="/api/push/unsubscribe" method="POST" id="unsubscribe" autofetch="false" on-success="#pushUserId.model = null"></pacem-fetch>
+    <pacem-fetch url="{{ '/api/push/send/'+ #pushUserId.model }}" method="POST" id="sendpush" autofetch="false"></pacem-fetch>
+
+    <pacem-serviceworker-proxy src="/sw.js" id="sw"
+                               on-unsubscribe="#unsubscribe.parameters = $event.detail.toJSON(); #unsubscribe.fetch()"
+                               on-subscribe="console.log($event.detail.toJSON()); #subscribe.parameters = Pacem.Utils.extend({ userId: #pushUserId.model }, $event.detail.toJSON()); #subscribe.fetch()"></pacem-serviceworker-proxy>
+
+    <script src="/js/pacem-foundation.js"></script>
+    <script src="/js/pacem-core.js"></script>
+    <script src="/js/pacem-logging.js"></script>
+    <script src="/js/pacem-ui.js"></script>
+
+    <pacem-style-proxy id="style" src="/css/pacem-phousys-content.min.css"></pacem-style-proxy>
+</body>
+</html>

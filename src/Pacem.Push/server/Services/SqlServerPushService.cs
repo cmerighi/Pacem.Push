@@ -27,31 +27,51 @@ namespace Pacem.Push.Services
             _logger = logger;
         }
 
-        public async Task SendAsync(string userId, Notification notification)
+        public Task SendAsync(string clientId, Notification notification)
+            => SendAsync(clientId, default, notification);
+
+        public async Task SendAsync(string clientId, string userId, Notification notification)
         {
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentNullException(nameof(clientId));
+            }
+
             var subscriptions = await _db.SubscriptionSet
-                .AsNoTracking()
-                .Where(s => s.UserId == userId)
+                .Where(s =>
+                    s.ClientId == clientId
+                    && s.Client.IsEnabled
+                    && (string.IsNullOrEmpty(userId) || s.UserId == userId)
+                )
                 .ProjectTo<WebPush.PushSubscription>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            string jsonNotification = System.Text.Json.JsonSerializer.Serialize(notification);
+            // no subscriptions?
+            if (subscriptions.Count == 0)
+            {
+                // no need to go further
+                return;
+            }
 
-            VapidData vapidData = await _vapid.GetVapidDataAsync();
+            string jsonNotification = System.Text.Json.JsonSerializer.Serialize(notification, Pacem.Push.Serialization.JsonSerializer.JsonSerializerOptions);
+
+            VapidDetails vapidData = await _vapid.GetVapidDetailsAsync(clientId);
             WebPush.VapidDetails vapid = _mapper.Map<WebPush.VapidDetails>(vapidData);
 
             foreach (var subscription in subscriptions)
             {
                 try
                 {
+                    _logger.LogInformation("Sending {p256dh} subscription to encrypt message:\n{message}...", subscription.P256DH, jsonNotification);
                     _client.SendNotification(subscription, jsonNotification, vapid);
+                    _logger.LogInformation("...sent!");
                 }
                 catch (WebPush.WebPushException exc)
                 {
-                    if (exc.Message == "Subscription no longer valid")
+                    if (exc.Message == /* This is a magic string from the WebPush lib */ "Subscription no longer valid")
                     {
                         // tidy-up
-                        await UnsubscribeAsync(subscription.P256DH);
+                        await UnsubscribeAsync(clientId, subscription.P256DH);
                     }
                     else
                     {
@@ -62,24 +82,50 @@ namespace Pacem.Push.Services
             }
         }
 
-        public async Task<PushSubscription> SubscribeAsync(PushSubscription subscription)
+        public async Task<PushSubscription> SubscribeAsync(string clientId, PushSubscription subscription)
         {
-            string p256dh = subscription.P256Dh();
+            Subscription stored = null;
+            var client = await _db.ClientSet.FindAsync(clientId);
+
+            if (client == null)
+            {
+                return null;
+            }
 
             // retrieve existing, if any
-            var stored = await _db.SubscriptionSet.Where(i => i.P256Dh == p256dh).FirstOrDefaultAsync();
+            stored = await _db.SubscriptionSet
+                .Include(s => s.Client)
+                .Where(i => i.ClientId == clientId
+                    && ((!string.IsNullOrEmpty(subscription.UserId) && i.UserId == subscription.UserId)
+                        || (string.IsNullOrEmpty(subscription.UserId) && i.P256Dh == subscription.P256Dh()))
+                )
+                .FirstOrDefaultAsync();
 
-            // expired?
-            if (stored?.Expires.HasValue == true && DateTimeOffset.FromUnixTimeMilliseconds(stored.Expires.Value) < DateTimeOffset.UtcNow)
+            // expired or disabled client?
+            if (stored != null
+                && (
+                    !client.IsEnabled
+                    || (stored.Expires.HasValue == true && DateTimeOffset.FromUnixTimeMilliseconds(stored.Expires.Value) < DateTimeOffset.UtcNow)
+                    )
+                )
             {
+                // tidy up
                 _db.Remove(stored);
                 stored = null;
+            }
+
+            // client isn't enabled?
+            if (!client.IsEnabled)
+            {
+                // tidy up already done, exit
+                return null;
             }
 
             // (re)new
             if (stored == null)
             {
                 stored = _mapper.Map<Subscription>(subscription);
+                stored.ClientId = clientId;
                 await _db.AddAsync(stored);
                 await _db.SaveChangesAsync(true);
             }
@@ -89,12 +135,12 @@ namespace Pacem.Push.Services
             return subscription;
         }
 
-        public Task UnsubscribeAsync(PushSubscription subscription)
-            => UnsubscribeAsync(subscription?.P256Dh() ?? throw new ArgumentNullException(nameof(subscription)));
+        public Task UnsubscribeAsync(string clientId, PushSubscription subscription)
+            => UnsubscribeAsync(clientId, subscription?.P256Dh() ?? throw new ArgumentNullException(nameof(subscription)));
 
-        private async Task UnsubscribeAsync(string p256dh)
+        private async Task UnsubscribeAsync(string clientId, string p256dh)
         {
-            var stored = await _db.SubscriptionSet.Where(i => i.P256Dh == p256dh).FirstOrDefaultAsync();
+            var stored = await _db.SubscriptionSet.Where(i => i.P256Dh == p256dh && i.ClientId == clientId).FirstOrDefaultAsync();
             if (stored != null)
             {
                 _db.Remove(stored);

@@ -1,13 +1,18 @@
 ﻿using FluentAssertions;
+using IdentityModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Pacem.Push.Data;
 using Pacem.Push.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -20,6 +25,9 @@ namespace Pacem.Push.Tests
         {
             using (var server = Utils.CreateTestServer())
             {
+                var db = server.Services.GetRequiredService<PushDbContext>();
+                Utils.SeedPushDbContext(db);
+
                 using (var client = server.CreateClient())
                 {
                     HttpContent payload = new StringContent(System.Text.Json.JsonSerializer.Serialize(
