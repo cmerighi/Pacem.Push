@@ -5,7 +5,8 @@
   "scripts": {
     "vapid": "node vapid.js",
     "build-sw": "tsc -p client/serviceWorker/tsconfig.json",
-    "copyfiles": "copyfiles -f node_modules/pacem/dist/js/*.js wwwroot/js && copyfiles -f node_modules/pacem/dist/css/*.css wwwroot/css"
+    "copyfiles": "copyfiles -f node_modules/pacem/dist/js/*.js wwwroot/js && copyfiles -f node_modules/pacem/dist/css/*.css wwwroot/css",
+    "build": "npm run copyfiles && npm run build-sw"
   },
   "devDependencies": {
     "web-push": "3.4.5",

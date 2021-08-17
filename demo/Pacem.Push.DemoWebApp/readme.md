@@ -15,5 +15,6 @@ Instances of it handle the various HTTP requests.
 Setup the application content before actually launching the app, by executing:
 
 ```cmd
+npm install
 npm run build
 ```
