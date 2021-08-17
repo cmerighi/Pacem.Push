@@ -346,5 +346,6 @@ healthchecksdb
 dist/
 package-lock.json
 Properties/
-src/Pacem.Apps/wwwroot/js/
-src/Pacem.Apps/wwwroot/css/
+demo/Pacem.Push.DemoWebApp/wwwroot/sw.js
+demo/Pacem.Push.DemoWebApp/wwwroot/js/
+demo/Pacem.Push.DemoWebApp/wwwroot/css/

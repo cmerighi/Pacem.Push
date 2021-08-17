@@ -10,3 +10,10 @@ Communicates with the underlying `ServiceWorkerRegistration` and `PushManager`.
 - [`PacemFetchElement`](https://js.pacem.it/basic/fetch):
 Instances of it handle the various HTTP requests.
 - and then _Buttons_ and _Data islands_...
+
+## Get Started
+Setup the application content before actually launching the app, by executing:
+
+```cmd
+npm run build
+```
