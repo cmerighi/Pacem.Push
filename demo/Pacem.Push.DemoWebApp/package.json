@@ -8,12 +8,12 @@
     "copyfiles": "copyfiles -f node_modules/pacem/dist/js/*.js wwwroot/js && copyfiles -f node_modules/pacem/dist/css/*.css wwwroot/css"
   },
   "devDependencies": {
-    "web-push": "3.4.4",
-    "typescript": "4.0.2",
-    "copyfiles": "2.3.0"
+    "web-push": "3.4.5",
+    "typescript": "4.3.5",
+    "copyfiles": "2.4.1"
   },
   "dependencies": {
-    "pacem": "0.10.0",
-    "pacem-less": "0.10.0"
+    "pacem": "0.20.0-alexandria",
+    "pacem-less": "0.20.0-alexandria"
   }
 }

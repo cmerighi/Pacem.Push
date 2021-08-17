@@ -1,6 +1,6 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -9,27 +9,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 var Pacem;
@@ -481,20 +470,18 @@ var Pacem;
                         }
                     }
                 }
-                _download(url, filename) {
-                    return __awaiter(this, void 0, void 0, function* () {
+                async _download(url, filename) {
+                    this.dispatchEvent(new Pacem.PropertyChangeEvent({
+                        propertyName: 'fetching', oldValue: this._fetching, currentValue: this._fetching = true
+                    }));
+                    try {
+                        await Pacem.Utils.download(url, { credentials: this.fetchCredentials, headers: this.fetchHeaders, filename: filename });
+                    }
+                    finally {
                         this.dispatchEvent(new Pacem.PropertyChangeEvent({
-                            propertyName: 'fetching', oldValue: this._fetching, currentValue: this._fetching = true
+                            propertyName: 'fetching', oldValue: this._fetching, currentValue: this._fetching = false
                         }));
-                        try {
-                            yield Pacem.Utils.download(url, { credentials: this.fetchCredentials, headers: this.fetchHeaders, filename: filename });
-                        }
-                        finally {
-                            this.dispatchEvent(new Pacem.PropertyChangeEvent({
-                                propertyName: 'fetching', oldValue: this._fetching, currentValue: this._fetching = false
-                            }));
-                        }
-                    });
+                    }
                 }
             };
             __decorate([
@@ -544,31 +531,31 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
-            var _audio, _canPlay_1, _canPlayThrough;
+            var _PacemAudioElement_audio, _PacemAudioElement_canPlay, _PacemAudioElement_canPlayThrough;
             let PacemAudioElement = class PacemAudioElement extends Components.PacemEventTarget {
                 constructor() {
                     super(...arguments);
                     // TODO: structure a proper MediaElement hierarchy (share logic with a future VideoElement)
                     /** @readonly */
                     // @Watch({ converter: PropertyConverters.Boolean }) duration: number;
-                    _audio.set(this, void 0);
-                    _canPlay_1.set(this, void 0);
-                    _canPlayThrough.set(this, void 0);
+                    _PacemAudioElement_audio.set(this, void 0);
+                    _PacemAudioElement_canPlay.set(this, void 0);
+                    _PacemAudioElement_canPlayThrough.set(this, void 0);
                     this._endedHandler = (e) => {
                         this.dispatchEvent(new Event('end'));
                     };
                     this._canPlayHandler = (e) => {
-                        __classPrivateFieldSet(this, _canPlay_1, true);
+                        __classPrivateFieldSet(this, _PacemAudioElement_canPlay, true, "f");
                         this._autoplay();
                     };
                     this._canPlayThroughHandler = (e) => {
-                        __classPrivateFieldSet(this, _canPlayThrough, true);
+                        __classPrivateFieldSet(this, _PacemAudioElement_canPlayThrough, true, "f");
                         this._autoplay();
                     };
                 }
                 connectedCallback() {
                     super.connectedCallback();
-                    const a = __classPrivateFieldSet(this, _audio, new Audio());
+                    const a = __classPrivateFieldSet(this, _PacemAudioElement_audio, new Audio(), "f");
                     a.addEventListener('canplay', this._canPlayHandler, false);
                     a.addEventListener('ended', this._endedHandler, false);
                     a.addEventListener('canplaythrough', this._canPlayThroughHandler, false);
@@ -588,7 +575,7 @@ var Pacem;
                     this._init();
                 }
                 disconnectedCallback() {
-                    const a = __classPrivateFieldGet(this, _audio);
+                    const a = __classPrivateFieldGet(this, _PacemAudioElement_audio, "f");
                     a.removeEventListener('ended', this._endedHandler, false);
                     a.removeEventListener('canplaythrough', this._canPlayThroughHandler, false);
                     a.removeEventListener('canplay', this._canPlayHandler, false);
@@ -599,20 +586,20 @@ var Pacem;
                     if (this.disabled) {
                         return Promise.reject('disabled');
                     }
-                    return __classPrivateFieldGet(this, _audio).play().then(_ => {
+                    return __classPrivateFieldGet(this, _PacemAudioElement_audio, "f").play().then(_ => {
                         this.dispatchEvent(new Event('start'));
                     }, e => {
                         this.dispatchEvent(new CustomEvent('error', { detail: e }));
                     });
                 }
                 pause() {
-                    __classPrivateFieldGet(this, _audio).pause();
+                    __classPrivateFieldGet(this, _PacemAudioElement_audio, "f").pause();
                 }
                 reset() {
-                    __classPrivateFieldGet(this, _audio).load();
+                    __classPrivateFieldGet(this, _PacemAudioElement_audio, "f").load();
                 }
                 get _canPlay() {
-                    return this.stream && __classPrivateFieldGet(this, _canPlay_1) || __classPrivateFieldGet(this, _canPlayThrough);
+                    return this.stream && __classPrivateFieldGet(this, _PacemAudioElement_canPlay, "f") || __classPrivateFieldGet(this, _PacemAudioElement_canPlayThrough, "f");
                 }
                 _autoplay() {
                     if (this.autoplay) {
@@ -622,12 +609,12 @@ var Pacem;
                     }
                 }
                 _init(src = this.src) {
-                    const audio = __classPrivateFieldGet(this, _audio);
-                    __classPrivateFieldSet(this, _canPlay_1, __classPrivateFieldSet(this, _canPlayThrough, false));
+                    const audio = __classPrivateFieldGet(this, _PacemAudioElement_audio, "f");
+                    __classPrivateFieldSet(this, _PacemAudioElement_canPlay, __classPrivateFieldSet(this, _PacemAudioElement_canPlayThrough, false, "f"), "f");
                     audio.src = src;
                 }
             };
-            _audio = new WeakMap(), _canPlay_1 = new WeakMap(), _canPlayThrough = new WeakMap();
+            _PacemAudioElement_audio = new WeakMap(), _PacemAudioElement_canPlay = new WeakMap(), _PacemAudioElement_canPlayThrough = new WeakMap();
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemAudioElement.prototype, "src", void 0);
@@ -718,7 +705,8 @@ var Pacem;
                     'track': true
                 }
             };
-            const allStyles = Pacem.PCSS + '-balloon balloon-right balloon-left balloon-bottom balloon-top balloon-start balloon-center balloon-end balloon-out balloon-in balloon-on';
+            const positioningStyles = 'balloon-right balloon-left balloon-bottom balloon-top balloon-start balloon-center balloon-end';
+            const allStyles = Pacem.PCSS + '-balloon ' + positioningStyles + ' balloon-out balloon-in balloon-on';
             let PacemBalloonElement = class PacemBalloonElement extends Components.PacemElement {
                 constructor() {
                     super();
@@ -733,17 +721,20 @@ var Pacem;
                     this._hoverDelegate = (evt) => {
                         //console.log(`${evt.type}: ${evt.target} (enabled: ${(!this.disabled)})`);
                         window.clearTimeout(this._timer);
-                        if (!this.disabled)
+                        if (!this.disabled) {
                             this._timer = window.setTimeout(this._popupDelegate, this._options.hoverDelay);
+                        }
                     };
                     this._outConditionalDelegate = (evt) => {
-                        if ((evt.srcElement || evt.target) != this)
+                        if ((evt.srcElement || evt.target) != this) {
                             this._outDelegate(evt);
+                        }
                     };
                     this._mousedownConditionalDelegate = (evt) => {
                         Pacem.preventDefaultHandler(evt);
-                        if (this._visible)
+                        if (this._visible) {
                             Pacem.stopPropagationHandler(evt);
+                        }
                     };
                     this._outDelegate = (evt) => {
                         window.clearTimeout(this._timer);
@@ -751,10 +742,12 @@ var Pacem;
                     };
                     this._toggleDelegate = (evt) => {
                         evt.preventDefault();
-                        if (this._visible)
+                        if (this._visible) {
                             this._outDelegate(evt);
-                        else
+                        }
+                        else {
                             this._hoverDelegate(evt);
+                        }
                     };
                 }
                 /** Gets whether the balloon is open and visible. */
@@ -781,6 +774,9 @@ var Pacem;
                     }
                     else if (name === 'disabled') {
                         //this.container.style.visibility = val ? 'hidden' : 'visible';
+                        if (val) {
+                            this.popout();
+                        }
                     }
                     if (this.target instanceof Element && name !== 'disabled') {
                         this._setHandlers(this.target);
@@ -989,6 +985,7 @@ var Pacem;
                             chosenAlignment = balloonConsts.defaults.align;
                             break;
                     }
+                    Pacem.Utils.removeClass(popup, positioningStyles);
                     Pacem.Utils.addClass(popup, 'balloon-' + chosenPosition);
                     Pacem.Utils.addClass(popup, 'balloon-' + chosenAlignment);
                     switch (chosenPosition) {
@@ -1059,9 +1056,9 @@ var Pacem;
                  * Shows the balloon, if hidden.
                  */
                 popup() {
-                    const popup = this, options = popup.options || {}, isVisible = Pacem.Utils.isVisible(popup);
+                    const popup = this, isVisible = Pacem.Utils.isVisible(popup);
                     this._adjustWatchers(true);
-                    if (isVisible) {
+                    if (isVisible || this.disabled) {
                         return;
                     }
                     // attach closured behavior to popup
@@ -1111,7 +1108,7 @@ var Pacem;
                  * Shows the balloon, if hidden. Otherwise hides it.
                  */
                 toggle() {
-                    if (!Pacem.Utils.isVisible(this)) {
+                    if (!Pacem.Utils.isVisible(this) && !this.disabled) {
                         this.popup();
                     }
                     else {
@@ -1119,8 +1116,9 @@ var Pacem;
                     }
                 }
                 _removeHandlers(el) {
-                    if (Pacem.Utils.isNull(el))
+                    if (Pacem.Utils.isNull(el)) {
                         return;
+                    }
                     el.removeEventListener('mouseenter', this._hoverDelegate, false);
                     el.removeEventListener('mouseleave', this._outDelegate, false);
                     el.removeEventListener('mousedown', this._popoutDelegate, false);
@@ -1134,8 +1132,9 @@ var Pacem;
                     this.popout();
                     // regenerate opts popup
                     var opts = this._options;
-                    if (opts.behavior == BalloonBehavior.Inert)
+                    if (opts.behavior == BalloonBehavior.Inert) {
                         return;
+                    }
                     switch (opts.trigger) {
                         case BalloonTrigger.Hover:
                             el.addEventListener('mouseenter', this._hoverDelegate, false);
@@ -1966,11 +1965,16 @@ var Pacem;
                     return d0.getHours() === v.getHours() && this.isToday(d, now);
                 }
                 isToday(d, now) {
-                    const d0 = Pacem.Utils.parseDate(d), v = Pacem.Utils.parseDate(now || new Date());
-                    return d0.getDate() === v.getDate() && d0.getMonth() == v.getMonth() && d0.getFullYear() === v.getFullYear();
+                    return this.isDate(d, now || new Date());
                 }
                 isViewDay(d, vd = this.viewDate) {
-                    const d0 = Pacem.Utils.parseDate(d), v = Pacem.Utils.parseDate(vd || this.viewDate || new Date());
+                    return this.isDate(d, vd || this.viewDate || new Date());
+                }
+                isDate(expected, d) {
+                    if (!Pacem.Utils.Dates.isDate(d) || !Pacem.Utils.Dates.isDate(expected)) {
+                        return false;
+                    }
+                    const d0 = Pacem.Utils.parseDate(expected), v = Pacem.Utils.parseDate(d);
                     return d0.getDate() === v.getDate() && d0.getMonth() == v.getMonth() && d0.getFullYear() === v.getFullYear();
                 }
                 isViewWeek(d) {
@@ -1984,7 +1988,7 @@ var Pacem;
                 isTimeSlotDisabled(ranges, d, h) {
                     if (!Pacem.Utils.isNullOrEmpty(ranges)) {
                         h = h || 0;
-                        const slot = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(h), 60 * (h % 1)).valueOf();
+                        const slotDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(h), 60 * (h % 1)), tz = slotDate.getTimezoneOffset(), slot = slotDate.valueOf() - (tz * 60 * 1000);
                         for (let range of ranges) {
                             let from = Pacem.Utils.Dates.parse(range.from), to = Pacem.Utils.Dates.parse(range.to);
                             if ((!from || (from && from.valueOf() <= slot))
@@ -2037,9 +2041,10 @@ var Pacem;
                     return this.month = month;
                 }
                 _synchronizeWeek() {
-                    const viewDate = this.viewDate;
-                    const ds = this._getDatasource(viewDate, this.weekStart);
-                    const week = ds.filter((w, j) => w.filter(d => d.getDate() == viewDate.getDate() && d.getMonth() == viewDate.getMonth() && d.getFullYear() == viewDate.getFullYear()).length > 0)[0];
+                    const viewDate = Pacem.Utils.parseDate(this.viewDate);
+                    const vd = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+                    const ds = this._getDatasource(vd, this.weekStart);
+                    const week = ds.filter((w, j) => w.some(d => d.getDate() == viewDate.getDate() && d.getMonth() == viewDate.getMonth() && d.getFullYear() == viewDate.getFullYear()))[0];
                     if (!(this.week && this.week.length) || this.week[0] !== week[0]) {
                         this.week = week;
                     }
@@ -2277,7 +2282,7 @@ css-class="{{ ['hour-start-'+ (^item.hour + 1), 'hour-end-'+ (^item.hour + ^item
                 for (let week = 0; week < 6; week++) {
                     for (let day = 0; day < 7; day++) {
                         let css = `class="calendar-day week-${week + 1} day-${day + 1}"`;
-                        grid += `<${Pacem.P}-panel disabled="{{ :host.isTimeSlotDisabled(:host.disabledRanges, :host.week[${day}]) }}" on-click=":host.date = :host.month[${week}][${day}]" ${css} css-class="{{ {'viewmonth': :host.isViewMonth(:host.month[${week}][${day}]), 'viewday': :host.isViewDay(:host.month[${week}][${day}], :host.viewDate), 'today': :host.isToday(:host.month[${week}][${day}], :host.now)} }}"><${Pacem.P}-span culture="{{ :host.culture }}" class="text-ellipsed" text="{{ :host.getDayLabel(:host.month[${week}][${day}]) }}"></${Pacem.P}-span></${Pacem.P}-panel>`;
+                        grid += `<${Pacem.P}-panel disabled="{{ :host.isTimeSlotDisabled(:host.disabledRanges, :host.month[${week}][${day}]) }}" on-click=":host.date = :host.month[${week}][${day}]" ${css} css-class="{{ {'viewmonth': :host.isViewMonth(:host.month[${week}][${day}]), 'viewday': :host.isViewDay(:host.month[${week}][${day}], :host.viewDate), 'today': :host.isToday(:host.month[${week}][${day}], :host.now), 'selected-date': :host.isDate(:host.month[${week}][${day}], :host.date)} }}"><${Pacem.P}-span culture="{{ :host.culture }}" class="text-ellipsed" text="{{ :host.getDayLabel(:host.month[${week}][${day}], :host._formatVersion) }}"></${Pacem.P}-span></${Pacem.P}-panel>`;
                     }
                 }
                 return grid;
@@ -2299,14 +2304,32 @@ css-class="{{ ['hour-start-'+ (^item.hour + 1), 'hour-end-'+ (^item.hour + ^item
                 }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
-                    if (name === 'date') {
-                        this.dispatchEvent(new DateSelectEvent(val));
+                    switch (name) {
+                        case 'date':
+                            this.dispatchEvent(new DateSelectEvent(val));
+                            break;
+                        case 'dayLabelFormatter':
+                            this._formatVersion = Date.now();
+                            break;
                     }
+                }
+                getDayLabel(d, _ = this._formatVersion) {
+                    const labeler = this.dayLabelFormatter;
+                    if (typeof labeler === 'function') {
+                        return labeler(d);
+                    }
+                    return super.getDayLabel(d);
                 }
             };
             __decorate([
                 Pacem.Watch({ converter: Pacem.PropertyConverters.Datetime })
             ], PacemCalendarElement.prototype, "date", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false })
+            ], PacemCalendarElement.prototype, "dayLabelFormatter", void 0);
+            __decorate([
+                Pacem.Watch()
+            ], PacemCalendarElement.prototype, "_formatVersion", void 0);
             PacemCalendarElement = __decorate([
                 Pacem.CustomElement({
                     tagName: Pacem.P + '-calendar', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
@@ -2463,13 +2486,7 @@ css-class="{{ ['hour-start-'+ (^item.hour + 1), 'hour-end-'+ (^item.hour + ^item
                 }
             };
             __decorate([
-                Pacem.Watch({
-                    emit: false,
-                    converter: {
-                        convert: attr => (attr || '').split(',').map(i => i.trim()),
-                        convertBack: prop => (prop || []).join(',')
-                    }
-                })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.StringArray })
             ], PacemCalendarDayOfWeekRuleElement.prototype, "days", void 0);
             PacemCalendarDayOfWeekRuleElement = __decorate([
                 Pacem.CustomElement({ tagName: Pacem.P + '-calendar-daysofweek-rule' })
@@ -2496,9 +2513,8 @@ var Pacem;
                     switch (name) {
                         case 'collapse':
                             this._toggle();
-                            break;
                         case 'disabled':
-                            this._resizer.disabled = val;
+                            this._resizer.disabled = this.disabled || this.collapse;
                             break;
                     }
                 }
@@ -2536,7 +2552,7 @@ var Pacem;
             ], PacemCollapseElement.prototype, "horizontal", void 0);
             PacemCollapseElement = __decorate([
                 Pacem.CustomElement({
-                    tagName: Pacem.P + '-collapse', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    tagName: Pacem.P + '-collapse', shadow: false,
                     template: `<div class="${Pacem.PCSS}-collapse"><${Pacem.P}-resize on-${Components.ResizeEventName}=":host._resize($event)"><${Pacem.P}-content></${Pacem.P}-content></${Pacem.P}-resize></div>`
                 })
             ], PacemCollapseElement);
@@ -2700,7 +2716,122 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
+            const SVG = /^\s*<svg\s/;
+            const FA = /^fa[brs]?\s+fa-/;
+            const FA_CDN = { url: "https://kit.fontawesome.com/4922589c3c.js", crossOrigin: true };
+            const LNI = /^lni\s+lni-/;
+            const LNI_CDN = "https://cdn.lineicons.com/2.0/LineIcons.css";
+            const COREUI = /^ci[dlsbf]-/;
+            const COREUI_CDN = "https://unpkg.com/@coreui/icons/css/all.min.css";
+            const MATERIAL = /^material(-icons)?\s+([\w]+)/;
+            const MATERIAL_CDN = "https://fonts.googleapis.com/icon?family=Material+Icons";
+            const URL = /^(https?:\/\/|\/\/)?.+\.(webp|svg|gif|png|jpe?g)$/;
+            const iconImportMemoizer = [];
+            function importConditionally(cssClassName, url, sha, crossOrigin, js) {
+                if (iconImportMemoizer.indexOf(cssClassName) >= 0) {
+                    return Promise.resolve();
+                }
+                iconImportMemoizer.push(cssClassName);
+                // this is the heavy part, be sure to call it just once (thus the memoizer)
+                if (Pacem.Utils.Css.isClassDefined(cssClassName)) {
+                    return Promise.resolve();
+                }
+                return js ? Pacem.CustomElementUtils.importjs(url, sha, crossOrigin) : Pacem.CustomElementUtils.importcss(url, sha, crossOrigin);
+            }
+            function getIconMarkup(icon) {
+                return new Promise((resolve, reject) => {
+                    // null or empty
+                    if (Pacem.Utils.isNullOrEmpty(icon)) {
+                        reject('No icon provided');
+                    }
+                    // svg?
+                    else if (SVG.test(icon)) {
+                        resolve(icon);
+                    }
+                    // font-awesome?
+                    else if (FA.test(icon)) {
+                        importConditionally("fa", FA_CDN.url, undefined, FA_CDN.crossOrigin, true).then(_ => {
+                            resolve(`<i class="${icon}"></i>`);
+                        }, e => reject(e));
+                    }
+                    // explicit material icons?
+                    else if (MATERIAL.test(icon)) {
+                        importConditionally("material-icons", MATERIAL_CDN).then(_ => {
+                            const regExcArray = MATERIAL.exec(icon), ligature = regExcArray[2], rest = icon.substr(regExcArray[0].length);
+                            resolve(`<i class="material-icons${rest}">${ligature}</i>`);
+                        }, e => reject(e));
+                    }
+                    // line-icons?
+                    else if (LNI.test(icon)) {
+                        importConditionally('lni', LNI_CDN).then(_ => {
+                            resolve(`<i class="${icon}"></i>`);
+                        }, e => reject(e));
+                    }
+                    // coreui icons?
+                    else if (COREUI.test(icon)) {
+                        importConditionally('clb', COREUI_CDN).then(_ => {
+                            resolve(`<i class="${icon}"></i>`);
+                        }, e => reject(e));
+                    }
+                    // image url?
+                    else if (URL.test(icon)) {
+                        resolve(`<img src="${icon}" />`);
+                    }
+                    else {
+                        // assume material icon as default
+                        const parts = icon.trim().split(' ');
+                        const ligature = parts[0];
+                        const css = parts.length > 1 ? ' ' + parts.slice(1).join(' ') : '';
+                        resolve(`<i class="${Pacem.PCSS}-icon${css}">${ligature}</i>`);
+                    }
+                });
+            }
+            let PacemIconElement = class PacemIconElement extends Components.PacemElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first) {
+                        switch (name) {
+                            case 'icon':
+                                this._setIcon();
+                                break;
+                        }
+                    }
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    this._setIcon();
+                }
+                _setIcon(icon = this.icon) {
+                    getIconMarkup(icon).then(markup => {
+                        this.innerHTML = markup;
+                    }, _ => {
+                        this.innerHTML = '';
+                    });
+                }
+            };
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemIconElement.prototype, "icon", void 0);
+            PacemIconElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-icon'
+                })
+            ], PacemIconElement);
+            UI.PacemIconElement = PacemIconElement;
+        })(UI = Components.UI || (Components.UI = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../../../dist/js/pacem-core.d.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var UI;
+        (function (UI) {
             let PacemImageElement = class PacemImageElement extends Components.PacemElement {
+                constructor() {
+                    super('img');
+                }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
                     switch (name) {
@@ -2727,8 +2858,9 @@ var Pacem;
                 }
                 _setSource() {
                     var _me = this, src;
-                    if (_me.disabled)
+                    if (_me.disabled) {
                         return;
+                    }
                     //
                     _me.style.backgroundImage = '';
                     if (!Pacem.Utils.isNullOrEmpty(src = _me.src)) {
@@ -2737,8 +2869,9 @@ var Pacem;
                             let weight, entries, entry;
                             if (window.performance
                                 && (entries = performance.getEntriesByName(img.src))
-                                && (entry = entries[0]))
+                                && (entry = entries[0])) {
                                 weight = entry.decodedBodySize;
+                            }
                             _me.size = {
                                 width: img.width,
                                 height: img.height,
@@ -2970,21 +3103,22 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
-            var _loop, _locked;
+            var _PacemLightboxElement_loop, _PacemLightboxElement_locked;
             let PacemLightboxElement = class PacemLightboxElement extends Components.PacemEventTarget {
                 constructor() {
                     super(...arguments);
                     this._resizeHandler = _ => {
-                        if (this.show)
+                        if (this.show) {
                             this._resize(_);
+                        }
                     };
                     this._keyupHandler = (evt) => {
                         if (evt.keyCode === 27 /* ESC */ && this.show && !this.modal) {
                             this.show = false;
                         }
                     };
-                    _loop.set(this, false);
-                    _locked.set(this, false);
+                    _PacemLightboxElement_loop.set(this, false);
+                    _PacemLightboxElement_locked.set(this, false);
                 }
                 viewActivatedCallback() {
                     super.viewActivatedCallback();
@@ -3037,12 +3171,12 @@ var Pacem;
                 _resize(evt) {
                     if (Pacem.Utils.isNull(this.container))
                         return;
-                    if (__classPrivateFieldGet(this, _locked)) {
-                        __classPrivateFieldSet(this, _loop, true);
+                    if (__classPrivateFieldGet(this, _PacemLightboxElement_locked, "f")) {
+                        __classPrivateFieldSet(this, _PacemLightboxElement_loop, true, "f");
                     }
                     else {
-                        __classPrivateFieldSet(this, _locked, true);
-                        __classPrivateFieldSet(this, _loop, false);
+                        __classPrivateFieldSet(this, _PacemLightboxElement_locked, true, "f");
+                        __classPrivateFieldSet(this, _PacemLightboxElement_loop, false, "f");
                         var win = window, element = this._wrapperElement;
                         var viewportHeight = Pacem.Utils.windowSize.height;
                         var scrollTop = win.pageYOffset;
@@ -3063,8 +3197,8 @@ var Pacem;
                             var top = (viewportHeight - containerHeight) * .5;
                             container.style.transform = `translateY(${Math.round(top)}px)`; // top + 'px auto 0 auto';
                             Pacem.Utils.waitForAnimationEnd(container, 300).then(() => {
-                                __classPrivateFieldSet(this, _locked, false);
-                                if (__classPrivateFieldGet(this, _loop)) {
+                                __classPrivateFieldSet(this, _PacemLightboxElement_locked, false, "f");
+                                if (__classPrivateFieldGet(this, _PacemLightboxElement_loop, "f")) {
                                     this._resize();
                                 }
                             });
@@ -3079,7 +3213,7 @@ var Pacem;
                     this.show = false;
                 }
             };
-            _loop = new WeakMap(), _locked = new WeakMap();
+            _PacemLightboxElement_loop = new WeakMap(), _PacemLightboxElement_locked = new WeakMap();
             __decorate([
                 Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
             ], PacemLightboxElement.prototype, "show", void 0);
@@ -3098,9 +3232,8 @@ var Pacem;
                     shadow: Pacem.Defaults.USE_SHADOW_ROOT,
                     template: `<${Pacem.P}-panel class="${Pacem.PCSS}-lightbox-wrapper" css-class="{{ {'${Pacem.PCSS}-shown': :host.show } }}" hidden>
         <div class="${Pacem.PCSS}-lightbox ${Pacem.PCSS}-relative" style="transform: translateY(50vh)">
-            <div class="${Pacem.PCSS}-scrollable"><${Pacem.P}-content></${Pacem.P}-content></div>
+            <div class="${Pacem.PCSS}-scrollable"><${Pacem.P}-content></${Pacem.P}-content><${Pacem.P}-button hide="{{ :host.modal }}" class="button-square square-smaller bg-default pos-fixed fixed-right fixed-top ${Pacem.PCSS}-margin margin-1" icon-glyph="close" on-click=":host._close($event)"></${Pacem.P}-button></div>
         </div><${Pacem.P}-resize watch-position="true" logger="{{ :host.logger }}" on-resize=":host._resize($event)" disabled="{{ !:host.show }}" target="{{ ::container }}"></${Pacem.P}-resize>
-    <${Pacem.P}-button hide="{{ :host.modal }}" class="${Pacem.PCSS}-close" on-click=":host._close($event)">X</${Pacem.P}-button>
 </${Pacem.P}-panel>`
                 })
             ], PacemLightboxElement);
@@ -3152,7 +3285,8 @@ var Pacem;
                     if (!Pacem.Utils.isNull(this._container)) {
                         switch (name) {
                             case 'active':
-                                if (val === true) {
+                            case 'disabled':
+                                if (this.active === true && !this.disabled) {
                                     Pacem.Utils.addClass(this._container, 'active');
                                 }
                                 else {
@@ -3210,196 +3344,242 @@ var Pacem;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
-/* TODO: remove from UI bundle -> dedicated API */
 var Pacem;
 (function (Pacem) {
-    const code_block_regex = /`{3}([\w#-]*)\r?\n([\s\S]*?)\n`{3}/g;
-    const R = Pacem.RegularExpressions;
-    const REGEX = R.Regex;
-    function void_replacer() { return { regex: R.EMPTY_MATCHER, fn: (m) => m }; }
-    ;
-    const regexes = [
-        // (* = totally custom markdown)
-        // headings
-        { regex: /^(#+)\s(.*)\s*$/gm, fn: (inp, r) => inp.replace(r, function (m, m0, m1) { return `<h${m0.length}>${m1}</h${m0.length}>`; }) },
-        // images
-        { regex: /!\[([^\]]+)\]\(([^\)]+)\)/g, fn: (inp, r) => inp.replace(r, `<img alt="$1" src="$2" />`) },
-        // #region embed links
-        // *tweet-embed
+    var _MarkdownService_grammar, _MarkdownService_md;
+    const match = (input, pattern, fn) => {
+        const arr = pattern.exec(input);
+        if (arr && arr.length) {
+            return fn(arr);
+        }
+        return null;
+    };
+    const MARKUP_RULES = [
         {
-            regex: /\[tweet\]\(([^\)]+)\)/g,
-            fn: (inp, r) => inp.replace(r, `<!-- twitter embed $1 -->\n<${Pacem.P}-tweetembed tweetid="$1"></${Pacem.P}-tweetembed>`)
-        },
-        // *youtube-embed
-        {
-            regex: /\[yt([\d]+x[\d]+)?\]\(([^\)]+)\)/g,
-            fn: (inp, r) => inp.replace(r, function (m, m0, m1) {
-                m0 = m0 || '560x315';
-                const size = m0.split('x'), w = size[0], h = size[1];
-                return `<!-- youtube embed ${m1} ${m0} -->
-<iframe width="${w}" height="${h}" src="https://www.youtube.com/embed/${m1}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            // comment
+            exec: (input) => match(input, /^((<|&lt;)!--(?:(?!(--(>|&gt;)))[\s\S])*(--(?:>|&gt;)|$))/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-comment', raw, text, index: arr.index
+                    }];
             })
         },
-        // #endregion
-        // links
-        { regex: /\[([^\]]+)\]\(([^\)]+)\)/g, fn: (inp, r) => inp.replace(r, `<a href="$2">$1</a>`) },
-        // bold/italics
-        { regex: /(^|[^\w])(\*\*?|__?)(.*?)\2([^\w]|$)/gm, fn: (inp, r) => inp.replace(r, function (m, s0, m0, m1, s1) { const tag = m0.length == 1 ? 'i' : 'b'; return `${s0}<${tag}>${m1}</${tag}>${s1}`; }) },
-        // strikethrough
-        { regex: /\~\~(.*?)\~\~/g, fn: (inp, r) => inp.replace(r, `<del>$1</del>`) },
-        // quotes
-        { regex: /\:\"(.*?)\"\:/g, fn: (inp, r) => inp.replace(r, `<q>$1</q>`) },
-        // code inlines
-        { regex: /`([^`]*)`/g, fn: (inp, r) => inp.replace(r, `<code>$1</code>`) },
-        // (un)ordered lists
-        { regex: /\n(-|\d+\.)\s+(.*)/g, fn: (inp, r) => inp.replace(r, function (m, m0, m1) { const tag = m0 === '-' ? 'ul' : 'ol'; return `\n<${tag}>\n\t<li>${m1}</li>\n</${tag}>`; }) },
-        // fix for extra <ul>s
-        { regex: /\n<\/(u|o)l>\n<\1l>/g, fn: (inp, r) => inp.replace(r, '') },
-        // blockquotes
         {
-            regex: /(\n(&gt;|>)\s.*)+/g,
-            fn: (inp, r) => inp.replace(r, function (m, m0, m1) {
-                var splitted = m.replace(/^(&gt;|>)\s(.*)$/gm, function (g, g0, g1) {
-                    return g1;
+            // opening/self-closing tag
+            exec: (input, lexer) => match(input, /^(<|&lt;)([\w-]+)(?:\s+[\w-]+(?:=(?:'[^']*'|"[^"]*"))*)*(\s*\/?(?:&gt;|>))/, arr => {
+                const openingTag = arr[1], tagName = arr[2], closingTag = arr[3];
+                const closingTagIndex = arr[0].length - closingTag.length, attributesIndex = openingTag.length + tagName.length, attributesString = input.substring(attributesIndex, closingTagIndex);
+                const attributes = lexer.tokenize(attributesString, [{
+                        exec: (input) => match(input, /^(\s+[\w-]+)(=('[^']*'|"[^"]*"))?/, arr => {
+                            const raw = arr[1];
+                            const output = [{
+                                    type: 'code-attribute', raw, text: raw, index: arr[0].indexOf(raw)
+                                }];
+                            if (arr.length > 2) {
+                                output.push({
+                                    type: 'code-string', raw: arr[2], text: arr[2], index: arr.index + arr[0].length - arr[2].length
+                                });
+                            }
+                            return output;
+                        })
+                    }]);
+                const retval = [{
+                        type: 'code-tag', raw: openingTag, text: openingTag, index: 0
+                    }, {
+                        type: 'code-tagname', raw: tagName, text: tagName, index: openingTag.length
+                    }];
+                // attributes
+                Array.prototype.push.apply(retval, attributes);
+                retval.push({
+                    type: 'code-tag', raw: closingTag, text: closingTag, index: closingTagIndex
                 });
-                return `\n<blockquote>${splitted}\n</blockquote>`;
+                return retval;
             })
         },
-        // horizontal rules
-        { regex: /\n-{5,}/g, fn: (inp, r) => inp.replace(r, function (m, m0, m1) { return `\n<hr />`; }) } /*,
-        // paragraphs
-        { regex: /\s{2}/g, fn: (inp: string, r: RegExp) => inp.replace(r, '<br />') }*/
+        {
+            // closing tag
+            exec: (input) => match(input, /^((?:<|&lt;)\/)([\w-]+)(\s*(?:&gt;|>))/, arr => {
+                const openingTag = arr[1], tagName = arr[2], closingTag = arr[3];
+                return [{
+                        type: 'code-tag', raw: openingTag, text: openingTag, index: 0
+                    }, {
+                        type: 'code-tagname', raw: tagName, text: tagName, index: openingTag.length
+                    }, {
+                        type: 'code-tag', raw: closingTag, text: closingTag, index: arr.index + arr[0].length - closingTag.length
+                    }];
+            })
+        },
+        {
+            // text
+            exec: (input) => match(input, /^(<|&lt;)?((?!<|&lt;).)+/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'text', raw, text
+                    }];
+            })
+        }
     ];
+    const C_LIKE_RULES = [{
+            // comments
+            exec: (input, _) => match(input, /^\/\/.*/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-comment', raw, text
+                    }];
+            })
+        }, {
+            exec: (input, _) => match(input, /^\/\*(?:(?!(\*\/))[\s\S])*(?:\*\/|$)/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-comment', raw, text
+                    }];
+            })
+        }, {
+            // string literal
+            exec: (input, _) => match(input, /^('(\\'|[^'])*[^\\]?'|@?\$?"(\\"|[^"])*[^\\]?")/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-string', raw, text
+                    }];
+            })
+        }, {
+            // keywords
+            exec: (input, _) => match(input, /^\b(abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|descending|dynamic|from|get|global|group|into|join|let|nameof|orderby|partial|remove|select|set|value|var|when|where|yield)\b/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-keyword', raw, text
+                    }];
+            })
+        }, {
+            // number 
+            exec: (input, _) => match(input, /^\b((0x[0-9a-fA-F]|[\d])*\.?[\d]+)\b/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-number', raw, text
+                    }];
+            })
+        }, {
+            // variables, operators, parentheses
+            exec: (input, _) => match(input, /^(@?\w+|:|\?\??|\?=?|\|\|?|&&?|&=?|;|,|=|\*=?|--|-=?|\+\+|\+=?|\/=?|\^|\(|\[|\)|\]|\{|\})/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'text', raw, text
+                    }];
+            }),
+        }, {
+            // spaces
+            exec: (input, _) => match(input, /^\s+/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'space', raw, text
+                    }];
+            }),
+        }];
+    const SCRIPT_RULES = [
+        C_LIKE_RULES[0], C_LIKE_RULES[1], {
+            // string literal
+            exec: (input, _) => match(input, /^('(\\'|[^'])*[^\\]?'|"(\\"|[^"])*[^\\]?"|`(\\`|[^`])*[^\\]?`)/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-string', raw, text
+                    }];
+            })
+        }, {
+            // keywords
+            exec: (input, _) => match(input, /^\b(abstract|any|arguments|async|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|declare|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|get|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|number|package|private|protected|public|return|short|static|string|super|switch|synchronized|this|throw|throws|transient|true|try|type|typeof|var|void|volatile|while|with|yield)\b/, arr => {
+                const raw = arr[0], text = raw;
+                return [{
+                        type: 'code-keyword', raw, text
+                    }];
+            })
+        },
+        C_LIKE_RULES[4],
+        C_LIKE_RULES[5],
+        C_LIKE_RULES[6]
+    ];
+    const TWITTER_RULE = {
+        rule: {
+            exec: (input) => {
+                const arr = /\{tweet\}\(([^\)]+)\)/.exec(input);
+                if (arr && arr.length > 1) {
+                    return [{
+                            type: 'tweet', raw: arr[0], text: arr[1], index: arr.index
+                        }];
+                }
+                return null;
+            }
+        },
+        type: 'inline'
+    };
+    const YOUTUBE_RULE = {
+        rule: {
+            exec: (input) => {
+                const arr = /\{yt([\d]+x[\d]+)?\}\(([^\)]+)\)/.exec(input);
+                if (arr && arr.length > 2) {
+                    const m0 = arr[1] || '560x315';
+                    const size = m0.split('x'), w = size[0], h = size[1];
+                    return [{
+                            type: 'youtube', raw: arr[0], text: arr[2], index: arr.index, width: w, height: h
+                        }];
+                }
+                return null;
+            }
+        },
+        type: 'inline'
+    };
+    const RULES_TO_HTML = (token) => {
+        switch (token.type) {
+            case 'youtube':
+                return `<!-- youtube embed -->
+<iframe width="${token['width']}" height="${token['height']}" src="https://www.youtube.com/embed/${token.text}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            case 'tweet':
+                return `<!-- twitter embed -->
+<${Pacem.P}-tweetembed tweetid="${token.text}"></${Pacem.P}-tweetembed>`;
+            // code
+            case 'code-string':
+            case 'code-keyword':
+            case 'code-number':
+            case 'code-comment':
+            case 'code-tag':
+            case 'code-tagname':
+            case 'code-attribute':
+                return `<span class="${token.type}">${token.text}</span>`;
+        }
+    };
     class MarkdownService {
         constructor() {
-            this._inparagraph = false;
-        }
-        // TODO: error prone and NOT safe. Process content line by line using encoding, regexes /m and scope variables. Try to keep it clean as well
-        toHtml(md = '') {
-            const _this = this, escapedMd = md.replace(/</g, '&lt;').replace(/>/g, '&gt;'), trunks = REGEX.split(escapedMd, code_block_regex);
-            var retval = [];
-            for (var t of trunks) {
-                if (t.match) {
-                    retval.push(t.value.replace(code_block_regex, function (m, m0, m1) {
-                        const lang = (m0 || 'unknown').replace('#', '-sharp').toLowerCase(), code = _this._parseCode(m1, lang);
-                        return `\n<code class="${Pacem.PCSS}-code-block ${lang}">${code}</code>`;
-                    }));
-                }
-                else {
-                    let out = t.value;
-                    for (var i of regexes) {
-                        out = i.fn(out, i.regex);
-                    }
-                    var step = _this._paragraphy(out) + (_this._inparagraph ? '</p>' : '');
-                    retval.push(_this._thenSafe(_this._thenTrim(step)));
-                }
+            _MarkdownService_grammar.set(this, void 0);
+            _MarkdownService_md.set(this, new Pacem.Compile.Markdown.Parser());
+            const grammar = [
+                TWITTER_RULE,
+                YOUTUBE_RULE
+            ];
+            for (let lang of ['c-sharp', 'c', 'c#', 'csharp', 'c++', 'cpp']) {
+                const c_like_rules = C_LIKE_RULES.map(rule => { return { rule, lang, type: 'code' }; });
+                Array.prototype.push.apply(grammar, c_like_rules);
             }
-            return retval.join('');
-        }
-        _parseCode(code, lang) {
-            var keywords = void_replacer(), numbers = void_replacer(), strings = void_replacer(), comments = void_replacer(), tags = void_replacer(), attrs = void_replacer();
-            lang = lang.toLowerCase();
-            switch (lang) {
-                case 'c#':
-                case 'c-sharp':
-                case 'js':
-                case 'javascript':
-                case 'ts':
-                case 'typescript':
-                    if (lang.startsWith('c')) {
-                        keywords.regex = /\b(abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|descending|dynamic|from|get|global|group|into|join|let|nameof|orderby|partial|remove|select|set|value|var|when|where|yield)\b/g;
-                        strings.regex = /'(\\'|[^'])*[^\\]?'|@?\$?"(\\"|[^"])*[^\\]?"/g;
-                    }
-                    else {
-                        keywords.regex = /\b(abstract|arguments|async|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)\b/g;
-                        strings.regex = /'(\\'|[^'])*[^\\]?'|"(\\"|[^"])*[^\\]?"|`(\\`|[^`])*[^\\]?`/g;
-                    }
-                    keywords.fn = '<span class="' + Pacem.PCSS + '-keyword">$1</span>';
-                    strings.fn = (m) => `<span class="${Pacem.PCSS}-string">${m}</span>`;
-                    numbers.regex = /\b((0x[0-9a-fA-F]|[\d])*\.?[\d]+)\b/g;
-                    numbers.fn = '<span class="' + Pacem.PCSS + '-number">$1</span>';
-                    comments.regex = /(\/\/.*|\/\*(?:(?!(\*\/))[\s\S])*\*\/)/g;
-                    comments.fn = `<span class="${Pacem.PCSS}-comment">$1</span>`;
-                    break;
-                case 'xml':
-                case 'html':
-                    tags.regex = /(&lt;\/?)([\w-]+)|(\/?&gt;)/g;
-                    tags.fn = (m, m1, m2, m3) => {
-                        if (Pacem.Utils.isNullOrEmpty(m3))
-                            return `<span class="${Pacem.PCSS}-tag">${m1}</span><span class="${Pacem.PCSS}-tag-name">${m2}</span>`;
-                        return `<span class="${Pacem.PCSS}-tag">${m3}</span>`;
-                    };
-                    strings.regex = /(=')(\\'|[^'])*[^\\]?(')|(=")(\\"|[^"])*[^\\]?(")/g;
-                    strings.fn = (m) => `<span class="${Pacem.PCSS}-string">${m}</span>`;
-                    // isn't this ugly?:
-                    attrs.regex = /(\s[\w-]+)$/g;
-                    attrs.fn = `<span class="${Pacem.PCSS}-attribute">$1</span>`;
-                    comments.regex = /((<|&lt;)!--(?:(?!(--(>|&gt;)))[\s\S])*--(>|&gt;))/g;
-                    comments.fn = `<span class="${Pacem.PCSS}-comment">$1</span>`;
+            for (let lang of ['ts', 'js', 'typescript', 'javascript']) {
+                const script_rules = SCRIPT_RULES.map(rule => { return { rule, lang, type: 'code' }; });
+                Array.prototype.push.apply(grammar, script_rules);
             }
-            var split = REGEX.split(code, comments.regex);
-            var retval = [];
-            for (var t of split) {
-                if (t.match)
-                    retval.push(t.value.replace(comments.regex, comments.fn));
-                else {
-                    let split2 = REGEX.split(t.value, strings.regex);
-                    let retval2 = [];
-                    for (var t2 of split2) {
-                        if (t2.match) {
-                            retval2.push(t2.value
-                                .replace(strings.regex, strings.fn));
-                        }
-                        else {
-                            retval2.push(t2.value
-                                .replace(tags.regex, tags.fn)
-                                .replace(keywords.regex, keywords.fn)
-                                .replace(attrs.regex, attrs.fn)
-                                .replace(numbers.regex, numbers.fn));
-                        }
-                    }
-                    retval.push(retval2.join(''));
-                }
+            for (let lang of ['xml', 'html']) {
+                const markup_rules = MARKUP_RULES.map(rule => { return { rule, lang, type: 'code' }; });
+                Array.prototype.push.apply(grammar, markup_rules);
             }
-            return retval.join('');
+            __classPrivateFieldSet(this, _MarkdownService_grammar, grammar, "f");
         }
-        _paragraphy(semi) {
-            this._inparagraph = false;
-            var incode = false, _this = this;
-            return semi.replace(/^([^\n]*)$/gm, function (m, m0, index, whole) {
-                if ((/^<code\s+([^>]+)>$/.test(m) && !incode) || (incode && /^<\/code>$/.test(m)))
-                    incode = !incode;
-                if (incode || /^\s*<\/?(ul|ol|li|h|p|bl|code)/i.test(m)) {
-                    if (_this._inparagraph === false)
-                        return m;
-                    _this._inparagraph = false;
-                    return '</p>\n' + m;
-                }
-                //
-                var ret = m0.replace(/\s{2}/g, '<br />');
-                if (!_this._inparagraph) {
-                    if (m0.length > 0) {
-                        ret = '<p>' + ret;
-                        _this._inparagraph = true;
-                    }
-                }
-                else if (m0 === undefined || m0.length === 0) {
-                    _this._inparagraph = false;
-                    ret += '</p>';
-                }
-                return ret;
-            });
+        _escape(md) {
+            // no html allowed
+            return (md !== null && md !== void 0 ? md : '').replace(/</g, '&lt;');
         }
-        _thenTrim(step) {
-            return step.replace(/<p>(((?!<\/p>)(.|[\r\n]))*)<\/p>/g, function (m, m0, m1) {
-                return `<p>${m0.trim()}</p>`;
-            });
+        toHtml(md) {
+            return __classPrivateFieldGet(this, _MarkdownService_md, "f").toHtml(this._escape(md), __classPrivateFieldGet(this, _MarkdownService_grammar, "f"), RULES_TO_HTML);
         }
-        _thenSafe(step) {
-            //return step.replace(/<\/?([\w]+-[\w]+|script)(?:[^>=]|='[^']*'|="[^"]*"|=[^'"][^\s>]*)*>/g, '');
-            return step.replace(/<\/?script(?:[^>=]|='[^']*'|="[^"]*"|=[^'"][^\s>]*)*>/g, '');
+        tokenize(md) {
+            return __classPrivateFieldGet(this, _MarkdownService_md, "f").tokenize(this._escape(md), __classPrivateFieldGet(this, _MarkdownService_grammar, "f"));
         }
     }
+    _MarkdownService_grammar = new WeakMap(), _MarkdownService_md = new WeakMap();
     Pacem.MarkdownService = MarkdownService;
 })(Pacem || (Pacem = {}));
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
@@ -3417,8 +3597,16 @@ var Pacem;
                 }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
-                    if (name === 'value')
-                        this.innerHTML = this._md.toHtml(val);
+                    if (name === 'value') {
+                        this.innerHTML = this.html();
+                    }
+                }
+                // IDEA: allow extensible parsing (grammar components?...)
+                tokens(md = this.value) {
+                    return this._md.tokenize(md);
+                }
+                html(md = this.value) {
+                    return this._md.toHtml(md);
                 }
             };
             __decorate([
@@ -3527,7 +3715,7 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
-            var _mql;
+            var _PacemMediaQueryElement_mql;
             const THRESHOLD_SM = 768;
             const THRESHOLD_MD = 992;
             const THRESHOLD_LG = 1200;
@@ -3548,7 +3736,7 @@ var Pacem;
             let PacemMediaQueryElement = class PacemMediaQueryElement extends Components.PacemEventTarget {
                 constructor() {
                     super(...arguments);
-                    _mql.set(this, void 0);
+                    _PacemMediaQueryElement_mql.set(this, void 0);
                     this._changeHandler = (evt) => {
                         const matches = this.isMatch = evt.matches;
                         this.dispatchEvent(new Event('change'));
@@ -3574,23 +3762,23 @@ var Pacem;
                     super.disconnectedCallback();
                 }
                 _init(q = this.query) {
-                    const old = __classPrivateFieldGet(this, _mql);
+                    const old = __classPrivateFieldGet(this, _PacemMediaQueryElement_mql, "f");
                     if (!Pacem.Utils.isNull(old)) {
                         old.removeListener(this._changeHandler);
                     }
                     if (!Pacem.Utils.isNullOrEmpty(q)) {
-                        const val = __classPrivateFieldSet(this, _mql, window.matchMedia(q));
+                        const val = __classPrivateFieldSet(this, _PacemMediaQueryElement_mql, window.matchMedia(q), "f");
                         val.addListener(this._changeHandler);
                         this.isMatch = val.matches;
                     }
                 }
             };
-            _mql = new WeakMap();
+            _PacemMediaQueryElement_mql = new WeakMap();
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemMediaQueryElement.prototype, "query", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
+                Pacem.Watch({ reflectBack: true, converter: Pacem.PropertyConverters.Boolean })
             ], PacemMediaQueryElement.prototype, "isMatch", void 0);
             PacemMediaQueryElement = __decorate([
                 Pacem.CustomElement({
@@ -3843,6 +4031,146 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
+            let PacemPictureSourceElement = class PacemPictureSourceElement extends Components.PacemItemElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    const picture = this.container;
+                    if (picture instanceof PacemPictureElement && ['srcset', 'media', 'type', 'disabled'].indexOf(name) >= 0) {
+                        picture.refreshSources();
+                    }
+                }
+            };
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemPictureSourceElement.prototype, "srcset", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemPictureSourceElement.prototype, "media", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemPictureSourceElement.prototype, "type", void 0);
+            PacemPictureSourceElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-picture-source'
+                })
+            ], PacemPictureSourceElement);
+            UI.PacemPictureSourceElement = PacemPictureSourceElement;
+            let PacemPictureElement = class PacemPictureElement extends Components.PacemItemsContainerElement {
+                constructor() {
+                    super('img');
+                    this._updateCurrentSrcHandler = (evt) => {
+                        this.currentSrc = this._img.currentSrc;
+                    };
+                }
+                validate(item) {
+                    return item instanceof PacemPictureSourceElement;
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'src':
+                            this._setSource();
+                            break;
+                        case 'items':
+                            this._setSources();
+                            break;
+                    }
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    this._img.addEventListener('load', this._updateCurrentSrcHandler, false);
+                    this._setSource();
+                    this._setSources();
+                }
+                disconnectedCallback() {
+                    const img = this._img;
+                    if (!Pacem.Utils.isNull(img)) {
+                        img.removeEventListener('load', this._updateCurrentSrcHandler, false);
+                    }
+                    super.disconnectedCallback();
+                }
+                refreshSources() {
+                    this._setSources();
+                }
+                _setSources(items = this.items) {
+                    var _a;
+                    const picture = this._picture, img = this._img;
+                    if (!Pacem.Utils.isNull(picture) && !Pacem.Utils.isNull(img)) {
+                        const sources = picture.querySelectorAll('source'), itemCount = (_a = items === null || items === void 0 ? void 0 : items.length) !== null && _a !== void 0 ? _a : 0;
+                        // populate
+                        for (let i = 0; i < itemCount; i++) {
+                            const item = this.items[i];
+                            let source;
+                            if (sources.length <= i) {
+                                picture.insertBefore(source = document.createElement('source'), img);
+                            }
+                            else {
+                                source = sources.item(i);
+                            }
+                            if (item.disabled || Pacem.Utils.isNullOrEmpty(item.srcset)) {
+                                source.removeAttribute('srcset');
+                            }
+                            else {
+                                source.srcset = item.srcset;
+                            }
+                            if (Pacem.Utils.isNullOrEmpty(item.media)) {
+                                source.removeAttribute('media');
+                            }
+                            else {
+                                source.media = item.media;
+                            }
+                            if (Pacem.Utils.isNullOrEmpty(item.type)) {
+                                source.removeAttribute('type');
+                            }
+                            else {
+                                source.type = item.type;
+                            }
+                        }
+                        // cleanup
+                        for (let i = sources.length - 1; i >= itemCount; i--) {
+                            let source = sources.item(i);
+                            source.remove();
+                        }
+                    }
+                }
+                _setSource(src = this.src) {
+                    const img = this._img;
+                    if (!Pacem.Utils.isNull(img)) {
+                        img.src = src;
+                    }
+                }
+            };
+            __decorate([
+                Pacem.ViewChild('picture')
+            ], PacemPictureElement.prototype, "_picture", void 0);
+            __decorate([
+                Pacem.ViewChild('img')
+            ], PacemPictureElement.prototype, "_img", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemPictureElement.prototype, "src", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemPictureElement.prototype, "currentSrc", void 0);
+            PacemPictureElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-picture', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<picture class="${Pacem.PCSS}-picture display-flex flex-fill">
+    <img loading="lazy" />
+</picture><${Pacem.P}-content></${Pacem.P}-content>`
+                })
+            ], PacemPictureElement);
+            UI.PacemPictureElement = PacemPictureElement;
+        })(UI = Components.UI || (Components.UI = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../../../dist/js/pacem-core.d.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var UI;
+        (function (UI) {
             let PacemProgressbarElement = class PacemProgressbarElement extends Components.PacemElement {
                 constructor() {
                     super('progressbar', { 'valuemin': '0%', 'valuemax': '100%', 'valuenow': '0%' });
@@ -4010,7 +4338,7 @@ var Pacem;
                     if (this._canUseWebcam && !this._webcamInitialized) {
                         var me = this;
                         me._webcamInitialized = true;
-                        me._getUserMedia.apply(navigator, [{ video: true /*, audio: false*/ }, 
+                        me._getUserMedia.apply(navigator, [{ video: true /*, audio: false*/ },
                             /* success */ function (localMediaStream) {
                                 var video = me._player;
                                 // deprecated:
@@ -4202,7 +4530,7 @@ var Pacem;
                                 Pacem.Utils.removeClass(tab, 'tab-in');
                                 Pacem.Utils.addAnimationEndCallback(tab, (t) => {
                                     Pacem.Utils.removeClass(t, 'tab-previous tab-next');
-                                    const tgetH = Pacem.Utils.offset(t).height + padding;
+                                    const tgetH = Pacem.Utils.offset(t).height /* + padding*/;
                                     this._tweener.run(parseInt(container.style.height), tgetH, 100, 0, Pacem.Animations.Easings.sineOut, (_, v) => {
                                         container.style.height = Math.round(v) + 'px';
                                     })
@@ -4276,7 +4604,7 @@ var Pacem;
             ], PacemTabsElement.prototype, "orientation", void 0);
             PacemTabsElement = __decorate([
                 Pacem.CustomElement({
-                    tagName: Pacem.P + '-tabs', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    tagName: Pacem.P + '-tabs', shadow: false,
                     template: `<div class="${Pacem.PCSS}-tabs">
     <${Pacem.P}-adapter class="${Pacem.PCSS}-tabs-adapter" swipe-enabled="false" hide="{{ !:host._isUsingDefaultTabAdapter }}" label-callback="{{ :host._labelCallback }}"></${Pacem.P}-adapter>
     <div class="${Pacem.PCSS}-tabs-content">
@@ -4338,8 +4666,9 @@ var Pacem;
                 }
                 _show() {
                     window.clearTimeout(this._handle);
-                    if (this.disabled)
+                    if (this.disabled) {
                         return;
+                    }
                     if (this.autohide) {
                         this._handle = window.setTimeout(() => { this.show = false; }, this.timeout);
                     }
@@ -4794,8 +5123,8 @@ var Pacem;
             __decorate([
                 Pacem.Watch({
                     emit: false, converter: {
-                        convert: (attr) => attr.split(',').map(i => parseInt(i)),
-                        convertBack: (prop) => prop.join(',')
+                        convert: (attr) => attr === null || attr === void 0 ? void 0 : attr.split(/[ ,]+/).map(i => parseInt(i)),
+                        convertBack: (prop) => prop === null || prop === void 0 ? void 0 : prop.join(' ')
                     }
                 })
             ], PacemVibrateElement.prototype, "pattern", void 0);
@@ -4813,8 +5142,13 @@ var Pacem;
     (function (Components) {
         var UI;
         (function (UI) {
+            var _PacemViewElement_aborter;
             const ANIM_TIMEOUT = 500;
             let PacemViewElement = class PacemViewElement extends Components.PacemEventTarget {
+                constructor() {
+                    super(...arguments);
+                    _PacemViewElement_aborter.set(this, void 0);
+                }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
                     // url
@@ -4865,7 +5199,11 @@ var Pacem;
                     });
                 }
                 _manageUrl(url = this.url) {
-                    fetch(url, { credentials: 'same-origin' }).then(r => {
+                    if (__classPrivateFieldGet(this, _PacemViewElement_aborter, "f")) {
+                        __classPrivateFieldGet(this, _PacemViewElement_aborter, "f").abort();
+                    }
+                    const { signal } = __classPrivateFieldSet(this, _PacemViewElement_aborter, new AbortController(), "f");
+                    fetch(url, { credentials: 'same-origin', signal }).then(r => {
                         if ((r.status === 301 || r.status === 302) && this.followRedirects) {
                             this._manageUrl(r.headers.get("Location"));
                         }
@@ -4875,11 +5213,14 @@ var Pacem;
                         // fallback to empty content.
                         else
                             this._manageResult('');
+                    }, _ => {
+                        // do nothing on fail
                     });
                 }
                 _manageResult(result) {
                     // this way, `this._container.innerHTML = ''` instruction will eventually let the page "scroll up"...
                     this.innerHTML = '';
+                    this.scrollTo(0, 0);
                     cancelAnimationFrame(this._renderHandle);
                     this._renderHandle = requestAnimationFrame(() => {
                         this.innerHTML = result;
@@ -4894,6 +5235,7 @@ var Pacem;
                     this.dispatchEvent(new CustomEvent("render"));
                 }
             };
+            _PacemViewElement_aborter = new WeakMap();
             __decorate([
                 Pacem.Watch({ reflectBack: true, converter: Pacem.PropertyConverters.String })
             ], PacemViewElement.prototype, "url", void 0);

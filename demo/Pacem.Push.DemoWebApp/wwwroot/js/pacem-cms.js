@@ -1,17 +1,8 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -74,34 +65,30 @@ var Pacem;
                     this._openApi = _openApi;
                     this._cachedMetadataUrls = [];
                 }
-                load(url, headers) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        let api = yield this._openApi.load(url, headers);
-                        if (api != null) {
-                            api[BAG] = {};
-                            // greedy load of datafields
-                            for (let endpoint of api.endpoints) {
-                                yield this._enrichSchemas(api, endpoint, headers);
-                            }
+                async load(url, headers) {
+                    let api = await this._openApi.load(url, headers);
+                    if (api != null) {
+                        api[BAG] = {};
+                        // greedy load of datafields
+                        for (let endpoint of api.endpoints) {
+                            await this._enrichSchemas(api, endpoint, headers);
                         }
-                        return api;
-                    });
+                    }
+                    return api;
                 }
-                _enrichSchemas(api, endpoint, headers) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        const response = endpoint.response;
-                        if (response && response.meta) {
-                            response.fields = yield this._fetchMetadata(api, { name: response.fullType, schema: response.meta }, headers);
+                async _enrichSchemas(api, endpoint, headers) {
+                    const response = endpoint.response;
+                    if (response && response.meta) {
+                        response.fields = await this._fetchMetadata(api, { name: response.fullType, schema: response.meta }, headers);
+                    }
+                    // parameters?
+                    const parameters = endpoint.parameters;
+                    for (let parameter of (parameters || [])) {
+                        if (parameter.meta && parameter.fullType) {
+                            let fields = await this._fetchMetadata(api, { name: parameter.fullType, schema: parameter.meta }, headers);
+                            parameter.fields = fields;
                         }
-                        // parameters?
-                        const parameters = endpoint.parameters;
-                        for (let parameter of (parameters || [])) {
-                            if (parameter.meta && parameter.fullType) {
-                                let fields = yield this._fetchMetadata(api, { name: parameter.fullType, schema: parameter.meta }, headers);
-                                parameter.fields = fields;
-                            }
-                        }
-                    });
+                    }
                 }
                 clearCache() {
                     const cache = this.cache, keys = this._cachedMetadataUrls;
@@ -118,73 +105,71 @@ var Pacem;
                  * @param def1
                  * @param headers HTTP headers for API fetching
                  */
-                _fetchMetadata(api, def0, headers) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        let _fetch = (def1) => __awaiter(this, void 0, void 0, function* () {
-                            let cols = [];
-                            if (def1 && def1.name) {
-                                // short-circuit if already in the bag
-                                if (api[BAG][def1.name]) {
-                                    return api[BAG][def1.name];
-                                }
-                                /* reserve a place for this type so that it gets not fetched again if aggressive recursion occurs */ api[BAG][def1.name] = cols;
-                                let meta = { props: [] }, metadataUrl;
-                                if (/^https?:\/\//.test(def1.name)) {
-                                    // name is url? then it's the endpoint for type metadata, fetch it!
-                                    metadataUrl = def1.name;
+                async _fetchMetadata(api, def0, headers) {
+                    let _fetch = async (def1) => {
+                        let cols = [];
+                        if (def1 && def1.name) {
+                            // short-circuit if already in the bag
+                            if (api[BAG][def1.name]) {
+                                return api[BAG][def1.name];
+                            }
+                            /* reserve a place for this type so that it gets not fetched again if aggressive recursion occurs */ api[BAG][def1.name] = cols;
+                            let meta = { props: [] }, metadataUrl;
+                            if (/^https?:\/\//.test(def1.name)) {
+                                // name is url? then it's the endpoint for type metadata, fetch it!
+                                metadataUrl = def1.name;
+                            }
+                            else {
+                                console.warn(`Swagger entity definition keys must appear in form of absolute url. Their response to a GET request needs to be the entity metadata itself.\nNo other options are currently supported.`);
+                                return;
+                            }
+                            if (metadataUrl) {
+                                let retrieveFn = async () => {
+                                    let response = await fetch(metadataUrl, { credentials: 'omit', mode: 'cors', headers: headers });
+                                    if (response.ok) {
+                                        return await response.json();
+                                    }
+                                };
+                                if (this.cache) {
+                                    // check for session cache
+                                    meta = this.cache.getPropertyValue(metadataUrl);
+                                    if (!meta) {
+                                        // no cache available? then fetch...
+                                        meta = await retrieveFn();
+                                        this._cachedMetadataUrls.push(metadataUrl);
+                                        this.cache.setPropertyValue(metadataUrl, meta, /* persist in session not on location */ false);
+                                    }
                                 }
                                 else {
-                                    console.warn(`Swagger entity definition keys must appear in form of absolute url. Their response to a GET request needs to be the entity metadata itself.\nNo other options are currently supported.`);
-                                    return;
-                                }
-                                if (metadataUrl) {
-                                    let retrieveFn = () => __awaiter(this, void 0, void 0, function* () {
-                                        let response = yield fetch(metadataUrl, { credentials: 'omit', mode: 'cors', headers: headers });
-                                        if (response.ok) {
-                                            return yield response.json();
-                                        }
-                                    });
-                                    if (this.cache) {
-                                        // check for session cache
-                                        meta = this.cache.getPropertyValue(metadataUrl);
-                                        if (!meta) {
-                                            // no cache available? then fetch...
-                                            meta = yield retrieveFn();
-                                            this._cachedMetadataUrls.push(metadataUrl);
-                                            this.cache.setPropertyValue(metadataUrl, meta, /* persist in session not on location */ false);
-                                        }
-                                    }
-                                    else {
-                                        // do fetch
-                                        meta = yield retrieveFn();
-                                    }
-                                }
-                                let schema = def1.schema;
-                                for (let col in schema.properties) {
-                                    let column = schema.properties[col], field = meta && meta.props.find(p => p.prop === col);
-                                    let datafield = Object.assign({
-                                        prop: col, type: column.type || 'text', props: undefined
-                                    }, field || /* if there's no match, then read-only */ { isReadOnly: true });
-                                    if (field) {
-                                        let $ref = (column.items && column.items.$ref) || column.$ref;
-                                        if ($ref) {
-                                            let ref = Pacem.Scaffolding.OpenApi.getOpenApiDefinition(api, $ref), key = ref.name;
-                                            if (api[BAG][key]) {
-                                                datafield.props = api[BAG][key];
-                                            }
-                                            else {
-                                                // recursion here
-                                                datafield.props = yield _fetch(ref);
-                                            }
-                                        }
-                                    }
-                                    cols.push(datafield);
+                                    // do fetch
+                                    meta = await retrieveFn();
                                 }
                             }
-                            return cols;
-                        });
-                        return yield _fetch(def0);
-                    });
+                            let schema = def1.schema;
+                            for (let col in schema.properties) {
+                                let column = schema.properties[col], field = meta && meta.props.find(p => p.prop === col);
+                                let datafield = Object.assign({
+                                    prop: col, type: column.type || 'text', props: undefined
+                                }, field || /* if there's no match, then read-only */ { isReadOnly: true });
+                                if (field) {
+                                    let $ref = (column.items && column.items.$ref) || column.$ref;
+                                    if ($ref) {
+                                        let ref = Pacem.Scaffolding.OpenApi.getOpenApiDefinition(api, $ref), key = ref.name;
+                                        if (api[BAG][key]) {
+                                            datafield.props = api[BAG][key];
+                                        }
+                                        else {
+                                            // recursion here
+                                            datafield.props = await _fetch(ref);
+                                        }
+                                    }
+                                }
+                                cols.push(datafield);
+                            }
+                        }
+                        return cols;
+                    };
+                    return await _fetch(def0);
                 }
             }
             OpenApi.SwaggerCmsParser = SwaggerCmsParser;
@@ -1031,8 +1016,7 @@ var Pacem;
             const FETCH_METADATA = {
                 display: {
                     icon: 'wifi', name: 'Api Fetcher', description: 'Fetching widget that retrieves data from a REST endpoint.'
-                },
-                props: [
+                }, props: [
                     {
                         prop: 'manifest', type: Cms.EXPRESSION_METADATA_TYPE, isComplexType: true, display: {
                             name: 'Api Manifest'
@@ -1659,7 +1643,10 @@ var Pacem;
                 svg.setAttribute('height', '100%');
                 svg.setAttribute('width', '100%');
                 svg.setAttribute('preserveAspectRatio', 'none');
-                svg.innerHTML = `<rect class="grid-cell" height="100%" width="100%"></rect>`;
+                svg.setAttribute('class', 'grid-cell-wrapper');
+                //svg.style.padding = '2px';
+                //svg.style.boxSizing = 'border-box';
+                svg.innerHTML = `<rect class="grid-cell" width="100%" height="100%"></rect>`;
                 return svg;
             }
             Cms.GRID_COLUMNS = 12;
@@ -1773,7 +1760,7 @@ var Pacem;
                             case Pacem.UI.RescaleEventType.Rescale:
                                 evt.preventDefault();
                                 // check pos
-                                const pos = evt.detail.currentPosition, handle = evt.detail.handle;
+                                const pos = { x: evt.clientX, y: evt.clientY }, handle = evt.detail.handle;
                                 const dropTarget = document.elementsFromPoint(pos.x, pos.y).find(e => this._dragDrop.dropTargets.indexOf(e) >= 0);
                                 if (dropTarget) {
                                     var col = +dropTarget.style.gridColumnStart;
@@ -2031,6 +2018,48 @@ var Pacem;
         })(Cms = Components.Cms || (Components.Cms = {}));
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
+/// <reference path="../../../scaffolding/types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Cms;
+        (function (Cms) {
+            /**
+             * UI widget container that eases dragdrop-based enrollment into composite widgets.
+             */
+            let PacemWidgetPickerElement = class PacemWidgetPickerElement extends Cms.PacemCompositeWidgetElement {
+                register(item) {
+                    const retval = super.register(item);
+                    if (retval) {
+                        item.hide = true;
+                    }
+                    return retval;
+                }
+            };
+            __decorate([
+                Pacem.ViewChild(Pacem.P + '-drag-drop')
+            ], PacemWidgetPickerElement.prototype, "_dragDrop", void 0);
+            PacemWidgetPickerElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-widget-picker', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<${Pacem.P}-repeater datasource="{{ :host.items }}">
+    <template>
+        <${Pacem.P}-panel behaviors="{{ [::_dragDrop] }}" class="${Pacem.PCSS}-widget-itempicker display-flex flex-fill flex-middle flex-nowrap">
+            <i class="${Pacem.PCSS}-icon flex-auto" dragger>drag_indicator</i>
+            <${Pacem.P}-icon icon="{{ ^item.metadata.display.icon }}" class="flex-auto ${Pacem.PCSS}-margin margin-x-1"></${Pacem.P}-icon>
+            <${Pacem.P}-text text="{{ ^item.metadata.display.name }}"></${Pacem.P}-text>
+        </${Pacem.P}-panel>
+    </template>
+</${Pacem.P}-repeater>
+<${Pacem.P}-drag-drop handle-selector="i.${Pacem.PCSS}-icon[dragger]"></${Pacem.P}-drag-drop>
+<${Pacem.P}-content></${Pacem.P}-content>`
+                })
+            ], PacemWidgetPickerElement);
+            Cms.PacemWidgetPickerElement = PacemWidgetPickerElement;
+        })(Cms = Components.Cms || (Components.Cms = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
 /// <reference path="../types.ts" />
 /// <reference path="../../scaffolding/datacolumns.ts" />
 var Pacem;
@@ -2051,7 +2080,8 @@ var Pacem;
                 props: [{
                         prop: 'datasource', type: Cms.EXPRESSION_METADATA_TYPE, display: { name: 'Datasource' },
                         extra: Pacem.Utils.extend({}, Cms.EXPRESSION_WIDGET_METADATA_EXTRA, { filter: (e) => e instanceof Cms.PacemWidgetDataElement || e instanceof Cms.PacemWidgetFetchElement })
-                    }, {
+                    },
+                    {
                         prop: 'columns', type: Cms.DATACOLUMNS_METADATA_TYPE, display: { name: 'Columns' },
                         // this will include 'datasource' as argument in the oneToMany source fn
                         extra: { properties: 'datarowMetadata' },

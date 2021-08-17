@@ -1,6 +1,6 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -9,25 +9,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 var Pacem;
 (function (Pacem) {
     var Drawing;
     (function (Drawing) {
-        var _transformMatrix_1;
+        var _UI2DEvent_transformMatrix;
         function isDrawable(object) {
             return !Pacem.Utils.isNull(object) && 'stage' in object;
         }
@@ -55,18 +53,18 @@ var Pacem;
         class UI2DEvent extends Pacem.CustomUIEvent {
             constructor(type, eventInit, originalEvent, transformMatrix) {
                 super(type, eventInit, originalEvent);
-                _transformMatrix_1.set(this, void 0);
-                __classPrivateFieldSet(this, _transformMatrix_1, transformMatrix);
+                _UI2DEvent_transformMatrix.set(this, void 0);
+                __classPrivateFieldSet(this, _UI2DEvent_transformMatrix, transformMatrix, "f");
             }
             /** Gets the screen transform matrix. */
             get transformMatrix() {
-                return __classPrivateFieldGet(this, _transformMatrix_1);
+                return __classPrivateFieldGet(this, _UI2DEvent_transformMatrix, "f");
             }
             project(pt = { x: this.screenX, y: this.screenY }) {
-                return Pacem.Matrix2D.multiply(pt, __classPrivateFieldGet(this, _transformMatrix_1));
+                return Pacem.Matrix2D.multiply(pt, __classPrivateFieldGet(this, _UI2DEvent_transformMatrix, "f"));
             }
         }
-        _transformMatrix_1 = new WeakMap();
+        _UI2DEvent_transformMatrix = new WeakMap();
         Drawing.UI2DEvent = UI2DEvent;
         class DragEvent extends UI2DEvent {
         }
@@ -220,20 +218,19 @@ var Pacem;
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], ShapeElement.prototype, "stroke", void 0);
             __decorate([
-                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
-            ], ShapeElement.prototype, "lineWidth", void 0);
-            __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], ShapeElement.prototype, "fill", void 0);
             __decorate([
                 Pacem.Watch({
-                    emit: false,
-                    converter: {
+                    emit: false, converter: {
                         convert: (attr) => attr === null || attr === void 0 ? void 0 : attr.split(',').map(i => parseInt(i)).filter(i => !Number.isNaN(i)),
                         convertBack: (prop) => prop === null || prop === void 0 ? void 0 : prop.join(',')
                     }
                 })
             ], ShapeElement.prototype, "dashArray", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
+            ], ShapeElement.prototype, "lineWidth", void 0);
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], ShapeElement.prototype, "lineJoin", void 0);
@@ -451,7 +448,7 @@ var Pacem;
     (function (Components) {
         var Drawing;
         (function (Drawing) {
-            var _trasformMatrix;
+            var _Pacem2DElement_trasformMatrix;
             // group [1] := align x,[3] := align y,[6] := slice
             const ASPECTRATIO_PATTERN = /^\s*[xX]\s*([Mm](in|ax|id))\s*[yY]\s*([Mm](in|ax|id))(\s+(none|slice|meet))?\s*$/;
             const aspectRatioPropertyConverter = {
@@ -482,7 +479,7 @@ var Pacem;
             let Pacem2DElement = class Pacem2DElement extends Components.PacemItemsContainerElement {
                 constructor() {
                     super(...arguments);
-                    _trasformMatrix.set(this, Pacem.Matrix2D.identity);
+                    _Pacem2DElement_trasformMatrix.set(this, Pacem.Matrix2D.identity);
                     this._options = DEFAULT_STAGE_OPTIONS;
                     this._resizeHandler = (evt) => {
                         this._size = { width: evt.detail.width, height: evt.detail.height };
@@ -573,7 +570,7 @@ var Pacem;
                     return this._stage;
                 }
                 get transformMatrix() {
-                    return __classPrivateFieldGet(this, _trasformMatrix);
+                    return __classPrivateFieldGet(this, _Pacem2DElement_trasformMatrix, "f");
                 }
                 validate(item) {
                     return item instanceof Drawing.DrawableElement && /* only direct items */ Pacem.Utils.isNull(item.parent);
@@ -619,7 +616,7 @@ var Pacem;
                 }
                 _invalidateSize() {
                     this.adapter.invalidateSize(this, this._size);
-                    __classPrivateFieldSet(this, _trasformMatrix, this.adapter.getTransformMatrix(this));
+                    __classPrivateFieldSet(this, _Pacem2DElement_trasformMatrix, this.adapter.getTransformMatrix(this), "f");
                     this.dispatchEvent(new Components.ResizeEvent(this._size));
                 }
                 viewActivatedCallback() {
@@ -698,7 +695,7 @@ var Pacem;
                     super.disconnectedCallback();
                 }
             };
-            _trasformMatrix = new WeakMap();
+            _Pacem2DElement_trasformMatrix = new WeakMap();
             __decorate([
                 Pacem.Watch({ converter: Pacem.PropertyConverters.Element })
             ], Pacem2DElement.prototype, "adapter", void 0);
@@ -724,7 +721,7 @@ var Pacem;
                 Pacem.Debounce(true)
             ], Pacem2DElement.prototype, "_drawDebounced", null);
             Pacem2DElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-' + Drawing.TAG_MIDDLE_NAME, shadow: Pacem.Defaults.USE_SHADOW_ROOT, template: `<${Pacem.P}-resize></${Pacem.P}-resize><div class="${Pacem.PCSS}-2d"></div><pacem-content></pacem-content>` })
+                Pacem.CustomElement({ tagName: Pacem.P + '-' + Drawing.TAG_MIDDLE_NAME, shadow: Pacem.Defaults.USE_SHADOW_ROOT, template: `<${Pacem.P}-resize></${Pacem.P}-resize><div class="${Pacem.PCSS}-2d"></div><${Pacem.P}-content></${Pacem.P}-content>` })
             ], Pacem2DElement);
             Drawing.Pacem2DElement = Pacem2DElement;
         })(Drawing = Components.Drawing || (Components.Drawing = {}));

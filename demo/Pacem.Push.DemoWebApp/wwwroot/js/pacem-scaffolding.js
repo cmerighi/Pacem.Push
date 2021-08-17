@@ -1,6 +1,6 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -9,60 +9,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-/// <reference path="../../../dist/js/pacem-core.d.ts" />
-var Pacem;
-(function (Pacem) {
-    var Components;
-    (function (Components) {
-        var Scaffolding;
-        (function (Scaffolding) {
-            Scaffolding.CHAR_COUNTER_CHILD = `<${Pacem.P}-char-count hide="{{ :host.readonly || !(:host.minlength > 0 || :host.maxlength > 0) }}" minlength="{{ :host.minlength }}" maxlength="{{ :host.maxlength }}" string="{{ :host.value }}"></${Pacem.P}-char-count>`;
-            let PacemCharCountElement = class PacemCharCountElement extends Components.PacemElement {
-                _isValid(v) {
-                    const l = this._length(v);
-                    if (this.minlength > 0 && l < this.minlength)
-                        return false;
-                    if (this.maxlength > 0 && l > this.maxlength)
-                        return false;
-                    return true;
-                }
-                _length(s) {
-                    return (s && s.length) || 0;
-                }
-            };
-            __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
-            ], PacemCharCountElement.prototype, "minlength", void 0);
-            __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
-            ], PacemCharCountElement.prototype, "maxlength", void 0);
-            __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
-            ], PacemCharCountElement.prototype, "string", void 0);
-            PacemCharCountElement = __decorate([
-                Pacem.CustomElement({
-                    tagName: Pacem.P + '-char-count',
-                    shadow: Pacem.Defaults.USE_SHADOW_ROOT,
-                    template: `<${Pacem.P}-panel class="${Pacem.PCSS}-char-count" css-class="{{ {'valid': :host._isValid(:host.string), 'invalid': !:host._isValid(:host.string) } }}">
-    <${Pacem.P}-span hide="{{ !(:host.minlength > 0) }}" class="${Pacem.PCSS}-char-min" content="{{ :host.minlength }}"></${Pacem.P}-span>
-    <${Pacem.P}-span class="${Pacem.PCSS}-char-curr" content="{{ :host._length(:host.string) || '0' }}"></${Pacem.P}-span>
-    <${Pacem.P}-span hide="{{ !(:host.maxlength > 0) }}" class="${Pacem.PCSS}-char-max" content="{{ :host.maxlength }}"></${Pacem.P}-span>
-</${Pacem.P}-panel>`
-                })
-            ], PacemCharCountElement);
-            Scaffolding.PacemCharCountElement = PacemCharCountElement;
-        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
-    })(Components = Pacem.Components || (Pacem.Components = {}));
-})(Pacem || (Pacem = {}));
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 /// <reference path="../../../dist/js/pacem-ui.d.ts" />
 var Pacem;
@@ -71,6 +28,7 @@ var Pacem;
     (function (Components) {
         var Scaffolding;
         (function (Scaffolding) {
+            var _PacemItemElement_container;
             const ORIGINAL_VALUE_FIELD = 'pacem:model:original-value';
             class PacemFormRelevantElement extends Components.PacemElement {
                 viewActivatedCallback() {
@@ -85,8 +43,16 @@ var Pacem;
             class PacemModelElement extends PacemFormRelevantElement {
                 viewActivatedCallback() {
                     super.viewActivatedCallback();
-                    if (!Pacem.Utils.isNullOrEmpty(this.name)) {
-                        this.form && this.form.registerField(this.name, this);
+                    const name = this.name, form = this.form;
+                    if (!Pacem.Utils.isNullOrEmpty(name) && !Pacem.Utils.isNull(form)
+                        && (!this.hasAttribute('autobind')
+                            || (this.getAttribute('autobind') !== 'off' && this.getAttribute('autobind') !== 'false'))) {
+                        form.registerField(name, this);
+                        // automatic bind value given the field name
+                        if (!this.hasAttribute('value')) {
+                            const formId = form.id = form.id || 'frm_' + Pacem.Utils.uniqueCode();
+                            this.setAttribute('value', `{{ #${formId}.entity.${name}, twoway }}`);
+                        }
                     }
                     this._setAsOriginalValue(this.value);
                 }
@@ -366,20 +332,70 @@ var Pacem;
                 Pacem.Watch({ converter: Pacem.PropertyConverters.String })
             ], PacemBaseElement.prototype, "placeholder", void 0);
             Scaffolding.PacemBaseElement = PacemBaseElement;
-            let PacemDataItemElement = class PacemDataItemElement extends HTMLElement {
+            class PacemItemElement extends Components.PacemElement {
+                constructor() {
+                    super(...arguments);
+                    _PacemItemElement_container.set(this, void 0);
+                }
                 /** @overridable */
-                _findContainer() {
-                    return Pacem.CustomElementUtils.findAncestor(this, n => n instanceof PacemDataSourceElement);
+                findContainer() {
+                    return Pacem.CustomElementUtils.findAncestor(this, n => n instanceof PacemItemsContainerBaseElement);
+                }
+                get container() {
+                    return __classPrivateFieldGet(this, _PacemItemElement_container, "f");
                 }
                 viewActivatedCallback() {
-                    const container = this._container = this._findContainer();
-                    if (!Pacem.Utils.isNull(container))
+                    super.viewActivatedCallback();
+                    const container = __classPrivateFieldSet(this, _PacemItemElement_container, this.findContainer(), "f");
+                    if (!Pacem.Utils.isNull(container)) {
                         container.register(this);
+                    }
                 }
                 disconnectedCallback() {
-                    if (!Pacem.Utils.isNull(this._container))
-                        this._container.unregister(this);
+                    if (!Pacem.Utils.isNull(__classPrivateFieldGet(this, _PacemItemElement_container, "f"))) {
+                        __classPrivateFieldGet(this, _PacemItemElement_container, "f").unregister(this);
+                    }
+                    super.disconnectedCallback();
                 }
+            }
+            _PacemItemElement_container = new WeakMap();
+            Scaffolding.PacemItemElement = PacemItemElement;
+            class PacemItemsContainerBaseElement extends PacemBaseElement {
+                /**
+                 * Registers a new item among the items.
+                 * @param item {PacemDataItemElement} Item to be enrolled
+                 */
+                register(item) {
+                    let flag = true;
+                    if (Pacem.Utils.isNull(this.items)) {
+                        this.items = [item];
+                    }
+                    else if (this.items.indexOf(item) === -1) {
+                        this.items.push(item);
+                    }
+                    else {
+                        flag = false;
+                    }
+                    return flag;
+                }
+                /**
+                 * Removes an existing element from the items.
+                 * @param item {PacemDataItemElement} Item to be removed
+                 */
+                unregister(item) {
+                    const ndx = !Pacem.Utils.isNull(this.items) && this.items.indexOf(item);
+                    if (ndx >= 0) {
+                        this.items.splice(ndx, 1)[0];
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            __decorate([
+                Pacem.Watch( /* can only be databound or assigned at runtime */)
+            ], PacemItemsContainerBaseElement.prototype, "items", void 0);
+            Scaffolding.PacemItemsContainerBaseElement = PacemItemsContainerBaseElement;
+            let PacemDataItemElement = class PacemDataItemElement extends PacemItemElement {
             };
             __decorate([
                 Pacem.Watch({
@@ -414,7 +430,7 @@ var Pacem;
                 Pacem.CustomElement({ tagName: Pacem.P + '-data-item' })
             ], PacemDataItemElement);
             Scaffolding.PacemDataItemElement = PacemDataItemElement;
-            class PacemDataSourceElement extends PacemBaseElement {
+            class PacemDataSourceElement extends PacemItemsContainerBaseElement {
                 constructor(multipleChoice = false) {
                     super();
                     this.multipleChoice = multipleChoice;
@@ -427,16 +443,7 @@ var Pacem;
                  * @param item {PacemDataItemElement} Item to be enrolled
                  */
                 register(item) {
-                    let flag = true;
-                    if (Pacem.Utils.isNull(this.items)) {
-                        this.items = [item];
-                    }
-                    else if (this.items.indexOf(item) === -1) {
-                        this.items.push(item);
-                    }
-                    else {
-                        flag = false;
-                    }
+                    const flag = super.register(item);
                     if (flag) {
                         item.addEventListener(Pacem.PropertyChangeEventName, this._itemPropertyChangedHandler, false);
                     }
@@ -447,13 +454,11 @@ var Pacem;
                  * @param item {PacemDataItemElement} Item to be removed
                  */
                 unregister(item) {
-                    const ndx = !Pacem.Utils.isNull(this.items) && this.items.indexOf(item);
-                    if (ndx >= 0) {
-                        let item = this.items.splice(ndx, 1)[0];
+                    const flag = super.register(item);
+                    if (flag) {
                         item.removeEventListener(Pacem.PropertyChangeEventName, this._itemPropertyChangedHandler, false);
-                        return true;
                     }
-                    return false;
+                    return flag;
                 }
                 buildAdaptedDatasource(ds = this.datasource) {
                     return ds && ds.map(i => this.mapEntityToItem(i));
@@ -476,17 +481,20 @@ var Pacem;
                  * @param value {any} value to match
                  */
                 isItemSelected(item, value = this.value) {
-                    if (Pacem.Utils.isNullOrEmpty(value))
+                    if (Pacem.Utils.isNullOrEmpty(value)) {
                         return false;
+                    }
                     const v = this.mapEntityToValue(item), c = this.compareBy;
                     if (this.multipleChoice && Pacem.Utils.isArray(value))
                         return !Pacem.Utils.isNull(value.find(j => 
                         // caution: numbers and strings might be compared, ease the comparison by loosing equality constraints: `===` to `==`.
                         j /* value item */ == /*=*/ v /* datasource item */ || (typeof j === 'object' && !Pacem.Utils.isNullOrEmpty(c) && c in v && c in j && v[c] == /*=*/ j[c])));
-                    else if (!this.multipleChoice)
+                    else if (!this.multipleChoice) {
                         return value == /*=*/ v || (typeof value === 'object' && !Pacem.Utils.isNullOrEmpty(c) && c in v && c in value && v[c] == /*=*/ value[c]);
-                    else
+                    }
+                    else {
                         return false;
+                    }
                 }
                 /**
                  * Checks wether the provided `item` matches the control's criteria for a selected option against a provided value (which defaults to control's value).
@@ -506,10 +514,12 @@ var Pacem;
                         let found = value.find(j => j == /*=*/ item.value || (typeof j === 'object' && !Pacem.Utils.isNullOrEmpty(c) && c in j && !Pacem.Utils.isNullOrEmpty(item.value) && c in item.value && j[c] == /*=*/ item.value[c]));
                         return !Pacem.Utils.isNull(found);
                     }
-                    else if (!this.multipleChoice)
+                    else if (!this.multipleChoice && !Pacem.Utils.isNullOrEmpty(item.value)) {
                         return value == /*=*/ item.value || (typeof value === 'object' && !Pacem.Utils.isNullOrEmpty(c) && c in value && !Pacem.Utils.isNullOrEmpty(item.value) && c in item.value && value[c] == /*=*/ item.value[c]);
-                    else
+                    }
+                    else {
                         return false;
+                    }
                 }
                 mapEntityToValue(entity) {
                     if (entity == null)
@@ -520,8 +530,9 @@ var Pacem;
                     }
                     // databound
                     let value = entity, prop;
-                    if (prop = this.valueProperty)
+                    if (prop = this.valueProperty) {
                         value = entity[prop];
+                    }
                     return value;
                 }
                 mapEntityToViewValue(entity) {
@@ -533,8 +544,9 @@ var Pacem;
                     }
                     // databound
                     let viewValue = entity.toString(), prop;
-                    if (prop = this.textProperty)
+                    if (prop = this.textProperty) {
                         viewValue = entity[prop];
+                    }
                     return viewValue;
                 }
                 mapEntityToItem(entity) {
@@ -542,7 +554,7 @@ var Pacem;
                         throw 'entity cannot be null';
                     // declared
                     if (entity instanceof PacemDataItemElement) {
-                        return { value: entity.value, viewValue: entity.label || entity.value, disabled: entity.disabled };
+                        return { value: entity.value, viewValue: entity.label || entity.value, disabled: entity.disabled, data: entity };
                     }
                     // databound
                     let disabled = false;
@@ -550,7 +562,7 @@ var Pacem;
                     if (!Pacem.Utils.isNullOrEmpty(disabledProp)) {
                         disabled = entity[disabledProp] || false;
                     }
-                    return { value: this.mapEntityToValue(entity), viewValue: this.mapEntityToViewValue(entity), disabled: disabled };
+                    return { value: this.mapEntityToValue(entity), viewValue: this.mapEntityToViewValue(entity), disabled: disabled, data: entity };
                 }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
@@ -575,8 +587,9 @@ var Pacem;
                     }
                 }
                 getViewValue(val) {
-                    if (Pacem.Utils.isNullOrEmpty(this.datasource))
+                    if (Pacem.Utils.isNullOrEmpty(this.datasource)) {
                         return undefined;
+                    }
                     return this.datasource.filter(i => this.isItemSelected(i)).map(i => this.mapEntityToViewValue(i)).join(', ');
                 }
                 convertValueAttributeToProperty(attr) {
@@ -588,9 +601,6 @@ var Pacem;
                     return Pacem.Utils.areSemanticallyEqual(old, val);
                 }
             }
-            __decorate([
-                Pacem.Watch( /* can only be databound or assigned at runtime */)
-            ], PacemDataSourceElement.prototype, "items", void 0);
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Json })
             ], PacemDataSourceElement.prototype, "datasource", void 0);
@@ -613,6 +623,476 @@ var Pacem;
                 Pacem.Debounce(true)
             ], PacemDataSourceElement.prototype, "databind", null);
             Scaffolding.PacemDataSourceElement = PacemDataSourceElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            const JsonOrStringConverter = {
+                convert: (attr, el) => {
+                    return /\{.+\}/.test(attr) ? Pacem.PropertyConverters.Json.convert(attr) : Pacem.PropertyConverters.String.convert(attr);
+                },
+                convertBack: (prop, el) => {
+                    if (typeof prop === 'string') {
+                        return prop;
+                    }
+                    return Pacem.PropertyConverters.Json.convertBack(prop, el);
+                }
+            };
+            // #region MONTH-PICKER (util component)
+            function buildMonthGrid() {
+                let header = '';
+                for (let month = 0; month < 12; month++) {
+                    header += `<div class="calendar-month month-${month + 1}"><${Pacem.P}-span class="month-button text-ellipsed" on-click=":host._setMonth(${month})" css-class="{{ { 'selected-month': :host._isSelectedMonth(${month}, :host.month, :host.viewYear), 'this-month': :host._isThisMonth(${month}, :host.viewYear) } }}" text="{{ :host._getMonthLabel(${month}) }}"></${Pacem.P}-span></div>`;
+                }
+                return header;
+            }
+            let PacemCalendarMonthPickerElement = class PacemCalendarMonthPickerElement extends Components.PacemElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'viewYear':
+                            this.dispatchEvent(new CustomEvent('viewyearchange', { detail: new Date(val, 0, 1), bubbles: false, cancelable: false }));
+                            Pacem.Utils.removeClass(this, "viewyear-next viewyear-previous");
+                            requestAnimationFrame(() => {
+                                Pacem.Utils.addClass(this, old > val ? "viewyear-previous" : "viewyear-next");
+                            });
+                            break;
+                    }
+                }
+                _getMonthLabel(m) {
+                    const year = new Date().getFullYear();
+                    const date = new Date(year, m, 1);
+                    return date.toLocaleString(Pacem.Utils.lang(this), { month: 'short' });
+                }
+                _isThisMonth(m, v = this.viewYear) {
+                    return this._isSelectedMonth(m, new Date(), v);
+                }
+                _isSelectedMonth(m, d = this.month, v = this.viewYear) {
+                    const actual = Pacem.Utils.parseDate(d);
+                    if (!Pacem.Utils.Dates.isDate(actual)) {
+                        return false;
+                    }
+                    const viewYear = v !== null && v !== void 0 ? v : new Date().getFullYear();
+                    return actual.getMonth() === m && actual.getFullYear() === viewYear;
+                }
+                _setMonth(m) {
+                    const year = this.viewYear;
+                    const date = new Date(year, m, 1);
+                    this.month = date;
+                    this.dispatchEvent(new CustomEvent('monthselect', { detail: date, bubbles: false, cancelable: false }));
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Date })
+            ], PacemCalendarMonthPickerElement.prototype, "month", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Date })
+            ], PacemCalendarMonthPickerElement.prototype, "viewYear", void 0);
+            PacemCalendarMonthPickerElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-calendar-month-picker', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<div class="${Pacem.PCSS}-month-picker">${buildMonthGrid()}</div>`
+                })
+            ], PacemCalendarMonthPickerElement);
+            Scaffolding.PacemCalendarMonthPickerElement = PacemCalendarMonthPickerElement;
+            // #endregion
+            // #region YEAR-PICKER (util component)
+            const YEARS_IN_RANGE = 12;
+            function buildYearGrid() {
+                let header = '';
+                for (let year = 0; year < YEARS_IN_RANGE; year++) {
+                    header += `<div class="calendar-year year-${year + 1}"><${Pacem.P}-span class="year-button text-ellipsed" on-click=":host._setYear(${year})" css-class="{{ { 'selected-year': :host._isSelectedYear(${year}, :host.year, :host.viewYear), 'this-year': :host._isThisYear(${year}, :host.viewYear) } }}" text="{{ :host._getYearLabel(${year}, :host.viewYear) }}"></${Pacem.P}-span></div>`;
+                }
+                return header;
+            }
+            function rangeFirstYear(y) {
+                const mod = y % 10;
+                return y - mod;
+            }
+            let PacemCalendarYearPickerElement = class PacemCalendarYearPickerElement extends Components.PacemElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'viewYear':
+                            this.dispatchEvent(new CustomEvent('viewyearchange', { detail: new Date(val, 0, 1), bubbles: false, cancelable: false }));
+                            Pacem.Utils.removeClass(this, "viewyear-next viewyear-previous");
+                            requestAnimationFrame(() => {
+                                Pacem.Utils.addClass(this, old > val ? "viewyear-previous" : "viewyear-next");
+                            });
+                            break;
+                    }
+                }
+                _getYearLabel(y, year = this.viewYear) {
+                    const first = rangeFirstYear(year);
+                    return '' + (first + y);
+                }
+                _isThisYear(y, v = this.viewYear) {
+                    return this._isSelectedYear(y, new Date(), v);
+                }
+                _isSelectedYear(y, d = this.year, v = this.viewYear) {
+                    const actual = Pacem.Utils.parseDate(d);
+                    if (!Pacem.Utils.Dates.isDate(actual)) {
+                        return false;
+                    }
+                    const start = rangeFirstYear(v), computed = start + y;
+                    ;
+                    return actual.getFullYear() === computed;
+                }
+                _setYear(y) {
+                    const v = this.viewYear, first = rangeFirstYear(v);
+                    const date = new Date(first + y, 0, 1);
+                    this.year = date;
+                    this.dispatchEvent(new CustomEvent('yearselect', { detail: date, bubbles: false, cancelable: false }));
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Date })
+            ], PacemCalendarYearPickerElement.prototype, "year", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Date })
+            ], PacemCalendarYearPickerElement.prototype, "viewYear", void 0);
+            PacemCalendarYearPickerElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-calendar-year-picker', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<div class="${Pacem.PCSS}-year-picker">${buildYearGrid()}</div>`
+                })
+            ], PacemCalendarYearPickerElement);
+            Scaffolding.PacemCalendarYearPickerElement = PacemCalendarYearPickerElement;
+            // #endregion
+            function buildCalendarHeader() {
+                let header = '';
+                for (let day = 0; day < 7; day++) {
+                    header += `<${Pacem.P}-span class="calendar-heading day-${day + 1} text-ellipsed" text="{{ :host._getHeaderLabel(:host._week[${day}]) }}"></${Pacem.P}-span>`;
+                }
+                return `<${Pacem.P}-panel hide="{{ :host.viewmode !== 'calendar' }}" class="calendar-header">${header}</${Pacem.P}-panel>`;
+            }
+            let PacemCalendarPickerElement = class PacemCalendarPickerElement extends Scaffolding.PacemBaseElement {
+                constructor() {
+                    super(...arguments);
+                    this.viewmode = 'calendar';
+                    this._clearBtnHandler = (evt) => {
+                        evt.preventDefault();
+                        this._viewDate = new Date();
+                        this.changeHandler(new Pacem.Components.UI.DateSelectEvent(void 0));
+                    };
+                    this._viewDateChangeHandler = (e) => {
+                        this._onViewDateChange(e);
+                    };
+                    this._popCalendarHandler = (e) => {
+                        this.viewmode = 'calendar';
+                        const dateValue = Pacem.Utils.parseDate(this.value);
+                        this._calendar.viewDate =
+                            this._monthPicker.month =
+                                this._yearPicker.year =
+                                    dateValue || this._calendar.viewDate;
+                        const offset = Pacem.Utils.offset(this._input);
+                        const dropdown = this._dropdown;
+                        dropdown.style.top = (offset.top + offset.height) + 'px';
+                        dropdown.style.left = offset.left + 'px';
+                        dropdown.hidden = false;
+                        requestAnimationFrame(() => {
+                            Pacem.Utils.addClass(dropdown, 'dropdown-in');
+                        });
+                    };
+                    this._hideCalendarHandler = (e) => {
+                        const path = e.composedPath() || [];
+                        if (path.indexOf(this._input) >= 0 || path.indexOf(this._dropdown) >= 0) {
+                            return;
+                        }
+                        this._hideCalendar();
+                    };
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'viewmode':
+                        case '_viewDate':
+                            this._onViewDateChange(this._viewDate);
+                            break;
+                    }
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    const dropdown = this._dropdown = this._proxy.dom[0];
+                    const calendar = this._calendar = dropdown.querySelector(Pacem.P + '-calendar');
+                    const monthPicker = this._monthPicker = dropdown.querySelector(Pacem.P + '-calendar-month-picker');
+                    const yearPicker = this._yearPicker = dropdown.querySelector(Pacem.P + '-calendar-year-picker');
+                    this._monthLabel = dropdown.querySelector('.calendar-month');
+                    this._yearLabel = dropdown.querySelector('.calendar-year');
+                    this._rangeLabel = dropdown.querySelector('.calendar-year-range');
+                    const now = this._calendar.now = new Date();
+                    const dateValue = Pacem.Utils.Dates.parse(this.value);
+                    const hasValue = Pacem.Utils.Dates.isDate(dateValue);
+                    const date = hasValue ? dateValue : now;
+                    calendar.dayLabelFormatter = (d) => {
+                        return Pacem.Utils.parseDate(d).toLocaleString(Pacem.Utils.lang(this), { day: 'numeric' });
+                    };
+                    monthPicker.addEventListener('viewyearchange', this._viewDateChangeHandler, false);
+                    yearPicker.addEventListener('viewyearchange', this._viewDateChangeHandler, false);
+                    calendar.addEventListener('viewdatechange', this._viewDateChangeHandler, false);
+                    calendar.viewDate = date;
+                    calendar.date = dateValue;
+                    const input = this._input;
+                    input.addEventListener('focus', this._popCalendarHandler, false);
+                    input.addEventListener('mousedown', this._popCalendarHandler, false);
+                    dropdown.addEventListener('mousedown', Pacem.stopPropagationHandler, false);
+                    window.document.body.addEventListener('mousedown', this._hideCalendarHandler, true);
+                    this._clearButton.addEventListener('mousedown', this._clearBtnHandler, false);
+                }
+                disconnectedCallback() {
+                    const input = this._input;
+                    if (!Pacem.Utils.isNull(input)) {
+                        this._clearButton.removeEventListener('mousedown', this._clearBtnHandler, false);
+                        input.removeEventListener('focus', this._popCalendarHandler, false);
+                        input.removeEventListener('mousedown', this._popCalendarHandler, false);
+                        this._dropdown.removeEventListener('mousedown', Pacem.stopPropagationHandler, false);
+                        window.document.body.removeEventListener('mousedown', this._hideCalendarHandler, true);
+                        this._calendar.removeEventListener('viewdatechange', this._viewDateChangeHandler, false);
+                        this._monthPicker.removeEventListener('viewyearchange', this._viewDateChangeHandler, false);
+                        this._yearPicker.removeEventListener('viewyearchange', this._viewDateChangeHandler, false);
+                    }
+                    super.disconnectedCallback();
+                }
+                _getHeaderLabel(d, mode = this.viewmode) {
+                    const dte = Pacem.Utils.parseDate(d);
+                    if (Pacem.Utils.Dates.isDate(dte)) {
+                        return dte.toLocaleString(Pacem.Utils.lang(this), { weekday: 'narrow' });
+                    }
+                    return '...';
+                }
+                _prev(e) {
+                    let months = -1;
+                    switch (this.viewmode) {
+                        case 'month':
+                            months = -12;
+                            break;
+                        case 'year':
+                            months = -120;
+                            break;
+                    }
+                    this._jumpMonths(months);
+                }
+                _next(e) {
+                    let months = 1;
+                    switch (this.viewmode) {
+                        case 'month':
+                            months = 12;
+                            break;
+                        case 'year':
+                            months = 120;
+                            break;
+                    }
+                    this._jumpMonths(months);
+                }
+                _jumpMonths(m) {
+                    const vd = Pacem.Utils.parseDate(this._viewDate);
+                    this._viewDate = Pacem.Utils.Dates.addMonths(vd, m);
+                }
+                _setMonth(e) {
+                    this._viewDate = e.detail;
+                    this.viewmode = 'calendar';
+                }
+                _setYear(e) {
+                    this._viewDate = e.detail;
+                    this.viewmode = 'month';
+                }
+                _onViewDateChange(e) {
+                    if (Pacem.Utils.isNullOrEmpty(e)) {
+                        return;
+                    }
+                    const date = Pacem.Utils.parseDate(this._viewDate);
+                    if (Pacem.Utils.Dates.isDate(date) && !Pacem.Utils.isNull(this._monthLabel)) {
+                        switch (this.viewmode) {
+                            case 'month':
+                                this._yearLabel.text = date.toLocaleString(Pacem.Utils.lang(this), { year: 'numeric' });
+                                break;
+                            case 'year':
+                                const fy = rangeFirstYear(date.getFullYear());
+                                this._rangeLabel.text = `${fy} - ${fy + YEARS_IN_RANGE - 1}`;
+                                break;
+                            default:
+                                this._monthLabel.text = date.toLocaleString(Pacem.Utils.lang(this), { month: 'long', year: 'numeric' });
+                                break;
+                        }
+                    }
+                }
+                _hideCalendar() {
+                    // animation just in case
+                    Pacem.Utils.removeClass(this._dropdown, 'dropdown-in');
+                    Pacem.Utils.addAnimationEndCallback(this._dropdown, e => {
+                        this._dropdown.hidden = true;
+                        Pacem.Utils.removeClass(this._dropdown, 'dropdown-select');
+                    }, 250);
+                }
+                get inputFields() {
+                    return [this._input];
+                }
+                toggleReadonlyView(readonly) {
+                    if (this.isReady) {
+                        this._input.readOnly = true;
+                        this._input.hidden = readonly;
+                        this._span.hide = !readonly;
+                    }
+                }
+                onChange(evt) {
+                    return new Promise((resolve, reject) => {
+                        if (Pacem.CustomEventUtils.isInstanceOf(evt, Pacem.Components.UI.DateSelectEvent)) {
+                            Pacem.Utils.addClass(this._dropdown, 'dropdown-select');
+                            this.focus();
+                            this._hideCalendar();
+                            resolve(this.value = evt.detail);
+                        }
+                        else {
+                            resolve(this.value);
+                        }
+                    });
+                }
+                acceptValue(val) {
+                    this._input.value = this.viewValue;
+                    const calendar = this._calendar;
+                    if (!Pacem.Utils.isNull(calendar)) {
+                        calendar.viewDate = calendar.date = Pacem.Utils.parseDate(val);
+                    }
+                }
+                getViewValue(value) {
+                    const v = value;
+                    if (v) {
+                        return Pacem.Utils.core.date(v, this.format || 'short', Pacem.Utils.lang(this));
+                    }
+                    return '';
+                }
+                compareValuePropertyValues(old, val) {
+                    const dold = Pacem.Utils.parseDate(old), dval = Pacem.Utils.parseDate(val);
+                    if (Pacem.Utils.isNullOrEmpty(dold) && Pacem.Utils.isNullOrEmpty(dval)) {
+                        return true;
+                    }
+                    if (Pacem.Utils.isNullOrEmpty(dold) || Pacem.Utils.isNullOrEmpty(dval)) {
+                        return false;
+                    }
+                    return dold.valueOf() == dval.valueOf();
+                }
+                convertValueAttributeToProperty(attr) {
+                    return Pacem.PropertyConverters.Datetime.convert(attr);
+                }
+            };
+            __decorate([
+                Pacem.ViewChild("input[type=text]")
+            ], PacemCalendarPickerElement.prototype, "_input", void 0);
+            __decorate([
+                Pacem.ViewChild(`.${Pacem.PCSS}-readonly`)
+            ], PacemCalendarPickerElement.prototype, "_span", void 0);
+            __decorate([
+                Pacem.ViewChild(`${Pacem.P}-button[clear]`)
+            ], PacemCalendarPickerElement.prototype, "_clearButton", void 0);
+            __decorate([
+                Pacem.ViewChild(Pacem.P + "-shell-proxy")
+            ], PacemCalendarPickerElement.prototype, "_proxy", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: JsonOrStringConverter })
+            ], PacemCalendarPickerElement.prototype, "format", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Eval })
+            ], PacemCalendarPickerElement.prototype, "disabledRanges", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemCalendarPickerElement.prototype, "weekStart", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemCalendarPickerElement.prototype, "viewmode", void 0);
+            __decorate([
+                Pacem.Watch()
+            ], PacemCalendarPickerElement.prototype, "_week", void 0);
+            __decorate([
+                Pacem.Watch()
+            ], PacemCalendarPickerElement.prototype, "_viewDate", void 0);
+            PacemCalendarPickerElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-calendar-picker', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<div class="${Pacem.PCSS}-calendar-picker">
+    <input type="text" class="${Pacem.PCSS}-input" /><${Pacem.P}-span text="{{ :host.viewValue }}" class="${Pacem.PCSS}-readonly"></${Pacem.P}-span>
+    <${Pacem.P}-button class="button-flat ${Pacem.PCSS}-anim anim-pop anim-sudden anim-quick pos-absolute absolute-right absolute-top display-block ${Pacem.PCSS}-margin margin-0"
+                 tab-order="-1"
+                 hide="{{ :host.readonly || $pacem.isNull(:host.value) }}"
+                 icon-glyph="close"
+                 clear></${Pacem.P}-button>
+</div>
+<${Pacem.P}-shell-proxy>
+    <div class="${Pacem.PCSS}-calendar-picker-dropdown" pacem hidden>
+        <${Pacem.P}-collapse collapse="false">
+            <div class="dropdown-grid">
+                <div class="calendar-title">
+                    <${Pacem.P}-span class="calendar-month calendar-zoom" on-click=":host.viewmode = 'month'" hide="{{ :host.viewmode !== 'calendar' }}"></${Pacem.P}-span>
+                    <${Pacem.P}-span class="calendar-year calendar-zoom" on-click=":host.viewmode = 'year'" hide="{{ :host.viewmode !== 'month' }}"></${Pacem.P}-span>
+                    <${Pacem.P}-span class="calendar-year-range" hide="{{ :host.viewmode !== 'year' }}"></${Pacem.P}-span>
+                </div>
+                <div class="calendar-month-nav ${Pacem.PCSS}-buttonset buttons">
+                    <div class="buttonset-left">
+                        <${Pacem.P}-button class="button button-size size-auto" on-click=":host._prev($event)" icon-glyph="chevron_left"></${Pacem.P}-button>
+                        <${Pacem.P}-button class="button button-size size-auto" on-click=":host._next($event)" icon-glyph="chevron_right"></${Pacem.P}-button>
+                    </div>
+                </div>
+                ${buildCalendarHeader()}
+                <${Pacem.P}-calendar hide="{{ :host.viewmode !== 'calendar' }}" week="{{ :host._week, twoway }}" view-date="{{ :host._viewDate, twoway }}" week-start="{{ :host.weekStart }}" disabled-ranges="{{ :host.disabledRanges }}" on-dateselect="{{ :host.changeHandler($event) }}"></${Pacem.P}-calendar>
+                <${Pacem.P}-calendar-month-picker hide="{{ :host.viewmode !== 'month' }}" on-monthselect=":host._setMonth($event)" month="{{ :host.value || Date.now() }}" view-year="{{ :host._viewDate && :host._viewDate.getFullYear() }}"></${Pacem.P}-calendar-month-picker>
+                <${Pacem.P}-calendar-year-picker hide="{{ :host.viewmode !== 'year' }}" on-yearselect=":host._setYear($event)" year="{{ :host.value || Date.now() }}" view-year="{{ :host._viewDate && :host._viewDate.getFullYear() }}"></${Pacem.P}-calendar-year-picker>
+            </div>
+        <${Pacem.P}-collapse>
+    </div>
+</${Pacem.P}-shell-proxy>`
+                })
+            ], PacemCalendarPickerElement);
+            Scaffolding.PacemCalendarPickerElement = PacemCalendarPickerElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../../../dist/js/pacem-core.d.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            Scaffolding.CHAR_COUNTER_CHILD = `<${Pacem.P}-char-count hide="{{ :host.readonly || !(:host.minlength > 0 || :host.maxlength > 0) }}" minlength="{{ :host.minlength }}" maxlength="{{ :host.maxlength }}" string="{{ :host.value }}"></${Pacem.P}-char-count>`;
+            let PacemCharCountElement = class PacemCharCountElement extends Components.PacemElement {
+                _isValid(v) {
+                    const l = this._length(v);
+                    if (this.minlength > 0 && l < this.minlength)
+                        return false;
+                    if (this.maxlength > 0 && l > this.maxlength)
+                        return false;
+                    return true;
+                }
+                _length(s) {
+                    return (s && s.length) || 0;
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+            ], PacemCharCountElement.prototype, "minlength", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+            ], PacemCharCountElement.prototype, "maxlength", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemCharCountElement.prototype, "string", void 0);
+            PacemCharCountElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-char-count',
+                    shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<${Pacem.P}-panel class="${Pacem.PCSS}-char-count" css-class="{{ {'valid': :host._isValid(:host.string), 'invalid': !:host._isValid(:host.string) } }}">
+    <${Pacem.P}-span hide="{{ !(:host.minlength > 0) }}" class="${Pacem.PCSS}-char-min" content="{{ :host.minlength }}"></${Pacem.P}-span>
+    <${Pacem.P}-span class="${Pacem.PCSS}-char-curr" content="{{ :host._length(:host.string) || '0' }}"></${Pacem.P}-span>
+    <${Pacem.P}-span hide="{{ !(:host.maxlength > 0) }}" class="${Pacem.PCSS}-char-max" content="{{ :host.maxlength }}"></${Pacem.P}-span>
+</${Pacem.P}-panel>`
+                })
+            ], PacemCharCountElement);
+            Scaffolding.PacemCharCountElement = PacemCharCountElement;
         })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
@@ -681,7 +1161,7 @@ var Pacem;
                     tagName: Pacem.P + '-checkbox-list', template: `<${Pacem.P}-repeater datasource="{{ :host.adaptedDatasource }}">
     <ol class="${Pacem.PCSS}-checkbox-list ${Pacem.PCSS}-viewfinder" pacem>
         <template>
-            <li><${Pacem.P}-checkbox disabled="{{ ::_disable.model || ^item.disabled }}" name="{{ :host.key, once }}" caption="{{ ^item.viewValue }}" true-value="{{ ^item.value }}" selected="{{ :host.isDataSourceItemSelected(^item, :host.value) }}"
+            <li><${Pacem.P}-checkbox disabled="{{ ::_disable.model || ^item.disabled }}" name="{{ :host.key, once }}" autobind="off" caption="{{ ^item.viewValue }}" true-value="{{ ^item.value }}" selected="{{ :host.isDataSourceItemSelected(^item, :host.value) }}"
 on-focus=":host.focusHandler($event)" on-blur=":host.focusHandler($event)"
 on-${Pacem.PropertyChangeEventName}=":host._selectionChanged($event, ^index, ^item)" on-change=":host.changeHandler($event)"></${Pacem.P}-checkbox></li>
         </template>
@@ -1100,7 +1580,7 @@ var Pacem;
                             fetcher.removeEventListener(Pacem.Net.FetchErrorEventName, fnError, false);
                             this.fail = true;
                             const response = evt.detail;
-                            deferred.reject(response.statusText);
+                            deferred.reject(response);
                         };
                         // fetcher propertychange event listener
                         const fnPropChange = (evt) => {
@@ -1365,7 +1845,7 @@ var Pacem;
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
             ], PacemFormElement.prototype, "autogenerate", void 0);
             __decorate([
-                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
             ], PacemFormElement.prototype, "suddenValidation", void 0);
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
@@ -1506,19 +1986,24 @@ var Pacem;
                 _deleteAt(evt) {
                     // prevent the event to bubble (nested scenarios).
                     Pacem.avoidHandler(evt.srcEvent);
+                    const model = this._model;
                     if (this.mode === 'array') {
-                        this._model.splice(evt.detail, 1);
+                        model.splice(evt.detail, 1);
                     }
                     else {
-                        this._model.splice(0, this._model.length, {});
+                        model.splice(0, model.length);
                     }
                     this._triggerChange();
                 }
                 _addItem(evt) {
-                    if (this.mode === 'array') {
-                        this._model.push({});
-                        this._triggerChange();
+                    const mode = this.mode, model = this._model;
+                    if (mode === 'array') {
+                        model.push({});
                     }
+                    else {
+                        model.splice(0, model.length, {});
+                    }
+                    this._triggerChange();
                 }
                 _triggerChange() {
                     this.changeHandler(new Event('change'));
@@ -1534,7 +2019,12 @@ var Pacem;
                         default:
                             const model = this._model, length = model.length;
                             if (length !== 1 || model[0] !== entity) {
-                                model.splice(0, length, entity || {});
+                                if (!Pacem.Utils.isNull(entity)) {
+                                    model.splice(0, length, entity);
+                                }
+                                else {
+                                    model.splice(0, length);
+                                }
                             }
                             break;
                     }
@@ -1589,7 +2079,7 @@ var Pacem;
         </${Pacem.P}-panel>
     </template>
     </div>
-    <${Pacem.P}-button tab-order="-1" class="flat circular circle-small add" hide="{{ :host.lockItems || :host.readonly || :host.mode !== 'array' }}" on-click=":host._addItem($event)"></${Pacem.P}-button>
+    <${Pacem.P}-button tab-order="-1" class="flat circular circle-small add" hide="{{ :host.lockItems || :host.readonly || !(:host.mode === 'array' || $pacem.isNullOrEmpty(:host._model)) }}" on-click=":host._addItem($event)"></${Pacem.P}-button>
 </${Pacem.P}-repeater>
 <div class="${Pacem.PCSS}-childform-item-floater ${Pacem.PCSS}-panel panel-border">
     <div class="corner top-left"></div><div class="corner top-right"></div><div class="corner bottom-left"></div><div class="corner bottom-right"></div>
@@ -1604,8 +2094,231 @@ var Pacem;
         })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            var _ContenteditableDOMObserver_selector, _ContenteditableDOMObserver_callback, _ContenteditableDOMObserver_contentElement, _ContenteditableDOMObserver_mutationObserver;
+            function isRoot(element) {
+                return element instanceof HTMLDivElement
+                    && element.contentEditable === 'true'
+                    && element.hasAttribute('pacem')
+                    && element.hasAttribute('role')
+                    && element.attributes['role'].value === 'presenter';
+            }
+            class ContenteditableDOMObserver {
+                constructor(contentElement, mutationCallback, selector = '*[contenteditable=false]') {
+                    _ContenteditableDOMObserver_selector.set(this, void 0);
+                    _ContenteditableDOMObserver_callback.set(this, void 0);
+                    _ContenteditableDOMObserver_contentElement.set(this, void 0);
+                    _ContenteditableDOMObserver_mutationObserver.set(this, void 0);
+                    __classPrivateFieldSet(this, _ContenteditableDOMObserver_callback, mutationCallback, "f");
+                    __classPrivateFieldSet(this, _ContenteditableDOMObserver_selector, selector, "f");
+                    __classPrivateFieldSet(this, _ContenteditableDOMObserver_mutationObserver, new MutationObserver(list => {
+                        const fn = (item, removed) => {
+                            item.childNodes.forEach(i => /* recursion here */ fn(i, removed));
+                            mutationCallback(item, removed);
+                        };
+                        for (let entry of list) {
+                            const added = entry.addedNodes;
+                            const removed = entry.removedNodes;
+                            for (let j = 0; j < added.length; j++) {
+                                const item = added.item(j);
+                                fn(item, false);
+                            }
+                            for (let j = 0; j < removed.length; j++) {
+                                const item = removed.item(j);
+                                fn(item, true);
+                            }
+                        }
+                    }), "f");
+                    this._initContainer(contentElement);
+                }
+                _initContainer(contentElement) {
+                    contentElement.querySelectorAll(__classPrivateFieldGet(this, _ContenteditableDOMObserver_selector, "f")).forEach(el => __classPrivateFieldGet(this, _ContenteditableDOMObserver_callback, "f").call(this, el));
+                    __classPrivateFieldGet(this, _ContenteditableDOMObserver_mutationObserver, "f").observe(contentElement, { subtree: true, childList: true });
+                    __classPrivateFieldSet(this, _ContenteditableDOMObserver_contentElement, contentElement, "f");
+                }
+                _disposeContainer(contentElement) {
+                    const observer = __classPrivateFieldGet(this, _ContenteditableDOMObserver_mutationObserver, "f");
+                    if (!Pacem.Utils.isNull(observer)) {
+                        observer.disconnect();
+                    }
+                    contentElement.querySelectorAll(__classPrivateFieldGet(this, _ContenteditableDOMObserver_selector, "f")).forEach(el => __classPrivateFieldGet(this, _ContenteditableDOMObserver_callback, "f").call(this, el, true));
+                }
+                dispose() {
+                    this._disposeContainer(__classPrivateFieldGet(this, _ContenteditableDOMObserver_contentElement, "f"));
+                }
+            }
+            _ContenteditableDOMObserver_selector = new WeakMap(), _ContenteditableDOMObserver_callback = new WeakMap(), _ContenteditableDOMObserver_contentElement = new WeakMap(), _ContenteditableDOMObserver_mutationObserver = new WeakMap();
+            Scaffolding.ContenteditableDOMObserver = ContenteditableDOMObserver;
+            class ContenteditableUtils {
+                static getDefaultDashboard() {
+                    const frag = new DocumentFragment();
+                    const toolbar0 = document.createElement('div');
+                    Pacem.Utils.addClass(toolbar0, Pacem.PCSS + '-contenteditable-toolbar');
+                    const undo = new Scaffolding.PacemContenteditableHistoryCommandElement();
+                    undo.command = 'undo';
+                    undo.keyboardShortcut = "Ctrl+Z";
+                    const redo = new Scaffolding.PacemContenteditableHistoryCommandElement();
+                    redo.command = 'redo';
+                    redo.keyboardShortcut = "Ctrl+Y";
+                    toolbar0.append(undo, redo);
+                    const separator0 = document.createElement('div');
+                    Pacem.Utils.addClass(separator0, Pacem.PCSS + '-contenteditable-separator');
+                    const toolbar1 = document.createElement('div');
+                    Pacem.Utils.addClass(toolbar1, Pacem.PCSS + '-contenteditable-toolbar');
+                    const bold = new Scaffolding.PacemContenteditableExecCommandElement();
+                    bold.command = Scaffolding.KnownExecCommand.Bold;
+                    bold.keyboardShortcut = "Ctrl+B";
+                    const italic = new Scaffolding.PacemContenteditableExecCommandElement();
+                    italic.command = Scaffolding.KnownExecCommand.Italic;
+                    italic.keyboardShortcut = "Ctrl+I";
+                    const underline = new Scaffolding.PacemContenteditableExecCommandElement();
+                    underline.command = Scaffolding.KnownExecCommand.Underline;
+                    underline.keyboardShortcut = "Ctrl+U";
+                    const strike = new Scaffolding.PacemContenteditableExecCommandElement();
+                    strike.command = Scaffolding.KnownExecCommand.StrikeThrough;
+                    underline.keyboardShortcut = "Ctrl+K";
+                    const ul = new Scaffolding.PacemContenteditableExecCommandElement();
+                    ul.command = Scaffolding.KnownExecCommand.UnorderedList;
+                    const ol = new Scaffolding.PacemContenteditableExecCommandElement();
+                    ol.command = Scaffolding.KnownExecCommand.OrderedList;
+                    const alignLeft = new Scaffolding.PacemContenteditableAlignCommandElement();
+                    alignLeft.align = 'left';
+                    const alignCenter = new Scaffolding.PacemContenteditableAlignCommandElement();
+                    alignCenter.align = 'center';
+                    const alignRight = new Scaffolding.PacemContenteditableAlignCommandElement();
+                    alignRight.align = 'right';
+                    const justify = new Scaffolding.PacemContenteditableAlignCommandElement();
+                    justify.align = 'justify';
+                    toolbar1.append(bold, italic, underline, strike, ul, ol, alignLeft, alignCenter, alignRight, justify);
+                    const separator1 = document.createElement('div');
+                    Pacem.Utils.addClass(separator1, Pacem.PCSS + '-contenteditable-separator');
+                    const toolbar2 = document.createElement('div');
+                    Pacem.Utils.addClass(toolbar2, Pacem.PCSS + '-contenteditable-toolbar');
+                    const link = new Scaffolding.PacemContenteditableLinkCommandElement();
+                    const img = new Scaffolding.PacemContenteditableImageCommandElement();
+                    toolbar2.append(link, img);
+                    frag.append(toolbar0, separator0, toolbar1, separator1, toolbar2);
+                    return frag;
+                }
+                static findSurroundingNode(range, arg1) {
+                    var node = range instanceof Node ? range : range.commonAncestorContainer;
+                    while (node && !(typeof arg1 === 'string' && node instanceof Element && node.tagName === arg1.toUpperCase()
+                        || typeof arg1 === 'function' && Pacem.Utils.isNull(arg1.prototype) && arg1(node)
+                        || typeof arg1 === 'function' && !Pacem.Utils.isNull(arg1.prototype) && node instanceof arg1)) {
+                        const parent = node.parentNode;
+                        if (isRoot(parent)) {
+                            node = null;
+                            break;
+                        }
+                        node = parent;
+                    }
+                    return node;
+                }
+                static findSurroundingBlockElement(range) {
+                    return this.findSurroundingNode(range, ContenteditableUtils.isBlockElement);
+                }
+                static findSurroundingSiblingBlockElements(range) {
+                    let output = [];
+                    if (isRoot(range.startContainer)) {
+                        if (!range.collapsed) {
+                            const root = range.startContainer;
+                            for (let k = range.startOffset; k <= range.endOffset; k++) {
+                                const child = root.children.item(k);
+                                if (this.isBlockElement(child)) {
+                                    output.push(root.children.item(k));
+                                }
+                            }
+                        }
+                        return output;
+                    }
+                    // simil-collapsed
+                    if (range.startContainer === range.endContainer) {
+                        let retval = range.startContainer;
+                        while (!ContenteditableUtils.isBlockElement(retval) && retval.parentElement.contentEditable != 'true') {
+                            retval = retval.parentElement;
+                        }
+                        return retval instanceof Element ? [retval] :
+                            (retval.parentElement.contentEditable === 'true' ? [] : [retval.parentElement]);
+                    }
+                    // generic
+                    let root = range.commonAncestorContainer, started = false;
+                    for (let j = 0; j < root.childNodes.length; j++) {
+                        const iNode = root.childNodes.item(j);
+                        const pick = (!started && iNode.contains(range.startContainer))
+                            || started;
+                        if (pick && ContenteditableUtils.isBlockElement(iNode)) {
+                            output.push(iNode);
+                            started = true;
+                            if (iNode.contains(range.endContainer)) {
+                                break;
+                            }
+                        }
+                    }
+                    return started ? output : (root instanceof Element && !isRoot(root) ? [root] : []);
+                }
+                static findContainingRootElements(range) {
+                    const range1 = range.cloneRange(), range2 = range.cloneRange();
+                    range1.collapse(true);
+                    range2.collapse();
+                    let root = this.findSurroundingNode(range1, n => n.parentElement.contentEditable === 'true');
+                    const retval = [root];
+                    while (!root.contains(range2.startContainer)) {
+                        retval.push(root = root.nextElementSibling);
+                    }
+                    return retval;
+                }
+                static isBlockElement(node) {
+                    return node instanceof Element && !getComputedStyle(node).display.startsWith('inline');
+                }
+                static select(node, inside = false) {
+                    const range = document.createRange();
+                    if (!inside) {
+                        range.setStartBefore(node);
+                        range.setEndAfter(node);
+                    }
+                    else {
+                        range.setStart(node, 0);
+                        range.setEnd(node, node.childNodes.length);
+                    }
+                    const selection = document.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    return range;
+                }
+                static copyAttributes(to, from) {
+                    const attrs = from.attributes;
+                    for (let j = 0; j < attrs.length; j++) {
+                        const attr = attrs.item(j);
+                        to.setAttribute(attr.name, attr.value);
+                    }
+                }
+                /**
+                 * Checks whether the provided range wraps an 'inert' (contentEditable=false) element, and returns result accordingly.
+                 * @param range
+                 */
+                static testInertElementWrapping(range) {
+                    if (!Pacem.Utils.isNull(range)) {
+                        const parent = range.startContainer, index = range.startOffset;
+                        var node;
+                        if (parent === range.endContainer && index == (range.endOffset - 1) && (node = parent.childNodes.item(index)) instanceof HTMLElement && node.contentEditable === 'false') {
+                            return { result: true, element: node };
+                        }
+                    }
+                    return { result: false };
+                }
+            }
+            Scaffolding.ContenteditableUtils = ContenteditableUtils;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 /// <reference path="../../../dist/js/pacem-ui.d.ts" />
+/// <reference path="contenteditable/utils.ts" />
 /// <reference path="char-counter.ts" />
 var Pacem;
 (function (Pacem) {
@@ -1613,119 +2326,190 @@ var Pacem;
     (function (Components) {
         var Scaffolding;
         (function (Scaffolding) {
-            Scaffolding.KNOWN_COMMANDS = ['bold', 'italic', 'underline', 'hyperlink', 'orderedList', 'unorderedList'];
-            const knownCommands = { BOLD: Scaffolding.KNOWN_COMMANDS[0], ITALIC: Scaffolding.KNOWN_COMMANDS[1], UNDERLINE: Scaffolding.KNOWN_COMMANDS[2], LINK: Scaffolding.KNOWN_COMMANDS[3], ORDEREDLIST: Scaffolding.KNOWN_COMMANDS[4], UNORDEREDLIST: Scaffolding.KNOWN_COMMANDS[5] };
-            class PacemExecCommand {
-                getSurroundingNode(selection, tagName) {
-                    var node = selection.anchorNode;
-                    while (node && node.nodeName.toUpperCase() !== tagName.toUpperCase()) {
-                        node = node.parentNode;
-                    }
-                    return node;
-                }
-                exec(command, arg, target) {
-                    ///<param name="command" type="String" />
-                    ///<param name="arg" type="String" optional="true" />
-                    ///<param name="target" type="String" optional="true" />
-                    var promise = new Promise((resolve, reject) => {
-                        switch (command) {
-                            case knownCommands.LINK:
-                                var selection = document.getSelection();
-                                var anchorNode = this.getSurroundingNode(selection, 'A');
-                                //console.log('selection: ' + selection);
-                                var current = "http://";
-                                var regex = /<a.*href=\"([^\"]*)/;
-                                if (anchorNode && regex.test(anchorNode.outerHTML))
-                                    current = regex.exec(anchorNode.outerHTML)[1];
-                                //console.log('link: ' + current);
-                                if (arg === 'current')
-                                    return current == 'http://' ? '' : current;
-                                var link = arg || (arg === void 0 && window.prompt('link (empty to unlink):', current));
-                                if (!link)
-                                    document.execCommand('unlink');
-                                else {
-                                    document.execCommand('createLink', false, link);
-                                    anchorNode = this.getSurroundingNode(selection, 'A');
-                                    if (anchorNode)
-                                        anchorNode.setAttribute('target', target || '_blank');
-                                }
-                                resolve();
-                                break;
-                            case knownCommands.ORDEREDLIST:
-                                document.execCommand('insertOrderedList');
-                                resolve();
-                                break;
-                            case knownCommands.UNORDEREDLIST:
-                                document.execCommand('insertUnorderedList');
-                                resolve();
-                                break;
-                            default:
-                                document.execCommand(command);
-                                resolve();
-                                break;
-                        }
-                    });
-                    return promise;
-                }
-            }
-            Scaffolding.PacemExecCommand = PacemExecCommand;
-            class ContentEditableChangeEvent extends Pacem.CustomTypedEvent {
+            var _PacemContenteditableElement_history;
+            const EXECUTECOMMAND_NAME = 'execute';
+            const EMPTY_CONTENT = '<p><br></p>';
+            class ContenteditableChangeEvent extends Pacem.CustomTypedEvent {
                 constructor(html) {
                     super('contenteditablechange', { html: html });
                 }
             }
-            let PacemContenteditableElement = class PacemContenteditableElement extends Scaffolding.PacemBaseElement {
-                constructor(_commands = new PacemExecCommand()) {
-                    super();
-                    this._commands = _commands;
-                    this._checkChangedHandler = (evt) => {
-                        var html = this._cleanup(this._container.innerHTML);
-                        if (html == '<br>')
-                            html = '';
-                        if (html != this.value) {
-                            this.changeHandler(new ContentEditableChangeEvent(html));
-                        }
+            class PacemContenteditableCommandElement extends Scaffolding.PacemItemElement {
+                constructor() {
+                    super(...arguments);
+                    this._containerPropChangeHandler = (evt) => {
+                        const p = evt.detail;
+                        this.containerPropertyChangedCallback(p.propertyName, p.oldValue, p.currentValue, p.firstChange);
                     };
-                    this._keydownHandler = (evt) => {
-                        const execCommand = this._commands, commands = knownCommands;
-                        if (evt.ctrlKey) {
-                            //console.log(evt.keyCode + ': ' + String.fromCharCode(evt.keyCode));
-                            let flag = false;
-                            switch (evt.keyCode) {
-                                case 49:
-                                    // `1`
-                                    flag = true;
-                                    //
-                                    execCommand.exec(commands.ORDEREDLIST);
-                                    break;
-                                case 189:
-                                    // `dash`
-                                    flag = true;
-                                    //
-                                    execCommand.exec(commands.UNORDEREDLIST);
-                                    break;
-                                case 72:
-                                    // `h`yperlink
-                                    flag = true;
-                                    //
-                                    execCommand.exec(commands.LINK).then(() => this.onChange());
-                                    break;
+                }
+                execCommand(...args) {
+                    const me = this;
+                    if (me.disabled) {
+                        return;
+                    }
+                    me.exec.apply(me, args).then(_ => {
+                        me.dispatchEvent(new Event(EXECUTECOMMAND_NAME));
+                    }, e => {
+                        console.error(e);
+                    });
+                }
+                connectedCallback() {
+                    super.connectedCallback();
+                    Pacem.Utils.addClass(this, Pacem.PCSS + '-contenteditable-command');
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    const cnt = this.container;
+                    if (!Pacem.Utils.isNull(cnt)) {
+                        this.contentElement = cnt.contentElement;
+                        cnt.addEventListener(Pacem.PropertyChangeEventName, this._containerPropChangeHandler, false);
+                    }
+                }
+                disconnectedCallback() {
+                    const cnt = this.container;
+                    if (!Pacem.Utils.isNull(cnt)) {
+                        cnt.removeEventListener(Pacem.PropertyChangeEventName, this._containerPropChangeHandler, false);
+                    }
+                    super.disconnectedCallback();
+                }
+                containerPropertyChangedCallback(name, old, val, first) {
+                    if (name === 'range') {
+                        this.range = val;
+                    }
+                }
+            }
+            __decorate([
+                Pacem.Watch()
+            ], PacemContenteditableCommandElement.prototype, "range", void 0);
+            __decorate([
+                Pacem.Watch()
+            ], PacemContenteditableCommandElement.prototype, "contentElement", void 0);
+            Scaffolding.PacemContenteditableCommandElement = PacemContenteditableCommandElement;
+            function isFileCommand(obj) {
+                return obj instanceof PacemContenteditableCommandElement && 'pasteCallback' in obj && typeof obj['pasteCallback'] === 'function';
+            }
+            function isElement(node) {
+                return (node === null || node === void 0 ? void 0 : node.nodeType) == Node.ELEMENT_NODE;
+            }
+            let PacemContenteditableElement = class PacemContenteditableElement extends Scaffolding.PacemItemsContainerBaseElement {
+                constructor() {
+                    super('rich text editor');
+                    _PacemContenteditableElement_history.set(this, void 0);
+                    this._focusHandler = (evt) => {
+                        this._ensureInteractiveMarkup();
+                    };
+                    this._blurHandler = (evt) => {
+                        // clean up the output
+                        const container = this._container;
+                        for (let command of this.items) {
+                            command.cleanUp(container);
+                        }
+                        this._checkChangedHandler(evt);
+                    };
+                    this._pasteHandler = (evt) => {
+                        // I'll manage it myself!
+                        evt.preventDefault();
+                        const range = this.range, files = evt.clipboardData.files;
+                        if (!Pacem.Utils.isNull(range) && files.length === 0) {
+                            const text = evt.clipboardData.getData('text/plain');
+                            const plainText = text.replace(/</gi, '&lt;').replace(/\n/gi, '<br />');
+                            const frag = range.createContextualFragment(plainText);
+                            range.deleteContents();
+                            range.insertNode(frag);
+                            this._checkChangedHandler(evt);
+                        }
+                        else {
+                            for (let j = 0; j < files.length; j++) {
+                                const f = files.item(j);
+                                for (let cmd of this.items) {
+                                    if (isFileCommand(cmd)) {
+                                        cmd.pasteCallback(f).then(_ => this._checkChangedHandler(evt), _ => { });
+                                    }
+                                }
                             }
-                            if (flag)
-                                Pacem.avoidHandler(evt);
+                            // this._checkAndSynchronizeHandler(evt);
                         }
                     };
-                    this._workspace = document.createElement('div');
+                    this._shortcutHandler = (evt) => {
+                        var _a;
+                        // prevent any default shortcut combo apart from 'copy', 'cut' and 'paste' (mainly due to the clipboard access limitations)
+                        if (evt.ctrlKey && ['C', 'V', 'X'].indexOf((_a = evt.key) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === -1) {
+                            // Let it manage it only if the relevant command is available
+                            evt.preventDefault();
+                        }
+                    };
+                    this._inputHandler = (evt) => {
+                        this._fixRangeMarkup();
+                        this._checkChangedHandler(evt);
+                    };
+                    this._checkChangedHandler = (evt) => {
+                        const container = this._container, inputHtml = container.innerHTML;
+                        var html = inputHtml;
+                        if (Pacem.Utils.isNullOrEmpty(inputHtml)
+                            || inputHtml === '<br>'
+                            || inputHtml === EMPTY_CONTENT) {
+                            container.innerHTML = EMPTY_CONTENT;
+                            html = '';
+                        }
+                        if (html != this.value) {
+                            this.changeHandler(new ContenteditableChangeEvent(html));
+                            if (this.value != __classPrivateFieldGet(this, _PacemContenteditableElement_history, "f").current) {
+                                this._updateHistory();
+                            }
+                        }
+                        // fire history change in any case
+                        this._fireHistoryChange();
+                    };
+                    this._selectionChangeHandler = (evt) => {
+                        const selection = document.getSelection();
+                        if (selection && selection.anchorNode && this._container.contains(selection.anchorNode)) {
+                            const range = selection.getRangeAt(0);
+                            this.range = range.cloneRange();
+                        }
+                        else {
+                            this.range = null;
+                        }
+                    };
+                    //this._workspace = document.createElement('div');
+                }
+                get history() {
+                    return __classPrivateFieldGet(this, _PacemContenteditableElement_history, "f");
+                }
+                reset() {
+                    super.reset();
+                    __classPrivateFieldGet(this, _PacemContenteditableElement_history, "f").reset();
+                    this._fireHistoryChange();
+                }
+                _fireHistoryChange() {
+                    const h = __classPrivateFieldGet(this, _PacemContenteditableElement_history, "f");
+                    this.dispatchEvent(new Pacem.PropertyChangeEvent({ propertyName: 'history', oldValue: h, currentValue: h }));
                 }
                 convertValueAttributeToProperty(attr) {
                     return attr;
                 }
                 toggleReadonlyView(readonly) {
-                    this._repeater.hidden = readonly;
-                    if (readonly)
+                    this._dashboard.hidden = readonly;
+                    if (readonly) {
                         this._container.removeAttribute('contenteditable');
-                    else
-                        this._container.setAttribute('contenteditable', '');
+                    }
+                    else {
+                        this._container.setAttribute('contenteditable', 'true');
+                        document.execCommand("defaultParagraphSeparator", false, "p");
+                    }
+                }
+                register(item) {
+                    if (super.register(item)) {
+                        item.addEventListener(EXECUTECOMMAND_NAME, this._checkChangedHandler, false);
+                        return true;
+                    }
+                    return false;
+                }
+                unregister(item) {
+                    if (super.unregister(item)) {
+                        item.removeEventListener(EXECUTECOMMAND_NAME, this._checkChangedHandler, false);
+                        return true;
+                    }
+                    return false;
                 }
                 /** @override */
                 get preventKeyboardSubmit() {
@@ -1734,42 +2518,101 @@ var Pacem;
                 get inputFields() {
                     return [this._container];
                 }
-                onChange(evt) {
-                    var deferred = Pacem.DeferPromise.defer();
-                    if (Pacem.CustomEventUtils.isInstanceOf(evt, ContentEditableChangeEvent)) {
-                        const html = this.value = evt.detail.html;
-                        deferred.resolve(html);
-                    }
-                    else
-                        deferred.resolve(this.value);
-                    return deferred.promise;
+                get contentElement() {
+                    return this._container;
                 }
-                _cleanup(html) {
-                    const cnt = this._workspace;
-                    cnt.innerHTML = html;
-                    let n, a = [], walker = document.createTreeWalker(cnt, NodeFilter.SHOW_ELEMENT, null, false);
-                    while (n = walker.nextNode()) {
-                        if (n instanceof Element)
-                            n.removeAttribute('style');
+                onChange(evt) {
+                    return new Promise((resolve, reject) => {
+                        if (Pacem.CustomEventUtils.isInstanceOf(evt, ContenteditableChangeEvent)) {
+                            const html = this.value = evt.detail.html;
+                            resolve(html);
+                            // find a less-instrusive way to call this...
+                            this._selectionChangeHandler(evt);
+                        }
+                        else
+                            resolve(this.value);
+                    });
+                }
+                _fixRangeMarkup() {
+                    const range = this.range, fnDownwards = (node) => {
+                        node.childNodes.forEach(i => fnDownwards(i));
+                        if (isElement(node) && node.tagName === 'SPAN') {
+                            Element.prototype.replaceWith.apply(node, Array.from(node.childNodes));
+                        }
+                        else if (node instanceof HTMLElement) {
+                            node.removeAttribute('style');
+                        }
+                    }, fn = (node) => {
+                        let element = node;
+                        if (!isElement(element)) {
+                            element = node.parentElement;
+                        }
+                        fnDownwards(element);
+                    };
+                    if (!Pacem.Utils.isNull(range)) {
+                        fn(range.commonAncestorContainer);
                     }
-                    return cnt.innerHTML;
+                }
+                _ensureInteractiveMarkup() {
+                    const workspace = this._container, nodes = workspace.childNodes, childCount = nodes.length;
+                    if (childCount == 0 || workspace.innerHTML === EMPTY_CONTENT) {
+                        workspace.innerHTML = EMPTY_CONTENT;
+                    }
+                    else {
+                        let node, range;
+                        const closeRange = (n) => {
+                            range.setEndAfter(n);
+                            const p = document.createElement('p');
+                            range.surroundContents(p);
+                        };
+                        for (let j = 0; j < childCount; j++) {
+                            node = nodes.item(j);
+                            if (!(node instanceof Element)) {
+                                if (Pacem.Utils.isNull(range)) {
+                                    range = document.createRange();
+                                    range.setStartBefore(node);
+                                }
+                            }
+                            else if (range) {
+                                closeRange(node.previousSibling);
+                                range = null;
+                            }
+                        }
+                        // open range?
+                        if (!Pacem.Utils.isNull(range)) {
+                            closeRange(node);
+                        }
+                    }
+                }
+                _updateHistory() {
+                    __classPrivateFieldGet(this, _PacemContenteditableElement_history, "f").push(this.value);
+                    this._fireHistoryChange();
                 }
                 acceptValue(val) {
-                    if (!Pacem.Utils.isNull(this._container) && /*the following `if` statement prevents from flashing the content and writing backwards!*/ val != this._container.innerHTML)
+                    if (!Pacem.Utils.isNull(this._container) && /*the following `if` statement prevents from flashing the content and writing backwards!*/ val != this._container.innerHTML) {
                         this._container.innerHTML = val;
+                    }
                 }
                 viewActivatedCallback() {
                     super.viewActivatedCallback();
-                    this._repeater.datasource = Pacem.Components.Scaffolding.KNOWN_COMMANDS;
-                    this._container.addEventListener('blur', this._checkChangedHandler, false);
-                    this._container.addEventListener('input', this._checkChangedHandler, false);
-                    this._container.addEventListener('keydown', this._keydownHandler, false);
+                    const container = this._container;
+                    __classPrivateFieldSet(this, _PacemContenteditableElement_history, new Pacem.HistoryService(this.value), "f");
+                    container.addEventListener('blur', this._blurHandler, false);
+                    container.addEventListener('keydown', this._shortcutHandler, false);
+                    container.addEventListener('focus', this._focusHandler, false);
+                    container.addEventListener('input', this._inputHandler, false);
+                    container.addEventListener('paste', this._pasteHandler, false);
+                    document.addEventListener('selectionchange', this._selectionChangeHandler, false);
                 }
                 disconnectedCallback() {
-                    if (!Pacem.Utils.isNull(this._container)) {
-                        this._container.removeEventListener('blur', this._checkChangedHandler, false);
-                        this._container.removeEventListener('input', this._checkChangedHandler, false);
-                        this._container.removeEventListener('keydown', this._keydownHandler, false);
+                    document.removeEventListener('selectionchange', this._selectionChangeHandler, false);
+                    const container = this._container;
+                    if (!Pacem.Utils.isNull(container)) {
+                        container.removeEventListener('keydown', this._shortcutHandler, false);
+                        container.removeEventListener('blur', this._blurHandler, false);
+                        container.removeEventListener('focus', this._focusHandler, false);
+                        container.removeEventListener('input', this._inputHandler, false);
+                        container.removeEventListener('paste', this._pasteHandler, false);
                     }
                     super.disconnectedCallback();
                 }
@@ -1777,31 +2620,28 @@ var Pacem;
                     return val;
                 }
             };
+            _PacemContenteditableElement_history = new WeakMap();
             __decorate([
                 Pacem.ViewChild("div[pacem]")
             ], PacemContenteditableElement.prototype, "_container", void 0);
             __decorate([
-                Pacem.ViewChild(Pacem.P + "-repeater")
-            ], PacemContenteditableElement.prototype, "_repeater", void 0);
+                Pacem.ViewChild("div[dashboard]")
+            ], PacemContenteditableElement.prototype, "_dashboard", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
-            ], PacemContenteditableElement.prototype, "minlength", void 0);
+                Pacem.Watch()
+            ], PacemContenteditableElement.prototype, "range", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
-            ], PacemContenteditableElement.prototype, "maxlength", void 0);
+                Pacem.Debounce(500)
+            ], PacemContenteditableElement.prototype, "_updateHistory", null);
             PacemContenteditableElement = __decorate([
                 Pacem.CustomElement({
                     tagName: Pacem.P + '-contenteditable', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
                     template: `<div class="${Pacem.PCSS}-contenteditable ${Pacem.PCSS}-viewfinder">
-    <div contenteditable pacem></div>
+    <div contenteditable="true" role="presenter" pacem></div>
 </div>${Scaffolding.CHAR_COUNTER_CHILD}
-<${Pacem.P}-repeater>
-<div class="${Pacem.PCSS}-commands">
-<template>
-    <${Pacem.P}-button class="button ${Pacem.PCSS}-command" css-class="{{ ['${Pacem.PCSS}-'+ ^item.toLowerCase()] }}" on-click=":host._commands.exec(^item).then(() => :host.changeHandler($event))"></${Pacem.P}-button>
-</template>
-</div>
-</${Pacem.P}-repeater>`
+<div dashboard>
+    <${Pacem.P}-content></${Pacem.P}-content>
+</div>`
                 })
             ], PacemContenteditableElement);
             Scaffolding.PacemContenteditableElement = PacemContenteditableElement;
@@ -1817,6 +2657,17 @@ var Pacem;
         var Scaffolding;
         (function (Scaffolding) {
             const emptyVal = '';
+            const JsonOrStringConverter = {
+                convert: (attr, el) => {
+                    return /\{.+\}/.test(attr) ? Pacem.PropertyConverters.Json.convert(attr) : Pacem.PropertyConverters.String.convert(attr);
+                },
+                convertBack: (prop, el) => {
+                    if (typeof prop === 'string') {
+                        return prop;
+                    }
+                    return Pacem.PropertyConverters.Json.convertBack(prop, el);
+                }
+            };
             //class DatetimeChangeEvent extends CustomTypedEvent<{ date: Date }> {
             //    constructor(date: Date) {
             //        super('datetimechange', { date: date });
@@ -1882,8 +2733,9 @@ var Pacem;
                         case 'min':
                         case 'max':
                             if (!Pacem.Utils.isNullOrEmpty(this.min)
-                                && !Pacem.Utils.isNullOrEmpty(this.max))
-                                this.setupYears();
+                                && !Pacem.Utils.isNullOrEmpty(this.max)) {
+                                this._setupYears();
+                            }
                             break;
                         case 'year':
                         case 'month':
@@ -1915,7 +2767,7 @@ var Pacem;
                     this.minutes = leftPad(v.getMinutes());
                     this.seconds = leftPad(v.getSeconds());
                 }
-                setupYears() {
+                _setupYears() {
                     let years = [];
                     const min = Pacem.Utils.parseDate(this.min), max = Pacem.Utils.parseDate(this.max);
                     for (let i = min.getFullYear(); i <= max.getFullYear(); i++) {
@@ -1995,7 +2847,7 @@ var Pacem;
                 getViewValue(val) {
                     const v = /*this.dateValue ||*/ val;
                     if (v) {
-                        return Pacem.Utils.core.date(v, this.precision != 'day' ? 'full' : 'short', Pacem.Utils.lang(this));
+                        return Pacem.Utils.core.date(v, this.format || (this.precision != 'day' ? 'full' : 'short'), Pacem.Utils.lang(this));
                     }
                     return '';
                 }
@@ -2034,7 +2886,7 @@ var Pacem;
                 Pacem.Watch({ converter: Pacem.PropertyConverters.String })
             ], PacemDatetimePickerElement.prototype, "precision", void 0);
             __decorate([
-                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Json })
+                Pacem.Watch({ emit: false, converter: JsonOrStringConverter })
             ], PacemDatetimePickerElement.prototype, "format", void 0);
             __decorate([
                 Pacem.Watch()
@@ -2094,11 +2946,11 @@ var Pacem;
     </${Pacem.P}-select></${Pacem.P}-panel>
 
     </div>
-    <${Pacem.P}-panel hide="{{ Pacem.Utils.isNullOrEmpty(:host.dateValue) || :host.precision === 'day' || :host.readonly }}">
-    <dl class="${Pacem.PCSS}-datetime-picker-preview">
-        <dt>local:</dt><dd><${Pacem.P}-text text="{{ :host.viewValue }}"></${Pacem.P}-text></dd>
-        <dt>iso:</dt><dd><${Pacem.P}-text text="{{ (:host.dateValue && :host.dateValue.toISOString()) || '' }}"></${Pacem.P}-text></dd>
-    </dl>
+    <${Pacem.P}-panel class="${Pacem.PCSS}-datetime-picker-preview" hide="{{ Pacem.Utils.isNullOrEmpty(:host.dateValue) || :host.precision === 'day' || :host.readonly }}">
+        <dl>
+            <dt>local:</dt><dd><${Pacem.P}-text text="{{ :host.viewValue }}"></${Pacem.P}-text></dd>
+            <dt>iso:</dt><dd><${Pacem.P}-text text="{{ (:host.dateValue && :host.dateValue.toISOString()) || '' }}"></${Pacem.P}-text></dd>
+        </dl>
     </${Pacem.P}-panel>
     <${Pacem.P}-span class="${Pacem.PCSS}-readonly" css-class="{{ { 'date': :host.precision === 'day', 'datetime': :host.precision !== 'day' } }}" content="{{ :host.viewValue }}" hide="{{ !:host.readonly }}"></${Pacem.P}-span>
 </div>`
@@ -2111,6 +2963,7 @@ var Pacem;
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 /// <reference path="../../../dist/js/pacem-ui.d.ts" />
 /// <reference path="types.ts" />
+/// <reference path="contenteditable.ts" />
 var Pacem;
 (function (Pacem) {
     var Components;
@@ -2123,15 +2976,24 @@ var Pacem;
             function patternToString(pattern) {
                 return new RegExp(pattern /*.split('\\').join('\\\\')*/).source;
             }
+            function isKnownValidator(v) {
+                return 'errorMessage' in v;
+            }
+            function isValidatorFactory(v) {
+                return 'attributes' in v && typeof v.attributes === 'function';
+            }
             let PacemFormFieldElement = class PacemFormFieldElement extends Components.PacemElement {
                 constructor(_md = new Pacem.MarkdownService()) {
                     super();
                     this._md = _md;
-                    this._key = '_' + Pacem.Utils.uniqueCode();
                     this._entityPropertyChangeHandler = (e) => {
                         // nudge entity propertychange notification
                         this.dispatchEvent(new Pacem.PropertyChangeEvent({ propertyName: 'entity', currentValue: this.entity }));
                     };
+                    this._labelClickHandler = (_) => {
+                        document.getElementById(this._label.htmlFor).focus();
+                    };
+                    this._key = '_' + Pacem.Utils.uniqueCode();
                 }
                 get key() {
                     return this._key;
@@ -2176,25 +3038,35 @@ var Pacem;
                     if (this.entity instanceof HTMLElement) {
                         this.entity.removeEventListener(Pacem.PropertyChangeEventName, this._entityPropertyChangeHandler, false);
                     }
+                    if (!Pacem.Utils.isNull(this._label)) {
+                        this._label.removeEventListener('click', this._labelClickHandler, false);
+                    }
                     if (!Pacem.Utils.isNull(this._balloon)) {
                         this._balloon.remove();
                     }
                     super.disconnectedCallback();
                 }
+                _normalizeTooltip() {
+                    const metadata = this.metadata && this.metadata.extra && this.metadata.extra.tooltip || false;
+                    if (typeof metadata === 'object') {
+                        return metadata;
+                    }
+                    return { type: metadata };
+                }
                 _ensureBalloon() {
-                    var innerText, tooltipMode;
+                    var innerText, tooltip;
                     const noBalloon = this.readonly
-                        || Pacem.Utils.isNullOrEmpty(tooltipMode = this.metadata && this.metadata.extra && this.metadata.extra.tooltip || false)
-                        || (tooltipMode !== true && tooltipMode !== 'html' && tooltipMode !== 'md' && tooltipMode !== 'markdown')
+                        || ((tooltip = this._normalizeTooltip()).type === false)
                         || Pacem.Utils.isNullOrEmpty(innerText = this.metadata && this.metadata.display && this.metadata.display.description);
                     // balloon
                     if (Pacem.Utils.isNull(this._balloon) && !noBalloon) {
                         let balloon = document.createElement(Pacem.P + '-balloon');
                         balloon.options = {
                             behavior: Components.UI.BalloonBehavior.Tooltip,
-                            position: Components.UI.BalloonPosition.Top,
+                            trigger: tooltip.trigger || Components.UI.BalloonTrigger.Hover,
+                            position: tooltip.position || Components.UI.BalloonPosition.Top,
                             hoverDelay: 200, hoverTimeout: 50,
-                            align: Components.UI.BalloonAlignment.Auto
+                            align: tooltip.align || Components.UI.BalloonAlignment.Auto
                         };
                         Pacem.Utils.addClass(balloon, Pacem.PCSS + '-field-tooltip');
                         var shell = Pacem.CustomElementUtils.findAncestorShell(this);
@@ -2202,41 +3074,51 @@ var Pacem;
                     }
                     const balloon = this._balloon;
                     if (!Pacem.Utils.isNull(balloon)) {
-                        balloon.target = this.label;
-                        balloon.disabled = noBalloon;
-                        const content = innerText || '';
-                        switch (tooltipMode) {
-                            case 'md':
-                            case 'markdown':
-                                balloon.innerHTML = this._md.toHtml(content);
-                                break;
-                            case 'html':
-                                balloon.innerHTML = content;
-                                break;
-                            default:
-                                balloon.innerText = content;
-                                break;
+                        balloon.target = this._label;
+                        if (!(balloon.disabled = noBalloon)) {
+                            const content = innerText || '';
+                            switch (tooltip.type) {
+                                case 'md':
+                                case 'markdown':
+                                    balloon.innerHTML = this._md.toHtml(content);
+                                    break;
+                                case 'html':
+                                    balloon.innerHTML = content;
+                                    break;
+                                default:
+                                    balloon.innerText = content;
+                                    break;
+                            }
                         }
                     }
                 }
                 _buildUpLabel() {
                     // label
-                    var label = this.label;
+                    var label = this._label;
                     let meta = this.metadata;
                     label.htmlFor = this._key;
                     Pacem.Utils.addClass(label, Pacem.PCSS + '-label');
                     const vals = this.metadata.validators;
-                    if (vals && vals.find(v => v.type === 'required'))
+                    if (vals && vals.find(v => v.type === 'required')) {
                         Pacem.Utils.addClass(label, Pacem.PCSS + '-required');
-                    else
+                    }
+                    else {
                         Pacem.Utils.removeClass(label, Pacem.PCSS + '-required');
+                    }
                     //
-                    if (!Pacem.Utils.isNull(this._balloon) && !this._balloon.disabled)
+                    if (!Pacem.Utils.isNull(this._balloon) && !this._balloon.disabled) {
                         Pacem.Utils.addClass(label, Pacem.PCSS + '-tooltip');
-                    else
+                    }
+                    else {
                         Pacem.Utils.removeClass(label, Pacem.PCSS + '-tooltip');
-                    label.textContent = (meta.display && meta.display.name) || meta.prop;
+                    }
+                    // exploit a pacem-span so that it cleans the htm content up
+                    const span = new Pacem.Components.PacemSpanElement();
+                    span.content = (meta.display && meta.display.name) || meta.prop;
+                    label.innerHTML = '';
+                    label.appendChild(span);
                     label.setAttribute('id', 'label' + this._key);
+                    label.addEventListener('click', this._labelClickHandler, false);
                 }
                 // #region Template-called
                 _isValueNullOrEmpty(entity = this.entity, metadata = this.metadata) {
@@ -2244,7 +3126,6 @@ var Pacem;
                 }
                 /**
                  * Reflects the value onto the entity attribute, if the 'entity' is an instance of HTMLElement.
-                 * @param value
                  */
                 _handleValueChange(evt) {
                     if (evt.detail.propertyName === 'value') {
@@ -2263,6 +3144,16 @@ var Pacem;
                             this.entity[prop] = value;
                         }
                     }
+                }
+                /**
+                 * 'Prettifies' the input value (for some specific cases) to be included in an URL segment or query string.
+                 * @param v Input value
+                 */
+                _adjustDependencyValue(v) {
+                    if (Pacem.Utils.Dates.isDate(v)) {
+                        return Pacem.Utils.Dates.parse(v).toISOString();
+                    }
+                    return v;
                 }
                 // #endregion
                 _buildUpFetcher() {
@@ -2295,7 +3186,7 @@ var Pacem;
                         'placeholder': `${((meta.display && meta.display.watermark) || "")}`
                     };
                     // fetch data
-                    let fetchData = meta.extra;
+                    let fetchData = meta.extra || {};
                     let fetchAttrs = {};
                     let disabledAttr = "false";
                     let dependingClause = '';
@@ -2303,81 +3194,155 @@ var Pacem;
                     let dependingParameters = '';
                     let dependsOn = [];
                     // #region dependency from other props
-                    if (!Pacem.Utils.isNullOrEmpty(fetchData && fetchData.dependsOn)) {
-                        dependsOn = fetchData.dependsOn;
-                        // there should be a better way...
-                        let disablingClauses = { empty: [], notEqual: {} };
-                        let hidingClauses = { empty: [], notEqual: {} };
-                        // fetch
-                        let namesAndPaths = [];
-                        let paths = [];
-                        for (var depends of dependsOn) {
-                            let path = ':host.entity.' + depends.prop, path2 = '$this.entity.' + depends.prop;
-                            if (!Pacem.Utils.isNullOrEmpty(depends.value)) {
-                                let clause = (p) => p + ' !== ' + JSON.stringify(depends.value);
-                                (disablingClauses.notEqual[path] = disablingClauses.notEqual[path] || []).push(clause(path));
-                                if (depends.hide) {
-                                    (hidingClauses.notEqual[path2] = hidingClauses.notEqual[path2] || []).push(clause(path2));
+                    if (!Pacem.Utils.isNullOrEmpty(fetchData.dependsOn)) {
+                        if (typeof fetchData.dependsOn === 'function') {
+                            const depAttrs = fetchData.dependsOn(this, ':host', ':host.entity', '$this.entity'), hideAttr = depAttrs.hideAttr;
+                            if (!Pacem.Utils.isNullOrEmpty(hideAttr)) {
+                                this.setAttribute('hide', hideAttr);
+                            }
+                            if (!Pacem.Utils.isNullOrEmpty(depAttrs.disabledAttr)) {
+                                disabledAttr = depAttrs.disabledAttr;
+                                if (Pacem.CustomElementUtils.isBindingAttribute(disabledAttr)) {
+                                    dependingDisabling = Pacem.CustomElementUtils.extractBindingAttributeExpression(disabledAttr);
                                 }
                             }
-                            else {
-                                let clause = (p) => 'Pacem.Utils.isNullOrEmpty(' + p + ')';
-                                disablingClauses.empty.push(clause(path));
-                                if (depends.hide) {
-                                    hidingClauses.empty.push(clause(path2));
+                            if (!Pacem.Utils.isNullOrEmpty(depAttrs.parameterAttrs)) {
+                                const pAttrs = depAttrs.parameterAttrs, parameterPairs = [];
+                                for (let alias in pAttrs) {
+                                    parameterPairs.push(`${alias}: ${pAttrs[alias]}`);
                                 }
+                                dependingParameters = parameterPairs.join(', ');
                             }
-                            // fetch
-                            paths.push(path);
-                            namesAndPaths.push(`${(depends.alias || depends.prop)} : ${path}`);
-                            dependingClause += path + ' && ';
                         }
-                        dependingParameters = namesAndPaths.join(', ');
-                        let joinClauses = (d) => {
-                            let ne = 'false', emp = 'false';
-                            if (!Pacem.Utils.isNullOrEmpty(d.notEqual)) {
-                                // when a value is provided then pick the logical operator when provided.
-                                // consider to switch semantic (i.e. 'or' -> '&&', 'and' -> '||') due to the 'notEqual' operator.
-                                // 'and' is assumed to be the default
-                                const neByProp = [];
-                                for (let dp in d.notEqual) {
-                                    // same property conditions always concatenated with '&&' (logical and)
-                                    neByProp.push('(' + d.notEqual[dp].join(' && ') + ')');
+                        else {
+                            dependsOn = fetchData.dependsOn;
+                            // there should be a better way...
+                            let disablingClauses = { empty: [], notEqual: {} };
+                            let hidingClauses = { empty: [], notEqual: {} };
+                            // fetch
+                            let namesAndPaths = [];
+                            let paths = [];
+                            for (var depends of dependsOn) {
+                                let path = ':host.entity.' + depends.prop, path2 = '$this.entity.' + depends.prop;
+                                if (!Pacem.Utils.isNullOrEmpty(depends.value)) {
+                                    let clause = (p) => p + ' !== ' + JSON.stringify(depends.value);
+                                    (disablingClauses.notEqual[path] = disablingClauses.notEqual[path] || []).push(clause(path));
+                                    if (depends.hide) {
+                                        (hidingClauses.notEqual[path2] = hidingClauses.notEqual[path2] || []).push(clause(path2));
+                                    }
                                 }
-                                // different property clauses should be concatenated with '||' (logical or)
-                                ne = '(' + neByProp.join(' || ') + ')';
+                                else {
+                                    let clause = (p) => '$pacem.isNullOrEmpty(' + p + ')';
+                                    disablingClauses.empty.push(clause(path));
+                                    if (depends.hide) {
+                                        hidingClauses.empty.push(clause(path2));
+                                    }
+                                }
+                                // fetch
+                                paths.push(path);
+                                namesAndPaths.push(`${(depends.alias || depends.prop)} : :host._adjustDependencyValue(${path})`);
+                                dependingClause += `!$pacem.isNullOrEmpty(${path}) && `;
                             }
-                            if (!Pacem.Utils.isNullOrEmpty(d.empty)) {
-                                // logical operator doe not affect 'empty' (no 'value' explicitated) deps:
-                                // empty always means 'BAD', then ANY empty entry would automatically trigger a negative outcome ('||').
-                                emp = '(' + d.empty.join(' || ') + ')';
-                            }
-                            return ne + ' || ' + emp;
-                        };
-                        dependingDisabling = joinClauses(disablingClauses);
-                        disabledAttr = `{{ ${dependingDisabling} }}`;
-                        // never disable the form-field, NEVER!
-                        // attrs['disabled'] = disabledAttr; // * BUG
-                        this.setAttribute('hide', `{{ ${joinClauses(hidingClauses)} }}`);
+                            dependingParameters = namesAndPaths.join(', ');
+                            let joinClauses = (d) => {
+                                let ne = 'false', emp = 'false';
+                                if (!Pacem.Utils.isNullOrEmpty(d.notEqual)) {
+                                    // when a value is provided then pick the logical operator when provided.
+                                    // consider to switch semantic (i.e. 'or' -> '&&', 'and' -> '||') due to the 'notEqual' operator.
+                                    // 'and' is assumed to be the default
+                                    const neByProp = [];
+                                    for (let dp in d.notEqual) {
+                                        // same property conditions always concatenated with '&&' (logical and)
+                                        neByProp.push('(' + d.notEqual[dp].join(' && ') + ')');
+                                    }
+                                    // different property clauses should be concatenated with '||' (logical or)
+                                    ne = '(' + neByProp.join(' || ') + ')';
+                                }
+                                if (!Pacem.Utils.isNullOrEmpty(d.empty)) {
+                                    // logical operator doe not affect 'empty' (no 'value' explicitated) deps:
+                                    // empty always means 'BAD', then ANY empty entry would automatically trigger a negative outcome ('||').
+                                    emp = '(' + d.empty.join(' || ') + ')';
+                                }
+                                return ne + ' || ' + emp;
+                            };
+                            dependingDisabling = joinClauses(disablingClauses);
+                            disabledAttr = `{{ ${dependingDisabling} }}`;
+                            // never disable the form-field, NEVER!
+                            // attrs['disabled'] = disabledAttr; // * BUG
+                            this.setAttribute('hide', `{{ ${joinClauses(hidingClauses)} }}`);
+                        }
                     }
                     // #endregion
                     const fn = 'fn';
                     const fns = this[fn] = this[fn] || {};
+                    const spinStaticDatasourceAttr = (source = []) => {
+                        let args = (dependsOn || []).map(p => ':host.entity.' + p.prop).join(', ');
+                        const fnKey = 'fn' + Pacem.Utils.uniqueCode();
+                        switch (typeof source) {
+                            case 'function':
+                                fns[fnKey] = source;
+                                break;
+                            default:
+                                if (Pacem.Utils.isArray(source)) {
+                                    fns[fnKey] = () => source;
+                                }
+                                else {
+                                    throw 'Unsupported source format.';
+                                }
+                                break;
+                        }
+                        return `{{ :host.${fn}.${fnKey}(${args}) }}`;
+                    };
+                    const children = new DocumentFragment();
+                    let uiHint;
                     // metadata
-                    if (typeof meta.type === 'function') {
+                    if (typeof meta.type === 'function' /* < factory */) {
                         // build-up meta-structure
                         var retval = meta.type(this, ':host', ':host.entity');
-                        // set tagName
-                        tagName = retval.tagName;
-                        // set/override attributes
-                        Pacem.Utils.extend(attrs, retval.attrs || {});
+                        // element must be a registered custom-element (hyphen!)
+                        if (retval.tagName.indexOf('-') === -1) {
+                            this.log(Pacem.Logging.LogLevel.Error, `${tagName} is not an allowed form-field`);
+                        }
+                        else {
+                            // set tagName
+                            tagName = retval.tagName;
+                            // set/override attributes
+                            Pacem.Utils.extend(attrs, retval.attrs || {});
+                            // prepare recursive seeding function
+                            function seedChildren(parent, children) {
+                                if (!Pacem.Utils.isNullOrEmpty(children)) {
+                                    for (let child of children) {
+                                        // element must be a registered custom-element (hyphen!)
+                                        if (child.tagName.indexOf('-') === -1) {
+                                            this.log(Pacem.Logging.LogLevel.Error, `${child.tagName} is not an allowed child element for form-field ${tagName}`);
+                                            continue;
+                                        }
+                                        const el = document.createElement(child.tagName);
+                                        if (!Pacem.Utils.isNullOrEmpty(child.attrs)) {
+                                            for (let attr in child.attrs) {
+                                                const attrVal = child.attrs[attr];
+                                                el.setAttribute(attr, attrVal);
+                                            }
+                                        }
+                                        if (!Pacem.Utils.isNullOrEmpty(child.children)) {
+                                            // recursion here
+                                            seedChildren(el, child.children);
+                                        }
+                                        parent.appendChild(el);
+                                    }
+                                }
+                            }
+                            // seed
+                            seedChildren(children, retval.children);
+                        }
                     }
                     else
-                        switch (meta.display && meta.display.ui) {
+                        switch (uiHint = (meta.display && meta.display.ui)) {
                             // remove this (use dataType = 'HTML' instead).
                             case 'contentEditable':
                                 console.warn('`contentEditable` ui hint is deprecated. Lean on `dataType` equal to \'HTML\' instead.');
                                 tagName = Pacem.P + '-contenteditable';
+                                children.append(Scaffolding.ContenteditableUtils.getDefaultDashboard());
                                 break;
                             case 'snapshot':
                                 tagName = Pacem.P + '-thumbnail';
@@ -2386,9 +3351,17 @@ var Pacem;
                                 let mode = attrs['mode'] = meta.type.toLowerCase() === 'string' ? 'string' : 'binary';
                                 break;
                             case 'oneToMany':
+                            case 'manyToMany':
                                 // select
-                                tagName = Pacem.P + '-select';
-                                attrs['on-wheel'] = '$event.preventDefault()';
+                                delete attrs['placeholder'];
+                                if (uiHint === 'oneToMany') {
+                                    tagName = Pacem.P + '-select';
+                                    attrs['on-wheel'] = '$event.preventDefault()';
+                                }
+                                else {
+                                    // checkboxlist
+                                    tagName = Pacem.P + '-checkbox-list';
+                                }
                                 if (!Pacem.Utils.isNullOrEmpty(fetchData.textProperty)) {
                                     attrs['text-property'] = fetchData.textProperty;
                                 }
@@ -2409,43 +3382,12 @@ var Pacem;
                                     //
                                     fetchAttrs['parameters'] = `{{ { ${dependingParameters} } }}`;
                                     fetchAttrs['disabled'] = disabledAttr;
-                                    attrs['datasource'] = `{{ ${dependingClause}Pacem.Utils.getApiResult(#fetch${this._key}.result) }}`;
+                                    attrs['datasource'] = `{{ ${dependingClause}Pacem.Utils.getApiResult(#fetch${this._key}.result) || null }}`;
                                 }
                                 else {
                                     // static datasource provided
-                                    let args = (dependsOn || []).map(p => ':host.entity.' + p.prop).join(', ');
-                                    const fnKey = 'fn' + Pacem.Utils.uniqueCode();
-                                    switch (typeof fetchData.source) {
-                                        case 'function':
-                                            fns[fnKey] = fetchData.source;
-                                            break;
-                                        default:
-                                            if (Pacem.Utils.isArray(fetchData.source)) {
-                                                fns[fnKey] = () => fetchData.source;
-                                            }
-                                            else {
-                                                throw 'Unsupported source format.';
-                                            }
-                                            break;
-                                    }
-                                    attrs['datasource'] = `{{ :host.${fn}.${fnKey}(${args}) }}`;
+                                    attrs['datasource'] = spinStaticDatasourceAttr(fetchData.source);
                                 }
-                                break;
-                            case 'manyToMany':
-                                // checkboxlist
-                                tagName = Pacem.P + '-checkbox-list';
-                                delete attrs['placeholder'];
-                                attrs['datasource'] = `{{ Pacem.Utils.getApiResult(#fetch${this._key}.result) }}`;
-                                if (!Pacem.Utils.isNullOrEmpty(fetchData.textProperty))
-                                    attrs['text-property'] = fetchData.textProperty;
-                                if (!Pacem.Utils.isNullOrEmpty(fetchData.disabledProperty))
-                                    attrs['disabled-property'] = fetchData.disabledProperty;
-                                if (!Pacem.Utils.isNullOrEmpty(fetchData.valueProperty))
-                                    attrs['compare-by'] = fetchData.valueProperty;
-                                this._fetcher.id = `fetch${this._key}`;
-                                this._fetcher.url = fetchData.sourceUrl;
-                                this._fetcher.method = fetchData.verb;
-                                // TODO: implement dependsOn
                                 break;
                             case 'suggest':
                             case 'tags':
@@ -2454,8 +3396,9 @@ var Pacem;
                                 const tags = meta.display.ui === 'tags';
                                 tagName = Pacem.P + (tags ? '-tags' : '-suggest');
                                 this._fetcher.id = `fetch${this._key}`;
-                                if (!Pacem.Utils.isNullOrEmpty(fetchData.textProperty))
+                                if (!Pacem.Utils.isNullOrEmpty(fetchData.textProperty)) {
                                     attrs['text-property'] = fetchData.textProperty;
+                                }
                                 let itemValue = `#${this._key}.value`;
                                 if (!Pacem.Utils.isNullOrEmpty(fetchData.valueProperty)) {
                                     attrs['compare-by'] = fetchData.valueProperty;
@@ -2479,11 +3422,45 @@ var Pacem;
                                         // no deps
                                         fetchAttrs['parameters'] = `{{ {q: #${this._key}.hint || '', ${(fetchData.valueProperty || 'value')}: ${itemValue} || '' } }}`;
                                     }
-                                    attrs['datasource'] = `{{ ${dependingClause}Pacem.Utils.getApiResult(#fetch${this._key}.result) }}`;
+                                    attrs['datasource'] = `{{ ${dependingClause}Pacem.Utils.getApiResult(#fetch${this._key}.result) || null }}`;
                                 }
-                                if (meta.display.ui === 'tags') {
+                                else {
+                                    // static datasource
+                                    attrs['datasource'] = spinStaticDatasourceAttr(fetchData.source);
+                                }
+                                if (tags) {
                                     attrs['allow-new'] = (meta.extra.allowNew === true).toString();
                                     attrs['allow-duplicates'] = (meta.extra.allowDuplicates === true).toString();
+                                }
+                                else {
+                                    if (!Pacem.Utils.isNullOrEmpty(fetchData.disabledProperty)) {
+                                        attrs['disabled-property'] = fetchData.disabledProperty;
+                                    }
+                                    if (!Pacem.Utils.isNullOrEmpty(fetchData.itemtemplate)) {
+                                        const itmpl = fetchData.itemtemplate;
+                                        if (itmpl instanceof HTMLElement) {
+                                            attrs['itemtemplate'] = '{{ #' + (itmpl.id = itmpl.id || this._key + '_itemtmpl') + ' }}';
+                                            if (!itmpl.isConnected) {
+                                                this.append(itmpl);
+                                            }
+                                        }
+                                        else {
+                                            attrs['itemtemplate'] = itmpl;
+                                        }
+                                    }
+                                    if (!Pacem.Utils.isNullOrEmpty(fetchData.filterFields)) {
+                                        const ffields = fetchData.filterFields;
+                                        attrs['filter-fields'] = (Pacem.Utils.isArray(ffields)) ? ffields.join(' ') : ffields;
+                                    }
+                                }
+                                break;
+                            case "calendar":
+                                tagName = Pacem.P + '-calendar-picker';
+                                if (!Pacem.Utils.isNullOrEmpty(fetchData.format)) {
+                                    attrs['format'] = '{{ ' + JSON.stringify(fetchData.format) + ' }}';
+                                }
+                                if (!Pacem.Utils.isNullOrEmpty(fetchData.disabledRanges)) {
+                                    attrs['disabled-ranges'] = '{{ ' + JSON.stringify(fetchData.disabledRanges) + ' }}';
                                 }
                                 break;
                             case 'switcher':
@@ -2522,6 +3499,7 @@ var Pacem;
                                     case 'html':
                                         // contenteditable
                                         tagName = Pacem.P + '-contenteditable';
+                                        children.append(Scaffolding.ContenteditableUtils.getDefaultDashboard());
                                         break;
                                     case 'enumeration':
                                         // radiobutton list
@@ -2542,16 +3520,19 @@ var Pacem;
                                         tagName = Pacem.P + '-input-color';
                                         break;
                                     case "time":
-                                        tagName = Pacem.P + '-datetime-picker';
-                                        break;
+                                    case "date":
                                     case "datetime":
                                         tagName = Pacem.P + '-datetime-picker';
                                         delete attrs['placeholder'];
-                                        attrs['precision'] = "minute";
-                                        break;
-                                    case "date":
-                                        tagName = Pacem.P + '-datetime-picker';
-                                        delete attrs['placeholder'];
+                                        if (dataType === 'datetime') {
+                                            attrs['precision'] = "minute";
+                                        }
+                                        if (!Pacem.Utils.isNullOrEmpty(fetchData.format)) {
+                                            attrs['format'] = '{{ ' + JSON.stringify(fetchData.format) + ' }}';
+                                        }
+                                        if (!Pacem.Utils.isNullOrEmpty(fetchData.disabledRanges)) {
+                                            attrs['disabled-ranges'] = '{{ ' + JSON.stringify(fetchData.disabledRanges) + ' }}';
+                                        }
                                         break;
                                     case "url":
                                         tagName = Pacem.P + '-input-url';
@@ -2617,7 +3598,7 @@ var Pacem;
                                                     attrs['mode'] = meta.type;
                                                     attrs['lock-items'] = '' + (meta.extra && meta.extra.lockItems || false);
                                                     attrs['logger'] = '{{ :host.logger }}';
-                                                    if (!Pacem.Utils.isNullOrEmpty(fetchData && fetchData.dependsOn)) {
+                                                    if (!Pacem.Utils.isNullOrEmpty(fetchData.dependsOn)) {
                                                         var extraDom = '';
                                                         for (let d of dependsOn) {
                                                             extraDom += `<${Pacem.P}-childform-propagator model="${attrs["value"]}" watch="{{ :host.entity.${d.prop} }}" property="${(d.alias || d.prop)}"></${Pacem.P}-childform-propagator>\n`;
@@ -2633,7 +3614,7 @@ var Pacem;
                                 }
                                 break;
                         }
-                    // commands
+                    // #region commands
                     if (!Pacem.Utils.isNullOrEmpty(meta.commands)) {
                         Pacem.Utils.addClass(this._container, Pacem.PCSS + '-fieldgroup');
                         const prepend = this._container.appendChild(document.createElement('div')), append = this._container.appendChild(document.createElement('div'));
@@ -2645,7 +3626,7 @@ var Pacem;
                             btn.setAttribute('icon-glyph', cmd.icon);
                             btn.setAttribute('command-name', cmd.name);
                             if (cmd.dependsOnValue) {
-                                btn.setAttribute('disabled', `{{ (${disable}) || !::_form.valid || Pacem.Utils.isNullOrEmpty(:host.entity.${meta.prop}) }}`);
+                                btn.setAttribute('disabled', `{{ (${disable}) || !::_form.valid || $pacem.isNullOrEmpty(:host.entity.${meta.prop}) }}`);
                                 btn.setAttribute('command-argument', `{{ :host.entity.${meta.prop} }}`);
                             }
                             else {
@@ -2658,81 +3639,110 @@ var Pacem;
                             (cmd.prepend ? prepend : append).appendChild(btn);
                         });
                     }
-                    // validators
+                    // #endregion
+                    // #region validators
                     if (!Pacem.Utils.isNullOrEmpty(meta.validators)) {
                         meta.validators.forEach((v) => {
                             var validatorElement;
-                            var validator = v;
-                            switch (validator.type) {
+                            var params = {};
+                            var attributes = {};
+                            if (isKnownValidator(v)) {
+                                params = v['params'] || {};
+                                attributes['error-message'] = v.errorMessage;
+                            }
+                            if (isValidatorFactory(v)) {
+                                attributes = v.attributes(this, ':host', ':host.entity');
+                            }
+                            switch (v.type) {
                                 case 'required':
                                     attrs['required'] = 'true';
-                                    validatorElement = document.createElement(Pacem.P + '-required-validator');
+                                    validatorElement = new Scaffolding.PacemRequiredValidatorElement();
                                     break;
                                 case 'length':
-                                    let lengthValidator = document.createElement(Pacem.P + '-length-validator');
+                                    let lengthValidator = new Scaffolding.PacemLengthValidatorElement();
                                     validatorElement = lengthValidator;
-                                    let max = validator.params && validator.params['max'];
-                                    let min = validator.params && validator.params['min'];
+                                    let max = params && params['max'];
+                                    let min = params && params['min'];
                                     if (max != null) {
                                         attrs['maxlength'] = '' + (lengthValidator.max = max);
+                                    }
+                                    else if ('max' in attributes) {
+                                        attrs['max'] = attributes['max'];
                                     }
                                     if (min != null) {
                                         attrs['minlength'] = '' + (lengthValidator.min = min);
                                     }
+                                    else if ('min' in attributes) {
+                                        attrs['minlength'] = attributes['min'];
+                                    }
                                     break;
                                 case 'range':
-                                    let rangeValidator = document.createElement(Pacem.P + '-range-validator');
+                                    let rangeValidator = new Scaffolding.PacemRangeValidatorElement();
                                     validatorElement = rangeValidator;
-                                    let maxNum = validator.params && validator.params['max'];
-                                    let minNum = validator.params && validator.params['min'];
+                                    let maxNum = params && params['max'];
+                                    let minNum = params && params['min'];
                                     let isDateTime = tagName === Pacem.P + '-datetime-picker';
                                     if (maxNum != null) {
                                         rangeValidator.max = maxNum;
                                         attrs['max'] = "{{ " + (isDateTime ? "'" + maxNum + "'" : maxNum) + " }}";
                                     }
+                                    else if ('max' in attributes) {
+                                        attrs['max'] = attributes['max'];
+                                    }
                                     if (minNum != null) {
                                         rangeValidator.min = minNum;
                                         attrs['min'] = "{{ " + (isDateTime ? "'" + minNum + "'" : minNum) + " }}";
                                     }
+                                    else if ('min' in attributes) {
+                                        attrs['min'] = attributes['min'];
+                                    }
                                     break;
                                 case 'email':
-                                    let emailValidator = document.createElement(Pacem.P + '-regex-validator');
+                                    let emailValidator = new Scaffolding.PacemRegexValidatorElement();
                                     validatorElement = emailValidator;
-                                    attrs['pattern'] = patternToString(emailValidator.pattern = "[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z0-9]{2,6}");
+                                    attrs['pattern'] = patternToString(emailValidator.pattern = "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z0-9]{2,6}$");
                                     break;
                                 case 'regex':
-                                    let regexValidator = document.createElement(Pacem.P + '-regex-validator');
+                                    let regexValidator = new Scaffolding.PacemRegexValidatorElement();
                                     validatorElement = regexValidator;
-                                    let pattern = validator.params['pattern'];
+                                    let pattern = params['pattern'];
+                                    pattern || (pattern = attributes['pattern']);
                                     attrs['pattern'] = patternToString(pattern);
                                     regexValidator.pattern = pattern;
                                     break;
                                 case 'binary':
-                                    let binaryValidator = document.createElement(Pacem.P + '-binary-validator');
+                                    let binaryValidator = new Scaffolding.PacemBinaryValidatorElement();
                                     validatorElement = binaryValidator;
-                                    let filePattern = validator.params['pattern'];
+                                    let filePattern = params['pattern'];
                                     if (filePattern != null) {
                                         attrs['pattern'] = patternToString(filePattern);
                                         binaryValidator.pattern = filePattern;
                                     }
-                                    let maxSize = validator.params && validator.params['maxSize'];
+                                    else if ('pattern' in attributes) {
+                                        attrs['pattern'] = attributes['pattern'];
+                                    }
+                                    let maxSize = params && params['maxSize'];
                                     if (maxSize != null) {
                                         binaryValidator.maxSize = maxSize;
                                         attrs['max-size'] = '' + maxSize;
                                     }
+                                    else if ('max-size' in attributes) {
+                                        attrs['max-size'] = attributes['max-size'];
+                                    }
                                     break;
                                 case 'compare':
-                                    let compareValidator = document.createElement(Pacem.P + '-compare-validator');
+                                    let compareValidator = new Scaffolding.PacemCompareValidatorElement();
                                     validatorElement = compareValidator;
                                     let comparedTo = '';
-                                    if ('value' in validator.params) {
-                                        comparedTo = `{{ ${validator.params.value} }}`;
+                                    if ('value' in params) {
+                                        comparedTo = `{{ ${params.value} }}`;
                                     }
                                     else {
-                                        comparedTo = `{{ :host.entity.${validator.params.to} }}`;
+                                        const toProp = 'to' in params ? params.to : params.toProperty;
+                                        comparedTo = `{{ :host.entity.${toProp} }}`;
                                     }
                                     compareValidator.setAttribute('to', comparedTo);
-                                    let operator = compareValidator.operator = validator.params['operator'] || 'equal';
+                                    let operator = compareValidator.operator = params['operator'] || attributes['operator'] || 'equal';
                                     // In case of `date(time)` try to add some interaction with `datetime-picker`'s min/max props.
                                     if (tagName === Pacem.P + '-datetime-picker') {
                                         switch (operator) {
@@ -2748,39 +3758,58 @@ var Pacem;
                                     }
                                     break;
                                 case 'async':
-                                    let asyncValidator = document.createElement(Pacem.P + '-async-validator');
+                                    let asyncValidator = new Scaffolding.PacemAsyncValidatorElement();
                                     validatorElement = asyncValidator;
-                                    asyncValidator.url = validator.params['url'];
-                                    let params = [], dependsOn = validator.params['dependsOn'];
-                                    params.push(`${meta.prop} : :host.entity.${meta.prop}`);
-                                    for (let depend of dependsOn || []) {
-                                        params.push(`${(depend.alias || depend.prop)} : :host.entity.${depend.prop}`);
+                                    asyncValidator.url = params['url'];
+                                    let parameters = [], depOn = params['dependsOn'] || dependsOn;
+                                    parameters.push(`${meta.prop} : :host.entity.${meta.prop}`);
+                                    for (let depend of depOn || []) {
+                                        parameters.push(`${(depend.alias || depend.prop)} : :host.entity.${depend.prop}`);
                                     }
-                                    asyncValidator.setAttribute('parameters', `{{ { ${(params.join(', '))} } }}`);
-                                    asyncValidator.method = validator.params['verb'] || Pacem.Net.HttpMethod.Get;
+                                    asyncValidator.setAttribute('parameters', `{{ { ${(parameters.join(', '))} } }}`);
+                                    asyncValidator.method = params['verb'] || Pacem.Net.HttpMethod.Get;
                                     asyncValidator.setAttribute('fetch-credentials', '{{ :host.fetchCredentials }}');
                                     asyncValidator.setAttribute('fetch-headers', '{{ :host.fetchHeaders }}');
+                                    break;
+                                case 'custom':
+                                    validatorElement = new Scaffolding.PacemCustomValidatorElement();
+                                    break;
+                                default:
+                                    // custom (extra-lib) validator
+                                    if (!Pacem.Utils.isNullOrEmpty(v.type) && /* must be a custom element */ v.type.indexOf('-') > 0) {
+                                        const tagName = v.type;
+                                        const extern = document.createElement(tagName);
+                                        if (extern instanceof Scaffolding.PacemBaseValidatorElement) {
+                                            validatorElement = extern;
+                                        }
+                                    }
                                     break;
                             }
                             //
                             if (Pacem.Utils.isNull(validatorElement)) {
-                                throw `Cannot generate a formfield validator based on type: ${validator.type}.`;
+                                throw `Cannot generate a formfield validator based on type: ${v.type}.`;
                             }
                             else {
                                 validatorElement.watch = meta.prop;
                                 validatorElement.setAttribute('hide', '{{ !this.invalid }}');
                                 validatorElement.setAttribute('disabled', disabledAttr);
-                                validatorElement.errorMessage = validator.errorMessage;
+                                for (let attrName in attributes) {
+                                    validatorElement.setAttribute(attrName, attributes[attrName]);
+                                }
                                 this._validators.appendChild(validatorElement);
                             }
                         });
                     }
+                    // #endregion
+                    // #region build-up
                     let field = document.createElement(tagName);
                     for (var name in attrs) {
                         let attr;
                         if (!Pacem.Utils.isNullOrEmpty(attr = attrs[name]))
                             field.setAttribute(name, attr);
                     }
+                    field.append(children);
+                    // #endregion
                     this._field = field;
                     this._container.insertBefore(field, this._container.firstElementChild);
                     for (var name in fetchAttrs) {
@@ -2794,7 +3823,7 @@ var Pacem;
             };
             __decorate([
                 Pacem.ViewChild('label')
-            ], PacemFormFieldElement.prototype, "label", void 0);
+            ], PacemFormFieldElement.prototype, "_label", void 0);
             __decorate([
                 Pacem.ViewChild(`div.${Pacem.PCSS}-input-container`)
             ], PacemFormFieldElement.prototype, "_container", void 0);
@@ -2926,8 +3955,7 @@ var Pacem;
             }
             __decorate([
                 Pacem.Watch({
-                    emit: false,
-                    converter: {
+                    emit: false, converter: {
                         convert: (attr) => {
                             switch (attr) {
                                 case 'true':
@@ -3118,9 +4146,6 @@ var Pacem;
         var Scaffolding;
         (function (Scaffolding) {
             let PacemEmailInputElement = class PacemEmailInputElement extends Scaffolding.PacemTextualInputElement {
-                constructor() {
-                    super();
-                }
                 toggleReadonlyView(readonly) {
                     this.input.hidden = readonly;
                     this.anchor.hidden = !readonly;
@@ -3170,6 +4195,7 @@ var Pacem;
                     this._tweener = _tweener;
                     this.undoCaption = 'undo';
                     this.retryCaption = 'retry';
+                    this.clearCaption = 'clear';
                     this.uploading = false;
                     this.size = 0;
                     this.percentage = .0;
@@ -3307,99 +4333,93 @@ var Pacem;
                         return this._upload(file, filename, state);
                     }
                 }
-                _upload(file, filename, state) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        var Uploader = this, fields = Uploader._fields;
-                        if (!file)
-                            return;
-                        if (!filename && file instanceof File) {
-                            filename = file.name;
+                async _upload(file, filename, state) {
+                    var Uploader = this, fields = Uploader._fields;
+                    if (!file)
+                        return;
+                    if (!filename && file instanceof File) {
+                        filename = file.name;
+                    }
+                    Uploader.failed = false;
+                    fields.undone = false;
+                    fields.ongoing = 0;
+                    const blob = file, size = Uploader.size = blob.size;
+                    filename = filename.substr(filename.lastIndexOf('\\') + 1);
+                    Uploader.percentage = .0;
+                    Uploader.complete = false;
+                    //
+                    var request = {
+                        filename: filename, length: size, action: "start", state: state
+                    };
+                    //
+                    Uploader.uploading = true;
+                    try {
+                        var r = await Uploader._fetch(request);
+                        if (r.ok) {
+                            var json = await r.json();
+                            fields.retryFrom = 0;
+                            fields.blob = blob;
+                            fields.uid = json.uid;
+                            Uploader._manage();
                         }
-                        Uploader.failed = false;
-                        fields.undone = false;
-                        fields.ongoing = 0;
-                        const blob = file, size = Uploader.size = blob.size;
-                        filename = filename.substr(filename.lastIndexOf('\\') + 1);
-                        Uploader.percentage = .0;
-                        Uploader.complete = false;
-                        //
-                        var request = {
-                            filename: filename, length: size, action: "start", state: state
-                        };
-                        //
-                        Uploader.uploading = true;
-                        try {
-                            var r = yield Uploader._fetch(request);
-                            if (r.ok) {
-                                var json = yield r.json();
-                                fields.retryFrom = 0;
-                                fields.blob = blob;
-                                fields.uid = json.uid;
-                                Uploader._manage();
-                            }
-                            else {
-                                Uploader.uploading = false;
-                            }
-                            return r;
-                        }
-                        catch (e) {
+                        else {
                             Uploader.uploading = false;
                         }
-                        finally {
-                        }
-                    });
+                        return r;
+                    }
+                    catch (e) {
+                        Uploader.uploading = false;
+                    }
+                    finally {
+                    }
                 }
-                _blobToBase64(blob) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        const result = yield Pacem.Utils.blobToDataURL(blob);
-                        return result.substr(result.indexOf('base64,') + 7);
-                    });
+                async _blobToBase64(blob) {
+                    const result = await Pacem.Utils.blobToDataURL(blob);
+                    return result.substr(result.indexOf('base64,') + 7);
                 }
-                _doUpload(blob, skip) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        var Uploader = this, fields = Uploader._fields;
-                        fields.ongoing++;
-                        //
-                        const chunk = yield this._blobToBase64(blob);
-                        var request = {
-                            chunk: chunk,
-                            uid: fields.uid, position: skip,
-                            action: "do"
-                        };
-                        try {
-                            const r = yield Uploader._fetch(request);
-                            if (r.ok) {
-                                fields.ongoing--;
-                                if (!!fields.undone)
-                                    return;
-                                const json = yield r.json();
-                                const result = json;
-                                // parallelism > 1 may cause non-ordered responses
-                                if (result.percentage > this.percentage) {
-                                    yield Uploader._tweenPercentage(Math.round(Math.max(1, result.percentage)), 200);
-                                }
-                                if (Uploader.complete != result.complete) {
-                                    Uploader.complete = result.complete;
-                                    if (Uploader.complete === true) {
-                                        Uploader.uploading = false;
-                                        Uploader.changeHandler(new FileUploadEvent(result));
-                                    }
+                async _doUpload(blob, skip) {
+                    var Uploader = this, fields = Uploader._fields;
+                    fields.ongoing++;
+                    //
+                    const chunk = await this._blobToBase64(blob);
+                    var request = {
+                        chunk: chunk,
+                        uid: fields.uid, position: skip,
+                        action: "do"
+                    };
+                    try {
+                        const r = await Uploader._fetch(request);
+                        if (r.ok) {
+                            fields.ongoing--;
+                            if (!!fields.undone)
+                                return;
+                            const json = await r.json();
+                            const result = json;
+                            // parallelism > 1 may cause non-ordered responses
+                            if (result.percentage > this.percentage) {
+                                await Uploader._tweenPercentage(Math.round(Math.max(1, result.percentage)), 200);
+                            }
+                            if (Uploader.complete != result.complete) {
+                                Uploader.complete = result.complete;
+                                if (Uploader.complete === true) {
+                                    Uploader.uploading = false;
+                                    Uploader.changeHandler(new FileUploadEvent(result));
                                 }
                             }
-                            else {
-                                // error occurred
-                                fields.retryFrom = skip;
-                                Uploader.failed = true;
-                                Uploader.uploading = false;
-                            }
                         }
-                        catch (_) {
-                            // crash
+                        else {
+                            // error occurred
                             fields.retryFrom = skip;
                             Uploader.failed = true;
                             Uploader.uploading = false;
                         }
-                    });
+                    }
+                    catch (_) {
+                        // crash
+                        fields.retryFrom = skip;
+                        Uploader.failed = true;
+                        Uploader.uploading = false;
+                    }
                 }
                 _manage() {
                     const fields = this._fields, size = this.size, blob = fields.blob, chunkSize = this.chunkSize || fields.chunkSize;
@@ -3422,13 +4442,11 @@ var Pacem;
                         }
                     }, 100);
                 }
-                _buildLocalValue(file, filename = file.name, blob = file) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        return this._localValue = { name: filename, size: file.size, type: file.type, lastModified: Pacem.Utils.parseDate(file.lastModified).toISOString(), content: yield this._blobToBase64(blob) };
-                    });
+                async _buildLocalValue(file, filename = file.name, blob = file) {
+                    return this._localValue = { name: filename, size: file.size, type: file.type, lastModified: Pacem.Utils.parseDate(file.lastModified).toISOString(), content: await this._blobToBase64(blob) };
                 }
                 onChange(evt) {
-                    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                    return new Promise(async (resolve, reject) => {
                         if (Pacem.CustomEventUtils.isInstanceOf(evt, FileUploadEvent)) {
                             // result of an upload?
                             const file = this.value = evt.detail.filename;
@@ -3437,77 +4455,81 @@ var Pacem;
                         }
                         else {
                             let Uploader = this, input = Uploader._fileupload;
-                            var file = input.files[0], filename = file.name, blob = file;
-                            // validate file
-                            if (!this._validate(file) && !Pacem.Utils.isNullOrEmpty(this.url)) {
-                                // do not start uploads with an invalid file
-                                resolve(this.value = yield this._buildLocalValue(file));
+                            if (input.files.length === 0) {
+                                // clear
+                                resolve(this.value = null);
                             }
                             else {
-                                if (/\.(jpe?g|png)$/i.test(filename) && this.maxImageWidth > 0 && this.maxImageHeight > 0) {
-                                    blob = yield Pacem.Utils.resizeImage(blob, this.maxImageWidth, this.maxImageHeight, .6);
-                                }
-                                yield this._buildLocalValue(file, filename, blob);
-                                if (Pacem.Utils.isNullOrEmpty(this.url)) {
-                                    // mimic upload
-                                    this.uploading = true; // <- triggers anim
-                                    if (!Pacem.Utils.isNullOrEmpty(this.value)) {
-                                        this.percentage = 0;
-                                        yield Pacem.Utils.waitForAnimationEnd(this._tuner);
-                                    }
-                                    else {
-                                        yield Pacem.Utils.idle(250);
-                                    }
-                                    yield this._tweener.run(0, 100, 500, 0, Pacem.Animations.Easings.sineInOut, (t, v) => {
-                                        this.percentage = v;
-                                    });
-                                    // reset pct
-                                    this.percentage = .0;
-                                    this.uploading = false;
-                                    // no direct upload? set the value to the very File
-                                    resolve(this.value = this._localValue);
+                                var file = input.files[0], filename = file.name, blob = file;
+                                // validate file
+                                if (!this._validate(file) && !Pacem.Utils.isNullOrEmpty(this.url)) {
+                                    // do not start uploads with an invalid file
+                                    resolve(this.value = await this._buildLocalValue(file));
                                 }
                                 else {
-                                    // upload, then wait for resulting filename (value will be the filename string) 
-                                    Uploader._upload(blob, input.value);
-                                    resolve(this.value);
+                                    if (/\.(jpe?g|png)$/i.test(filename) && this.maxImageWidth > 0 && this.maxImageHeight > 0) {
+                                        blob = await Pacem.Utils.resizeImage(blob, this.maxImageWidth, this.maxImageHeight, .6);
+                                    }
+                                    await this._buildLocalValue(file, filename, blob);
+                                    if (Pacem.Utils.isNullOrEmpty(this.url)) {
+                                        // mimic upload
+                                        this.uploading = true; // <- triggers anim
+                                        if (!Pacem.Utils.isNullOrEmpty(this.value)) {
+                                            this.percentage = 0;
+                                            await Pacem.Utils.waitForAnimationEnd(this._tuner);
+                                        }
+                                        else {
+                                            await Pacem.Utils.idle(250);
+                                        }
+                                        await this._tweener.run(0, 100, 500, 0, Pacem.Animations.Easings.sineInOut, (t, v) => {
+                                            this.percentage = v;
+                                        });
+                                        // reset pct
+                                        this.percentage = .0;
+                                        this.uploading = false;
+                                        // no direct upload? set the value to the very File
+                                        resolve(this.value = this._localValue);
+                                    }
+                                    else {
+                                        // upload, then wait for resulting filename (value will be the filename string) 
+                                        Uploader._upload(blob, input.value);
+                                        resolve(this.value);
+                                    }
                                 }
                             }
                         }
-                    }));
+                    });
                 }
                 _fetch(request) {
                     return fetch(this.url, {
                         method: 'POST', credentials: this.fetchCredentials, headers: Pacem.Utils.extend({ 'Accept': 'application/json', 'Content-Type': 'application/json' }, this.fetchHeaders || {}), body: JSON.stringify(request)
                     });
                 }
-                _undo(e) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        var Uploader = this, fields = Uploader._fields, input = Uploader._fileupload;
-                        clearInterval(fields.enqueuer);
-                        var request = {
-                            action: "undo", uid: fields.uid
-                        };
-                        try {
-                            var r = yield Uploader._fetch(request);
-                            if (r.ok) {
-                                fields.undone = true;
-                                Uploader.size = 0;
-                                Uploader._tweenPercentage(.0, 300);
-                            }
-                            return r;
+                async _undo(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var Uploader = this, fields = Uploader._fields, input = Uploader._fileupload;
+                    clearInterval(fields.enqueuer);
+                    var request = {
+                        action: "undo", uid: fields.uid
+                    };
+                    try {
+                        var r = await Uploader._fetch(request);
+                        if (r.ok) {
+                            fields.undone = true;
+                            Uploader.size = 0;
+                            Uploader._tweenPercentage(.0, 300);
                         }
-                        catch (e) {
-                        }
-                        finally {
-                            // This input element accepts a filename, which may only be programmatically set to the empty string(!)
-                            input.value = '';
-                            Uploader.uploading = false;
-                            return r;
-                        }
-                    });
+                        return r;
+                    }
+                    catch (e) {
+                    }
+                    finally {
+                        // This input element accepts a filename, which may only be programmatically set to the empty string(!)
+                        input.value = '';
+                        Uploader.uploading = false;
+                        return r;
+                    }
                 }
                 _tweenPercentage(pct, duration = 500) {
                     const from = this.percentage;
@@ -3520,6 +4542,20 @@ var Pacem;
                     e.stopPropagation();
                     this.failed = false;
                     this._manage();
+                }
+                _clear(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.url = null;
+                    this.invalidFile = false;
+                    const input = this.inputFields[0];
+                    // https://stackoverflow.com/a/35323290
+                    input.value = '';
+                    if (!/safari/i.test(navigator.userAgent)) {
+                        input.type = '';
+                        input.type = 'file';
+                    }
+                    this.changeHandler(null);
                 }
             };
             __decorate([
@@ -3540,6 +4576,9 @@ var Pacem;
             __decorate([
                 Pacem.Watch({ converter: Pacem.PropertyConverters.String })
             ], PacemUploadElement.prototype, "retryCaption", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemUploadElement.prototype, "clearCaption", void 0);
             __decorate([
                 Pacem.Watch({ emit: false, reflectBack: true, converter: Pacem.PropertyConverters.String })
             ], PacemUploadElement.prototype, "pattern", void 0);
@@ -3584,28 +4623,31 @@ var Pacem;
                     tagName: Pacem.P + '-upload', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
                     template: `<${Pacem.P}-button on-click=":host._dispatchDownload($event)" class="${Pacem.PCSS}-upload ${Pacem.PCSS}-viewfinder flat" css-class="{{ {'upload-chosen': !Pacem.Utils.isNullOrEmpty(:host.value) && !:host.uploading, 'upload-error': ${ERROR_BINDING}, 'upload-readonly': :host.readonly } }}">
 
-        <${Pacem.P}-panel class="upload-button" hide="{{ (:host.uploading || :host.failed) && !Pacem.Utils.isNullOrEmpty(:host.url) }}">
-            <${Pacem.P}-button tooltip="{{ :host.readonly ? :host.viewValue : 'upload' }}" class="circular pos-relative overflow-hidden" icon-glyph="{{ :host._getMimeIcon(:host.value, :host.uploading) }}" 
-                on-mouseover="$this.iconGlyph = :host._getMimeIcon(:host.readonly ? :host.value : '', :host.uploading)" on-mouseout="$this.iconGlyph = :host._getMimeIcon(:host.value, :host.uploading)"
-                css-class="{{ {'${Pacem.PCSS}-anim anim-rotate': :host.uploading, 'button-error': :host.invalidFile, 'button-primary': Pacem.Utils.isNullOrEmpty(:host.value) && !:host.invalidFile, 'button-success': !Pacem.Utils.isNullOrEmpty(:host.value) && !:host.invalidFile } }}">
-                <input type="file" class="${Pacem.PCSS}-transparent ${Pacem.PCSS}-clickable pos-absolute absolute-left absolute-right absolute-top absolute-bottom" />
-            </${Pacem.P}-button>
-        </${Pacem.P}-panel>
-        <${Pacem.P}-panel class="upload-button" hide="{{ !:host.failed }}">
-            <${Pacem.P}-button class="circular flat" icon-glyph="refresh"
-            tooltip="{{ :host.retryCaption }}" on-click=":host._retry($event)"><${Pacem.P}-text text="{{ :host.retryCaption }}"></${Pacem.P}-text></${Pacem.P}-button>
-        </${Pacem.P}-panel>
-        <${Pacem.P}-panel class="upload-button" hide="{{ !:host.uploading || Pacem.Utils.isNullOrEmpty(:host.url) }}">
-            <${Pacem.P}-button class="circular flat" icon-glyph="clear" tooltip="{{ :host.undoCaption }}" 
-                on-click=":host._undo($event)"><${Pacem.P}-text text="{{ :host.undoCaption }}"></${Pacem.P}-text></${Pacem.P}-button>
-        </${Pacem.P}-panel>
+    <${Pacem.P}-panel class="upload-button" hide="{{ (:host.uploading || :host.failed) && !Pacem.Utils.isNullOrEmpty(:host.url) }}">
+        <${Pacem.P}-button tooltip="{{ :host.readonly ? :host.viewValue : 'upload' }}" class="circular pos-relative overflow-hidden" icon-glyph="{{ :host._getMimeIcon(:host.value, :host.uploading) }}" 
+            on-mouseover="$this.iconGlyph = :host._getMimeIcon(:host.readonly ? :host.value : '', :host.uploading)" on-mouseout="$this.iconGlyph = :host._getMimeIcon(:host.value, :host.uploading)"
+            css-class="{{ {'${Pacem.PCSS}-anim anim-rotate': :host.uploading, 'button-error': :host.invalidFile, 'button-primary': Pacem.Utils.isNullOrEmpty(:host.value) && !:host.invalidFile, 'button-success': !Pacem.Utils.isNullOrEmpty(:host.value) && !:host.invalidFile } }}">
+            <input type="file" class="${Pacem.PCSS}-transparent ${Pacem.PCSS}-clickable pos-absolute absolute-left absolute-right absolute-top absolute-bottom" />
+        </${Pacem.P}-button>
+    </${Pacem.P}-panel>
+    <${Pacem.P}-panel class="upload-button" hide="{{ !:host.failed }}">
+        <${Pacem.P}-button class="circular flat" icon-glyph="refresh"
+        tooltip="{{ :host.retryCaption }}" on-click=":host._retry($event)"><${Pacem.P}-text text="{{ :host.retryCaption }}"></${Pacem.P}-text></${Pacem.P}-button>
+    </${Pacem.P}-panel>
+    <${Pacem.P}-panel class="upload-button" hide="{{ !:host.uploading || Pacem.Utils.isNullOrEmpty(:host.url) }}">
+        <${Pacem.P}-button class="circular flat" icon-glyph="clear" tooltip="{{ :host.undoCaption }}" 
+            on-click=":host._undo($event)"><${Pacem.P}-text text="{{ :host.undoCaption }}"></${Pacem.P}-text></${Pacem.P}-button>
+    </${Pacem.P}-panel>
 
-        <${Pacem.P}-span tooltip="{{ :host.viewValue }}" hide="{{ $pacem.isNullOrEmpty(:host.value) || :host.uploading }}" class="readonly text-reset display-block ${Pacem.PCSS}-anim text-truncate text-left text-pre ${Pacem.PCSS}-pad pad-right-3" text="{{ :host.viewValue }}"></${Pacem.P}-span>
+    <${Pacem.P}-span tooltip="{{ :host.viewValue }}"
+                hide="{{ $pacem.isNullOrEmpty(:host.value) || :host.uploading }}" class="upload-data readonly text-reset display-block ${Pacem.PCSS}-anim text-truncate text-left ${Pacem.PCSS}-pad pad-right-3" text="{{ :host.viewValue }}"></${Pacem.P}-span>
 
-        <${Pacem.P}-panel class="upload-progress hit-none" hide="{{ :host.readonly || (!Pacem.Utils.isNullOrEmpty(:host.value) && !:host.uploading) }}">
-            <${Pacem.P}-tuner value="{{ :host.percentage }}" css-class="{{ {'tuner-success': !:host.invalidFile, 'tuner-error': :host.invalidFile} }}" interactive="false"></${Pacem.P}-tuner>
-        </${Pacem.P}-panel>
+    <${Pacem.P}-panel class="upload-progress hit-none" hide="{{ :host.readonly || (!Pacem.Utils.isNullOrEmpty(:host.value) && !:host.uploading) }}">
+        <${Pacem.P}-tuner value="{{ :host.percentage }}" css-class="{{ {'tuner-success': !:host.invalidFile, 'tuner-error': :host.invalidFile} }}" interactive="false"></${Pacem.P}-tuner>
+    </${Pacem.P}-panel>
 
+    <${Pacem.P}-button class="circular flat clear-button" icon-glyph="clear" hide="{{ $pacem.isNullOrEmpty(:host.value) }}" tooltip="{{ :host.clearCaption }}" on-click=":host._clear($event)"></${Pacem.P}-button>
+        
 </${Pacem.P}-button>`
                 })
             ], PacemUploadElement);
@@ -4723,7 +5765,7 @@ var Pacem;
                     tagName: Pacem.P + '-radio-list', template: `<${Pacem.P}-repeater datasource="{{ :host.adaptedDatasource }}">
     <ol class="${Pacem.PCSS}-radio-list ${Pacem.PCSS}-viewfinder" pacem>
         <template>
-            <li><${Pacem.P}-radio disabled="{{ ::_disable.model || ^item.disabled }}" name="{{ :host.key, once }}" caption="{{ ^item.viewValue }}" value="{{ ^item.value }}" selected="{{ :host.isDataSourceItemSelected(^item, :host.value) }}"
+            <li><${Pacem.P}-radio disabled="{{ ::_disable.model || ^item.disabled }}" name="{{ :host.key, once }}" autobind="off" caption="{{ ^item.viewValue }}" value="{{ ^item.value }}" selected="{{ :host.isDataSourceItemSelected(^item, :host.value) }}"
 on-focus=":host.focusHandler($event)" on-blur=":host.focusHandler($event)"
 on-${Pacem.PropertyChangeEventName}=":host._selectionChanged($event, ^index, ^item)"></${Pacem.P}-radio></li>
         </template>
@@ -4827,7 +5869,7 @@ var Pacem;
         (function (Scaffolding) {
             let PacemSelectElement = class PacemSelectElement extends Scaffolding.PacemDataSourceElement {
                 constructor() {
-                    super();
+                    super(...arguments);
                     this.emptyOption = true;
                 }
                 toggleReadonlyView(readonly) {
@@ -4870,7 +5912,7 @@ var Pacem;
                 buildAdaptedDatasource(ds = this.datasource) {
                     let adapted = super.buildAdaptedDatasource(ds);
                     if (adapted && this.emptyOption) {
-                        adapted.splice(0, 0, { viewValue: this.placeholder || '', value: '' });
+                        adapted.splice(0, 0, { viewValue: this.placeholder || '', value: '', data: null });
                     }
                     return adapted;
                 }
@@ -5203,6 +6245,7 @@ var Pacem;
     (function (Components) {
         var Scaffolding;
         (function (Scaffolding) {
+            var _PacemSuggestElement_selecting;
             class SuggestionSelectEvent extends Pacem.CustomTypedEvent {
                 constructor(value) {
                     super('suggestionselect', { selectedValue: value });
@@ -5211,14 +6254,52 @@ var Pacem;
             let PacemSuggestElement = class PacemSuggestElement extends Scaffolding.PacemDataSourceElement {
                 constructor() {
                     super(...arguments);
+                    this._toggleBtnHandler = (evt) => {
+                        evt.preventDefault();
+                        if (!this.disabled) {
+                            this._balloon.toggle();
+                        }
+                    };
+                    this._clearBtnHandler = (evt) => {
+                        evt.preventDefault();
+                        this._lockSelection();
+                        this.value = void 0;
+                        this._unlockSelection();
+                        if (!this.preventFocus) {
+                            this._input.focus();
+                        }
+                        this.popup();
+                    };
+                    _PacemSuggestElement_selecting.set(this, void 0);
+                    this._balloonPopupHandler = (evt) => {
+                        Pacem.Utils.addClass(this._btnArrow, 'rotate-180');
+                    };
+                    this._balloonPopoutHandler = (evt) => {
+                        Pacem.Utils.removeClass(this._btnArrow, 'rotate-180');
+                    };
                     this._focusHandler = (evt) => {
-                        this.hint = (this._downOn = this._input).value;
+                        if (this.preventFocus) {
+                            // manage the balloon toggle manually (since focus won't be dispatched)
+                            evt.preventDefault();
+                            const balloon = this._balloon;
+                            if (!balloon.visible) {
+                                this.popup();
+                            }
+                            else {
+                                this.popout();
+                            }
+                        }
+                        const actualHint = (this._downOn = this._input).value;
+                        if (this.viewValue != actualHint) {
+                            this.hint = actualHint;
+                        }
+                        // now just lean on the balloon's trigger, it will popup eventually...
                     };
                     this._keyupHandler = (evt) => {
-                        if (evt.target !== this._downOn)
+                        if (evt.target !== this._downOn) {
                             Pacem.avoidHandler(evt);
-                        else //if (this._input.value !== this.viewValue)
-                         {
+                        }
+                        else if /* TODO: check this clause against TAB navigation */ (this._isTyping()) {
                             this.hint = this._input.value;
                             this.changeHandler(new SuggestionSelectEvent(null));
                         }
@@ -5231,35 +6312,53 @@ var Pacem;
                             case 9: /*tab*/
                             case 13: /* enter */
                                 if (this._balloon.visible === true && !Pacem.Utils.isNull(el = this._repeater.querySelector('ol > li'))) {
+                                    while (!Pacem.Utils.isNull(el) && el.dataset['pacemDisabled'] === 'true' && el.localName === 'li') {
+                                        el = el.nextElementSibling;
+                                    }
                                     Pacem.avoidHandler(evt);
-                                    this._focus(el);
+                                    if (!Pacem.Utils.isNull(el)) {
+                                        this._focus(el);
+                                    }
                                 }
                                 break;
                         }
                     };
                     this._selectHandler = (evt) => {
+                        const _this = this;
                         var fn = function (e) {
-                            const value = JSON.parse(e.currentTarget.dataset['pacemValue']), viewValue = JSON.parse(e.currentTarget.dataset['pacemViewValue']);
                             Pacem.avoidHandler(e);
-                            this.changeHandler(new SuggestionSelectEvent(value));
+                            const el = e.currentTarget, value = JSON.parse(el.dataset['pacemValue']), disabled = el.dataset['pacemDisabled'] === 'true';
+                            if (!disabled) {
+                                _this._lockSelection();
+                                _this.changeHandler(new SuggestionSelectEvent(value));
+                            }
                         };
                         if ((evt instanceof KeyboardEvent && (evt.keyCode === 9 /*tab*/
                             || evt.keyCode === 13 /*enter*/
                             || evt.keyCode === 32 /*space-bar*/))
-                            || evt.type === 'click') {
+                            || evt.type === 'mousedown') {
                             fn.apply(this, [evt]);
                         }
                         else if (evt instanceof KeyboardEvent) {
                             this._downOn = evt.target;
-                            var li = evt.target, target;
+                            var li = evt.target, target = li;
                             switch (evt.keyCode) {
                                 case 38 /*arrow up*/:
-                                    target = (li.previousElementSibling || this._input);
+                                    do {
+                                        target = target.previousElementSibling;
+                                    } while (!Pacem.Utils.isNull(target) && target.dataset['pacemDisabled'] === 'true');
+                                    target = target || this._input;
                                     Pacem.avoidHandler(evt);
                                     break;
                                 case 40 /*arrow down*/:
-                                    if (li.nextElementSibling && li.nextElementSibling.localName === 'li')
-                                        target = (li.nextElementSibling);
+                                    do {
+                                        target = (target.nextElementSibling);
+                                    } while (!Pacem.Utils.isNull(target) && target.localName === 'li' && target.dataset['pacemDisabled'] === 'true');
+                                    target = target || li;
+                                    Pacem.avoidHandler(evt);
+                                    break;
+                                case 27 /*esc*/:
+                                    this.popout();
                                     Pacem.avoidHandler(evt);
                                     break;
                             }
@@ -5267,6 +6366,7 @@ var Pacem;
                         }
                     };
                     this._afterSelectHandler = (evt) => {
+                        // keyup event
                         if (evt.keyCode === 9 /*tab*/
                             || evt.keyCode === 13 /*enter*/
                             || evt.keyCode === 32 /*space-bar*/) {
@@ -5281,7 +6381,7 @@ var Pacem;
                     if (!this._isTyping()
                         && (this.allowNew || !Pacem.Utils.isNullOrEmpty(this.datasource))) {
                         this.hint = '';
-                        this._input.value = this.getViewValue(this.value) || '';
+                        this._input.value = this.getViewValue(val) || '';
                     }
                 }
                 getViewValue(val) {
@@ -5291,101 +6391,212 @@ var Pacem;
                     }
                     return superValue;
                 }
-                _isTyping() {
-                    return Pacem.Utils.is(this._input, ':focus');
-                }
                 onChange(evt) {
-                    var deferred = Pacem.DeferPromise.defer();
-                    // change triggered elsewhere... (see _afterSelectHandler)
-                    if (evt.type === 'suggestionselect') {
-                        const val = evt.detail.selectedValue;
-                        this.value = val;
-                        if (val) {
-                            this._balloon.popout();
+                    return new Promise((resolve, reject) => {
+                        // change triggered elsewhere... (see _afterSelectHandler)
+                        if (evt.type === 'suggestionselect') {
+                            const val = evt.detail.selectedValue;
+                            this.value = val;
+                            if (val) {
+                                this.popout();
+                            }
+                            resolve(val);
+                            this._unlockSelection();
                         }
-                        deferred.resolve(val);
-                    }
-                    else
-                        // keep the current value
-                        deferred.resolve(this.value);
-                    return deferred.promise;
+                        else {
+                            // keep the current value
+                            resolve(this.value);
+                        }
+                    });
                 }
                 viewActivatedCallback() {
                     super.viewActivatedCallback();
+                    this._setDropdownMode();
+                    this._setupItemTemplate();
                     var balloon = this._createBalloon();
                     balloon.appendChild(this._repeater);
                     this._checkBalloon(balloon);
-                    document.body.appendChild(balloon);
+                    const shell = Pacem.CustomElementUtils.findAncestorShell(this);
+                    shell.appendChild(balloon);
                     this._balloon = balloon;
+                    this._input.addEventListener('mousedown', this._focusHandler, false);
                     this._input.addEventListener('keydown', this._keydownHandler, false);
                     this._input.addEventListener('keyup', this._keyupHandler, false);
                     this._input.addEventListener('focus', this._focusHandler, false);
+                    this._btnClear.addEventListener('mousedown', this._clearBtnHandler, false);
+                    this._btnArrow.addEventListener('mousedown', this._toggleBtnHandler, false);
+                    this._databind();
+                    this._syncButtons();
                 }
                 propertyChangedCallback(name, old, val, first) {
                     super.propertyChangedCallback(name, old, val, first);
-                    if (Pacem.Utils.isNull(this._balloon))
+                    if (Pacem.Utils.isNull(this._balloon)) {
                         return;
+                    }
+                    const typing = this._isTyping();
                     switch (name) {
-                        case 'datasource':
-                            if (!Pacem.Utils.isNullOrEmpty(val) && !this._isTyping()) {
-                                this._input.value = this.getViewValue(this.value);
+                        case 'adaptedDatasource':
+                            if (!Pacem.Utils.isNullOrEmpty(val)) {
+                                if (!typing) {
+                                    this._input.value = this.getViewValue(this.value);
+                                }
+                                else {
+                                    this.popup();
+                                }
+                            }
+                            else {
+                                this.popout();
                             }
                             break;
                         case 'hint':
-                            if (!this._isTyping()) {
+                            if (!typing) {
                                 this._input.value = val;
                             }
                             break;
                         case 'disabled':
+                        case 'value':
                         case 'readonly':
                             this._checkBalloon();
                             break;
+                        case 'itemtemplate':
+                            if (!first) {
+                                this._setupItemTemplate();
+                            }
+                            break;
+                        case 'allowTyping':
+                            if (!first) {
+                                this._setDropdownMode();
+                            }
+                            break;
+                    }
+                    if (['adaptedDatasource', 'hint', 'value'].indexOf(name) >= 0) {
+                        this._databind();
+                    }
+                    if (['allowTyping', 'value', 'hint'].indexOf(name) >= 0) {
+                        this._syncButtons();
                     }
                 }
                 disconnectedCallback() {
                     if (!Pacem.Utils.isNull(this._balloon)) {
+                        this._balloon.removeEventListener('popup', this._balloonPopupHandler, false);
+                        this._balloon.removeEventListener('popout', this._balloonPopoutHandler, false);
                         this._balloon.remove();
                     }
                     if (!Pacem.Utils.isNull(this._input)) {
+                        this._input.removeEventListener('mousedown', this._focusHandler, false);
                         this._input.removeEventListener('focus', this._focusHandler, false);
                         this._input.removeEventListener('keydown', this._keydownHandler, false);
                         this._input.removeEventListener('keyup', this._keyupHandler, false);
                     }
+                    if (!Pacem.Utils.isNull(this._btnClear)) {
+                        this._btnClear.removeEventListener('mousedown', this._clearBtnHandler, false);
+                    }
+                    if (!Pacem.Utils.isNull(this._btnArrow)) {
+                        this._btnArrow.addEventListener('mousedown', this._toggleBtnHandler, false);
+                    }
                     super.disconnectedCallback();
                 }
+                _databind() {
+                    if (!Pacem.Utils.isNull(this._repeater)) {
+                        this._repeater.datasource = this._filter(this.adaptedDatasource, this.hint, this.value);
+                    }
+                }
+                _syncButtons() {
+                    if (!Pacem.Utils.isNull(this._btnArrow)) {
+                        // hide="{{ !$pacem.isNullOrEmpty(:host.hint || :host.value) || :host.allowTyping !== false }}"
+                        this._btnArrow.hide = this.allowTyping !== false || !Pacem.Utils.isNullOrEmpty(this.hint || this.value);
+                    }
+                    if (!Pacem.Utils.isNull(this._btnClear)) {
+                        //  hide="{{ $pacem.isNullOrEmpty(:host.hint || :host.value) }}"
+                        this._btnClear.hide = Pacem.Utils.isNullOrEmpty(this.hint || this.value);
+                    }
+                }
+                _isTyping() {
+                    return !__classPrivateFieldGet(this, _PacemSuggestElement_selecting, "f") && Pacem.Utils.is(this._input, ':focus'); // && this.viewValue !== this._input.value;
+                }
+                _lockSelection(unlock = false) {
+                    __classPrivateFieldSet(this, _PacemSuggestElement_selecting, !unlock, "f");
+                    this._checkBalloon();
+                }
+                _unlockSelection() {
+                    this._lockSelection(true);
+                }
+                _setDropdownMode(allowTyping = this.allowTyping) {
+                    const dropdown = !(allowTyping !== null && allowTyping !== void 0 ? allowTyping : true);
+                    this._input.readOnly = dropdown;
+                }
+                _setupItemTemplate() {
+                    if (this.itemtemplate instanceof HTMLTemplateElement) {
+                        const frag = this.itemtemplate.cloneNode(true).content;
+                        const tmpl = document.createElement('template');
+                        const li = document.createElement('li');
+                        li.append(frag);
+                        tmpl.content.appendChild(li);
+                        this._tmplProxy.target = tmpl;
+                    }
+                    else {
+                        this._tmplProxy.target = this._defaultTemplate;
+                    }
+                }
                 _focus(el) {
-                    if (Pacem.Utils.isNull(el))
+                    if (Pacem.Utils.isNull(el) || this.preventFocus) {
                         return;
+                    }
                     el.focus();
                     el.dispatchEvent(new Event('focus', { bubbles: true }));
                 }
-                _filter(ds, hint) {
+                _filter(ds, hint, value = this.value) {
                     let datasource = ds || [];
+                    //if (!Utils.isNull(value)) {
+                    //    datasource = datasource.filter(i => i.value == value);
+                    //} else 
                     if (!Pacem.Utils.isNullOrEmpty(hint && hint.trim())) {
                         const lowerHints = hint.toLowerCase().split(' ');
                         let filtered = datasource.filter(i => {
                             for (let lowerHint of lowerHints) {
-                                if (i.viewValue.toLowerCase().indexOf(lowerHint) >= 0)
+                                if (i.viewValue.toLowerCase().indexOf(lowerHint) >= 0) {
                                     return true;
+                                }
+                                // check the whole 'data' object, just in case
+                                const filters = this.filterFields;
+                                if (!Pacem.Utils.isNullOrEmpty(filters)) {
+                                    const iData = i.data;
+                                    if (typeof iData === 'object' && !Pacem.Utils.isNullOrEmpty(iData)) {
+                                        for (let prop in iData) {
+                                            if (filters.indexOf(prop) === -1) {
+                                                continue;
+                                            }
+                                            const iPropValue = iData[prop];
+                                            if (Pacem.Utils.isNullOrEmpty(iPropValue)) {
+                                                continue;
+                                            }
+                                            if (iPropValue.toString().toLowerCase().indexOf(lowerHint) >= 0) {
+                                                return true;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             return false;
                         });
                         const concatenate = this.allowNew
+                            // only concatenate on plain strings...
                             && Pacem.Utils.isNullOrEmpty(this.valueProperty)
                             && Pacem.Utils.isNullOrEmpty(this.textProperty)
+                            // ...and no matches are available
                             && (Pacem.Utils.isNullOrEmpty(filtered) || Pacem.Utils.isNull(filtered.find(i => i.viewValue === hint)));
-                        datasource = concatenate ? [{ value: hint, viewValue: hint }].concat(filtered) : filtered;
+                        datasource = concatenate ? [{ value: hint, viewValue: hint, data: hint }].concat(filtered) : filtered;
                     }
-                    let retval = datasource.slice(0, this.maxSuggestions || 10);
+                    let retval = datasource;
+                    if (this.allowTyping !== false) {
+                        // max-suggestions enabled only when typing is allowed (default)
+                        retval = datasource.slice(0, this.maxSuggestions || 10);
+                    }
                     //
-                    if (this._isTyping())
-                        this._balloon.popup();
+                    if (this._isTyping()) {
+                        this.popup();
+                    }
                     this._balloon.style.opacity = Pacem.Utils.isNullOrEmpty(retval) ? '0' : '';
-                    //if (this._isTyping && retval.length > 0) {
-                    //    this._balloon.popup();
-                    //} else {
-                    //    this._balloon.popout();
-                    //}
                     this.log(Pacem.Logging.LogLevel.Log, `${retval.length} dropdown suggestion(s), given hint '${hint}' and ${(ds || []).length} datasource items`);
                     return retval;
                 }
@@ -5393,29 +6604,49 @@ var Pacem;
                     const li = evt.detail.dom.find(i => i instanceof HTMLLIElement);
                     const item = evt.detail.item;
                     const index = evt.detail.index;
-                    li.tabIndex = 0;
+                    const disabled = item.disabled === true;
+                    li.tabIndex = disabled ? -1 : 0;
                     li.dataset['pacemValue'] = JSON.stringify(item.value);
                     li.dataset['pacemViewValue'] = JSON.stringify(item.viewValue);
+                    li.dataset['pacemDisabled'] = disabled.toString();
                     li.addEventListener('keydown', this._selectHandler, false);
                     li.addEventListener('keyup', this._afterSelectHandler, false);
-                    li.addEventListener('click', this._selectHandler, false);
+                    li.addEventListener('mousedown', this._selectHandler, false);
                 }
                 _itemRemove(evt) {
                     const li = evt.detail.dom.find(i => i instanceof HTMLLIElement);
                     li.removeEventListener('keydown', this._selectHandler, false);
                     li.removeEventListener('keyup', this._afterSelectHandler, false);
-                    li.removeEventListener('click', this._selectHandler, false);
+                    li.removeEventListener('mousedown', this._selectHandler, false);
                 }
                 toggleReadonlyView(readonly) {
                     this.span.hidden = !readonly;
                     this._input.hidden = readonly;
+                    if (readonly) {
+                        this._btnClear.hide = this._btnArrow.hide = true;
+                    }
+                    else {
+                        this._syncButtons();
+                    }
                 }
                 /*
                 Balloon and repeater
                 */
+                popup() {
+                    var _a;
+                    if (!Pacem.Utils.isNullOrEmpty(this.adaptedDatasource)) {
+                        (_a = this._balloon) === null || _a === void 0 ? void 0 : _a.popup();
+                    }
+                }
+                popout() {
+                    var _a;
+                    (_a = this._balloon) === null || _a === void 0 ? void 0 : _a.popout();
+                }
                 _checkBalloon(balloon = this._balloon) {
-                    if (!Pacem.Utils.isNull(balloon))
-                        balloon.disabled = this.readonly || this.disabled; // || Pacem.Utils.isNullOrEmpty(this.adaptedDatasource);
+                    if (!Pacem.Utils.isNull(balloon)) {
+                        const hasValue = !Pacem.Utils.isNullOrEmpty(this.value) && !Pacem.Utils.isNullOrEmpty(this._input.value) && Pacem.Utils.isNullOrEmpty(this.hint);
+                        balloon.disabled = __classPrivateFieldGet(this, _PacemSuggestElement_selecting, "f") || hasValue || this.readonly || this.disabled || /* normalize to an actual boolean */ false; // || Pacem.Utils.isNullOrEmpty(this.adaptedDatasource);
+                    }
                 }
                 _createBalloon() {
                     /*<${ P }-balloon target="{{ ::_input }}" options="{ position: 'bottom', align: 'left', behavior: 'inert', hoverDelay: 0 }"
@@ -5425,16 +6656,19 @@ var Pacem;
                     balloon.options = {
                         trackPosition: true,
                         trigger: Components.UI.BalloonTrigger.Focus,
-                        position: Components.UI.BalloonPosition.Bottom,
+                        position: Components.UI.BalloonPosition.VerticalAuto,
                         size: Components.UI.BalloonSizing.Match,
                         align: Components.UI.BalloonAlignment.Start,
                         behavior: Components.UI.BalloonBehavior.Menu,
-                        hoverDelay: 0, hoverTimeout: 200
+                        hoverDelay: 0, hoverTimeout: 0
                     };
+                    balloon.addEventListener('popup', this._balloonPopupHandler, false);
+                    balloon.addEventListener('popout', this._balloonPopoutHandler, false);
                     balloon.target = this._input;
                     return balloon;
                 }
             };
+            _PacemSuggestElement_selecting = new WeakMap();
             __decorate([
                 Pacem.ViewChild('input[type=text]')
             ], PacemSuggestElement.prototype, "_input", void 0);
@@ -5445,28 +6679,58 @@ var Pacem;
                 Pacem.ViewChild(`span.${Pacem.PCSS}-readonly`)
             ], PacemSuggestElement.prototype, "span", void 0);
             __decorate([
+                Pacem.ViewChild(`template`)
+            ], PacemSuggestElement.prototype, "_defaultTemplate", void 0);
+            __decorate([
+                Pacem.ViewChild(Pacem.P + '-template-proxy')
+            ], PacemSuggestElement.prototype, "_tmplProxy", void 0);
+            __decorate([
+                Pacem.ViewChild(`${Pacem.P}-button[toggle]`)
+            ], PacemSuggestElement.prototype, "_btnArrow", void 0);
+            __decorate([
+                Pacem.ViewChild(`${Pacem.P}-button[clear]`)
+            ], PacemSuggestElement.prototype, "_btnClear", void 0);
+            __decorate([
                 Pacem.Watch({ converter: Pacem.PropertyConverters.String })
             ], PacemSuggestElement.prototype, "hint", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
             ], PacemSuggestElement.prototype, "maxSuggestions", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
+            ], PacemSuggestElement.prototype, "allowTyping", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
+            ], PacemSuggestElement.prototype, "preventFocus", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Element })
+            ], PacemSuggestElement.prototype, "itemtemplate", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.StringArray })
+            ], PacemSuggestElement.prototype, "filterFields", void 0);
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
             ], PacemSuggestElement.prototype, "allowNew", void 0);
             PacemSuggestElement = __decorate([
                 Pacem.CustomElement({
                     tagName: Pacem.P + '-suggest', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
-                    template: `<input type="text" class="${Pacem.PCSS}-input" />
+                    template: `<div class="${Pacem.PCSS}-relative"><input type="text" class="${Pacem.PCSS}-input" />
+<${Pacem.P}-button clear
+class="button-flat ${Pacem.PCSS}-anim anim-pop anim-sudden anim-quick pos-absolute absolute-right absolute-top display-block ${Pacem.PCSS}-margin margin-0" 
+    icon-glyph="highlight_off"></${Pacem.P}-button>
+<${Pacem.P}-button 
+class="button-flat icon-rotate ${Pacem.PCSS}-anim anim-pop anim-sudden anim-quick pos-absolute absolute-right absolute-top display-block ${Pacem.PCSS}-margin margin-0" 
+    icon-glyph="arrow_drop_down" toggle></${Pacem.P}-button>
+</div>
 <span class="${Pacem.PCSS}-readonly"><${Pacem.P}-text text="{{ :host.viewValue }}"></${Pacem.P}-text></span>
-<${Pacem.P}-repeater datasource="{{ :host._filter(:host.adaptedDatasource, :host.hint) }}"
-    on-${Components.RepeaterItemCreateEventName}=":host._itemCreate($event)"
-    on-${Components.RepeaterItemRemoveEventName}=":host._itemRemove($event)">
+<${Pacem.P}-repeater on-${Components.RepeaterItemCreateEventName}=":host._itemCreate($event)" on-${Components.RepeaterItemRemoveEventName}=":host._itemRemove($event)">
     <ol>
-        <template>
-            <li><${Pacem.P}-span content="{{ $pacem.highlight(^item.viewValue, ::_input.value) }}"></${Pacem.P}-span></li>
-        </template>
+        <${Pacem.P}-template-proxy></${Pacem.P}-template-proxy>
     </ol>
-</${Pacem.P}-repeater><${Pacem.P}-content></${Pacem.P}-content>`
+</${Pacem.P}-repeater><${Pacem.P}-content></${Pacem.P}-content>
+<template>
+    <li><${Pacem.P}-span content="{{ $pacem.highlight(^item.viewValue, ::_input.value) }}"></${Pacem.P}-span></li>
+</template>`
                 })
             ], PacemSuggestElement);
             Scaffolding.PacemSuggestElement = PacemSuggestElement;
@@ -5543,6 +6807,7 @@ var Pacem;
                 }
                 _tagAdd(v) {
                     this.changeHandler(new TagAddEvent(v));
+                    // after the - just in case - assignment => reset the suggest component
                 }
                 handleDatasourceMismatch() {
                     // do nothing!
@@ -5586,10 +6851,14 @@ var Pacem;
                                     && (this.allowDuplicates || Pacem.Utils.isNullOrEmpty(valadd && valadd.find(i => this.mapEntityToViewValue(i) == this.mapEntityToViewValue(value))))) {
                                     let newvalue = (valadd || []).concat([value]);
                                     resolve(this.value = newvalue);
+                                    this._justAddedIndex = this.value.length - 1;
+                                    setTimeout(() => {
+                                        this._suggest.focus();
+                                    }, 250);
+                                    // this will allow to accept the hint change...
+                                    this._suggest.blur();
                                     this._suggest.hint = '';
                                     this._suggest.reset();
-                                    this._justAddedIndex = this.value.length - 1;
-                                    setTimeout(() => this._suggest.focus(), 250);
                                 }
                                 break;
                             default:
@@ -5631,7 +6900,9 @@ var Pacem;
             </li>
         </template>
         <li class="tag-new">
-            <${Pacem.P}-suggest logger="{{ :host.logger }}" placeholder="{{ :host.placeholder }}" allow-new="{{ :host.allowNew }}" class="${Pacem.PCSS}-tags" on-change=":host._tagAdd($this.value)" hint="{{ :host.hint, twoway }}"></${Pacem.P}-suggest>
+            <${Pacem.P}-suggest logger="{{ :host.logger }}" placeholder="{{ :host.placeholder }}" allow-new="{{ :host.allowNew }}" class="${Pacem.PCSS}-tags" on-change=":host._tagAdd($this.value)" hint="{{ :host.hint, twoway }}">
+                <${Pacem.P}-content></${Pacem.P}-content>
+            </${Pacem.P}-suggest>
         </li>
     </ul>
 </${Pacem.P}-repeater>`
@@ -5809,8 +7080,14 @@ var Pacem;
                             }
                             break;
                         case 'disabled':
-                            form && form.validate(this.watch);
+                            this.triggerFormFieldValidation();
                             break;
+                    }
+                }
+                triggerFormFieldValidation() {
+                    const form = this.form, watch = this.watch;
+                    if (!Pacem.Utils.isNull(form) && !Pacem.Utils.isNullOrEmpty(watch)) {
+                        form.validate(watch);
                     }
                 }
                 validate(val) {
@@ -5827,10 +7104,10 @@ var Pacem;
                 Pacem.Watch({ converter: Pacem.PropertyConverters.String })
             ], PacemBaseValidatorElement.prototype, "errorMessage", void 0);
             __decorate([
-                Pacem.Watch({ reflectBack: true, converter: Pacem.PropertyConverters.String })
+                Pacem.Watch({ emit: false, reflectBack: true, converter: Pacem.PropertyConverters.String })
             ], PacemBaseValidatorElement.prototype, "watch", void 0);
             Scaffolding.PacemBaseValidatorElement = PacemBaseValidatorElement;
-            const BASIC_VALIDATOR_TEMPLATE = `<${Pacem.P}-span hide="{{ !:host.invalid  }}" text="{{ :host.errorMessage }}"></${Pacem.P}-span>`;
+            Scaffolding.BASIC_VALIDATOR_TEMPLATE = `<${Pacem.P}-span hide="{{ !:host.invalid  }}" text="{{ :host.errorMessage }}"></${Pacem.P}-span>`;
             // #region TEXTUAL
             function isValueEmpty(val) {
                 return Pacem.Utils.isNullOrEmpty(val);
@@ -5842,10 +7119,16 @@ var Pacem;
                 }
             };
             PacemRequiredValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-required-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-required-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemRequiredValidatorElement);
             Scaffolding.PacemRequiredValidatorElement = PacemRequiredValidatorElement;
             let PacemRegexValidatorElement = class PacemRegexValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first && name === 'pattern') {
+                        this.triggerFormFieldValidation();
+                    }
+                }
                 evaluate(val) {
                     let retval = true, pattern = this.pattern;
                     if (!isValueEmpty(val)) {
@@ -5855,13 +7138,20 @@ var Pacem;
                 }
             };
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemRegexValidatorElement.prototype, "pattern", void 0);
             PacemRegexValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-regex-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-regex-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemRegexValidatorElement);
             Scaffolding.PacemRegexValidatorElement = PacemRegexValidatorElement;
             let PacemLengthValidatorElement = class PacemLengthValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first &&
+                        (name === 'min' || name === 'max')) {
+                        this.triggerFormFieldValidation();
+                    }
+                }
                 evaluate(val) {
                     let retval = true;
                     if (!isValueEmpty(val)) {
@@ -5874,18 +7164,25 @@ var Pacem;
                 }
             };
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
             ], PacemLengthValidatorElement.prototype, "min", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
             ], PacemLengthValidatorElement.prototype, "max", void 0);
             PacemLengthValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-length-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-length-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemLengthValidatorElement);
             Scaffolding.PacemLengthValidatorElement = PacemLengthValidatorElement;
             // #endregion
             // #region NUMERIC/ORDINAL
             let PacemRangeValidatorElement = class PacemRangeValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first &&
+                        (name === 'min' || name === 'max')) {
+                        this.triggerFormFieldValidation();
+                    }
+                }
                 evaluate(val) {
                     let retval = true;
                     if (!isValueEmpty(val)) {
@@ -5907,18 +7204,25 @@ var Pacem;
                 }
             };
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
             ], PacemRangeValidatorElement.prototype, "min", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.Number })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
             ], PacemRangeValidatorElement.prototype, "max", void 0);
             PacemRangeValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-range-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-range-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemRangeValidatorElement);
             Scaffolding.PacemRangeValidatorElement = PacemRangeValidatorElement;
             // #endregion
             // #region COMPLEX
             let PacemCompareValidatorElement = class PacemCompareValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first &&
+                        (name === 'operator' || name === 'to')) {
+                        this.triggerFormFieldValidation();
+                    }
+                }
                 evaluate(val) {
                     let retval = true, other = this.to;
                     if (!isValueEmpty(val) && !isValueEmpty(other)) {
@@ -5947,17 +7251,24 @@ var Pacem;
                 }
             };
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemCompareValidatorElement.prototype, "operator", void 0);
             __decorate([
-                Pacem.Watch({ reflectBack: true })
+                Pacem.Watch({ emit: false, reflectBack: true })
             ], PacemCompareValidatorElement.prototype, "to", void 0);
             PacemCompareValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-compare-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-compare-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemCompareValidatorElement);
             Scaffolding.PacemCompareValidatorElement = PacemCompareValidatorElement;
             // #endregion
             let PacemBinaryValidatorElement = class PacemBinaryValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first &&
+                        (name === 'pattern' || name === 'maxSize')) {
+                        this.triggerFormFieldValidation();
+                    }
+                }
                 evaluate(val) {
                     let retval = true, pattern = this.pattern, maxSize = this.maxSize;
                     if (!isValueEmpty(val)) {
@@ -5975,13 +7286,13 @@ var Pacem;
                 }
             };
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemBinaryValidatorElement.prototype, "pattern", void 0);
             __decorate([
-                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
             ], PacemBinaryValidatorElement.prototype, "maxSize", void 0);
             PacemBinaryValidatorElement = __decorate([
-                Pacem.CustomElement({ tagName: Pacem.P + '-binary-validator', template: BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+                Pacem.CustomElement({ tagName: Pacem.P + '-binary-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
             ], PacemBinaryValidatorElement);
             Scaffolding.PacemBinaryValidatorElement = PacemBinaryValidatorElement;
             let PacemAsyncValidatorElement = class PacemAsyncValidatorElement extends PacemBaseValidatorElement {
@@ -6016,7 +7327,7 @@ var Pacem;
                                         let res = Pacem.Utils.getApiResult(json);
                                         deferred.resolve(res || false);
                                     }
-                                    catch (_a) {
+                                    catch (_) {
                                         deferred.resolve(false);
                                     }
                                     break;
@@ -6042,6 +7353,20 @@ var Pacem;
                         });
                     }
                 }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first) {
+                        switch (name) {
+                            case 'parameters':
+                            case 'url':
+                            case 'method':
+                            case 'fetchCredentials':
+                            case 'fetchHeaders':
+                                this.triggerFormFieldValidation();
+                                break;
+                        }
+                    }
+                }
             };
             __decorate([
                 Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Json })
@@ -6064,10 +7389,916 @@ var Pacem;
             PacemAsyncValidatorElement = __decorate([
                 Pacem.CustomElement({
                     tagName: Pacem.P + '-async-validator',
-                    template: BASIC_VALIDATOR_TEMPLATE + `<${Pacem.P}-fetch autofetch="false" credentials="{{ :host.fetchCredentials }}" headers="{{ :host.fetchHeaders }}"></${Pacem.P}-fetch>`, shadow: Pacem.Defaults.USE_SHADOW_ROOT
+                    template: Scaffolding.BASIC_VALIDATOR_TEMPLATE + `<${Pacem.P}-fetch autofetch="false" throttle="true" credentials="{{ :host.fetchCredentials }}" headers="{{ :host.fetchHeaders }}"></${Pacem.P}-fetch>`, shadow: Pacem.Defaults.USE_SHADOW_ROOT
                 })
             ], PacemAsyncValidatorElement);
             Scaffolding.PacemAsyncValidatorElement = PacemAsyncValidatorElement;
+            let PacemCustomValidatorElement = class PacemCustomValidatorElement extends PacemBaseValidatorElement {
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first &&
+                        (name === 'isValid')) {
+                        this.triggerFormFieldValidation();
+                    }
+                }
+                evaluate(val) {
+                    let retval = true;
+                    if (!isValueEmpty(val)) {
+                        retval = !!this.isValid;
+                    }
+                    return Pacem.Utils.fromResult(retval);
+                }
+            };
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
+            ], PacemCustomValidatorElement.prototype, "isValid", void 0);
+            PacemCustomValidatorElement = __decorate([
+                Pacem.CustomElement({ tagName: Pacem.P + '-custom-validator', template: Scaffolding.BASIC_VALIDATOR_TEMPLATE, shadow: Pacem.Defaults.USE_SHADOW_ROOT })
+            ], PacemCustomValidatorElement);
+            Scaffolding.PacemCustomValidatorElement = PacemCustomValidatorElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            class PacemContenteditableButtonCommandElement extends Scaffolding.PacemContenteditableCommandElement {
+                cleanUp(_) {
+                    // do nothing
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (name === 'range') {
+                        this.active = !Pacem.Utils.isNull(val);
+                    }
+                }
+                getTooltip(altText = this.altText, shortcut = this.keyboardShortcut) {
+                    const hint = altText;
+                    if (Pacem.Utils.isNullOrEmpty(shortcut)) {
+                        return hint;
+                    }
+                    return `${hint} (${shortcut})`;
+                }
+            }
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableButtonCommandElement.prototype, "icon", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableButtonCommandElement.prototype, "keyboardShortcut", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableButtonCommandElement.prototype, "altText", void 0);
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
+            ], PacemContenteditableButtonCommandElement.prototype, "active", void 0);
+            Scaffolding.PacemContenteditableButtonCommandElement = PacemContenteditableButtonCommandElement;
+            Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE = `<${Pacem.P}-button disabled="{{ !:host.active }}" css-class="{{ {'text-primary': :host.isRelevant(:host.range)} }}" tooltip="{{ :host.getTooltip(:host.altText, :host.keyboardShortcut) }}" class="button" on-click=":host.execCommand()"><${Pacem.P}-icon class="text-rootsize" icon="{{ :host.icon }}"></${Pacem.P}-icon></${Pacem.P}-button>
+                   <${Pacem.P}-shortcut disabled="{{ !:host.active }}" target="{{ :host.contentElement }}" combination="{{ :host.keyboardShortcut }}" on-execute=":host.execCommand()"></${Pacem.P}-shortcut>`;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="types.ts" />
+/// <reference path="utils.ts" />
+/// <reference path="../contenteditable.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            function getAlignIcon(align) {
+                return 'format_align_' + align;
+            }
+            let PacemContenteditableAlignCommandElement = class PacemContenteditableAlignCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                isRelevant(range) {
+                    const els = Scaffolding.ContenteditableUtils.findSurroundingSiblingBlockElements(range);
+                    if (Pacem.Utils.isNullOrEmpty(els)) {
+                        return false;
+                    }
+                    const el = els[0], textAlign = getComputedStyle(el).textAlign;
+                    return textAlign == this.align;
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (name === 'align') {
+                        if (Pacem.Utils.isNullOrEmpty(this.icon) || this.icon === getAlignIcon(old)) {
+                            this.icon = getAlignIcon(val);
+                        }
+                        if (Pacem.Utils.isNullOrEmpty(this.altText) || this.altText === old) {
+                            this.altText = val;
+                        }
+                    }
+                }
+                exec() {
+                    const elements = Scaffolding.ContenteditableUtils.findSurroundingSiblingBlockElements(this.range);
+                    let targetAlign;
+                    for (let el of elements) {
+                        if (Scaffolding.ContenteditableUtils.isBlockElement(el) && el instanceof HTMLElement) {
+                            // normalize alignment: pick one element (the 1st one) to rule them all
+                            if (Pacem.Utils.isNull(targetAlign)) {
+                                targetAlign = Pacem.Utils.hasClass(el, 'text-' + this.align) ? '' : this.align;
+                            }
+                            el.style.textAlign = '';
+                            Pacem.Utils.removeClass(el, 'text-left text-right text-center text-justify');
+                            if (!Pacem.Utils.isEmpty(targetAlign)) {
+                                Pacem.Utils.addClass(el, 'text-' + targetAlign);
+                            }
+                        }
+                    }
+                    return Promise.resolve();
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableAlignCommandElement.prototype, "align", void 0);
+            PacemContenteditableAlignCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-aligncommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE
+                })
+            ], PacemContenteditableAlignCommandElement);
+            Scaffolding.PacemContenteditableAlignCommandElement = PacemContenteditableAlignCommandElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="utils.ts" />
+/// <reference path="../contenteditable.ts" />
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            let KnownExecCommand;
+            (function (KnownExecCommand) {
+                KnownExecCommand["Bold"] = "bold";
+                KnownExecCommand["Italic"] = "italic";
+                KnownExecCommand["Underline"] = "underline";
+                KnownExecCommand["StrikeThrough"] = "strikeThrough";
+                KnownExecCommand["OrderedList"] = "insertOrderedList";
+                KnownExecCommand["UnorderedList"] = "insertUnorderedList";
+                KnownExecCommand["JustifyLeft"] = "justifyLeft";
+                KnownExecCommand["JustifyCenter"] = "justifyCenter";
+                KnownExecCommand["JustifyRight"] = "justifyRight";
+                KnownExecCommand["JustifyFull"] = "justifyFull";
+                //Copy = 'copy',
+                //Cut = 'cut',
+                //Paste = 'paste'
+                //Undo = 'undo',
+                //Redo = 'redo',
+            })(KnownExecCommand = Scaffolding.KnownExecCommand || (Scaffolding.KnownExecCommand = {}));
+            ;
+            /**
+             * Returns relevant material icon ligatures
+             * @param cmd A known command
+             */
+            function getKnownCommandIcon(cmd) {
+                const lower_cmd = cmd === null || cmd === void 0 ? void 0 : cmd.toLowerCase();
+                switch (lower_cmd) {
+                    case "bold":
+                    case "italic":
+                        return 'format_' + lower_cmd;
+                    case 'underline':
+                        return 'format_underlined';
+                    case 'strikethrough':
+                        return 'strikethrough_s';
+                    case 'insertorderedlist':
+                        return 'format_list_numbered';
+                    case 'insertunorderedlist':
+                        return 'format_list_bulleted';
+                    case 'justifyleft':
+                    case 'justifyright':
+                    case 'justifycenter':
+                        return 'format_align_' + lower_cmd.substr(7 /* 'justify' */);
+                    case 'justifyfull':
+                        return 'format_align_justify';
+                    default:
+                        return 'help_outline';
+                }
+            }
+            function getKnownCommandFilters(cmd, argument) {
+                const lower_cmd = cmd === null || cmd === void 0 ? void 0 : cmd.toLowerCase();
+                switch (lower_cmd) {
+                    case "bold":
+                        return ['b', 'strong'];
+                    case "italic":
+                        return ['i', 'em'];
+                    case 'underline':
+                        return ['u'];
+                    case 'strikethrough':
+                        return ['strike', 's', 'del'];
+                    case 'insertorderedlist':
+                        return ['ol'];
+                    case 'insertunorderedlist':
+                        return ['ul'];
+                    case 'justifyleft':
+                        return [{ style: { name: 'text-align', value: 'left' } }];
+                    case 'justifyright':
+                        return [{ style: { name: 'text-align', value: 'right' } }];
+                    case 'justifycenter':
+                        return [{ style: { name: 'text-align', value: 'center' } }];
+                    case 'justifyfull':
+                        return [{ style: { name: 'text-align', value: 'justify' } }];
+                    case 'formatblock':
+                        return [argument];
+                    default:
+                        return ['none'];
+                }
+            }
+            let PacemContenteditableExecCommandElement = class PacemContenteditableExecCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                _matchRelevance(range, arg) {
+                    const found = (typeof arg === 'object') ?
+                        Scaffolding.ContenteditableUtils.findSurroundingNode(range, node => node instanceof HTMLElement
+                            && (Pacem.Utils.isNullOrEmpty(arg.tagName) || node.tagName === arg.tagName.toUpperCase())
+                            && node.style[arg.style.name] === arg.style.value)
+                        : Scaffolding.ContenteditableUtils.findSurroundingNode(range, arg);
+                    return !Pacem.Utils.isNull(found);
+                }
+                isRelevant(range) {
+                    const filters = getKnownCommandFilters(this.command, this.argument);
+                    for (let f of filters) {
+                        if (this._matchRelevance(range, f)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (name === 'command') {
+                        if (Pacem.Utils.isNullOrEmpty(this.icon) || this.icon === getKnownCommandIcon(old)) {
+                            this.icon = getKnownCommandIcon(val);
+                        }
+                        if (Pacem.Utils.isNullOrEmpty(this.altText) || this.altText === old) {
+                            this.altText = val;
+                        }
+                    }
+                }
+                exec() {
+                    return new Promise((resolve, _) => {
+                        // check if selection is around an 'inert' ([contenteditable=false]) element
+                        const r = this.range, cmdfilter = getKnownCommandFilters(this.command, this.argument)[0];
+                        if (!Pacem.Utils.isNull(r)) {
+                            // #region wrap/unwrap (manages contenteditable=false 'islands')
+                            const island = Scaffolding.ContenteditableUtils.testInertElementWrapping(r);
+                            if (island.result
+                                && typeof cmdfilter === 'string' && ['b', 'i', 'strike', 'u'].indexOf(cmdfilter) >= 0) {
+                                // wrap or remove?
+                                const wrapper = Scaffolding.ContenteditableUtils.findSurroundingNode(r, cmdfilter);
+                                if (!Pacem.Utils.isNull(wrapper) && wrapper.childNodes.length === 1) {
+                                    // remove
+                                    const newChild = wrapper.childNodes.item(0), select = island.element;
+                                    wrapper.parentElement.replaceChild(newChild, wrapper);
+                                    Scaffolding.ContenteditableUtils.select(select);
+                                }
+                                else {
+                                    // wrap
+                                    const n = document.createElement(cmdfilter), select = island.element;
+                                    const frag = r.extractContents();
+                                    r.insertNode(n);
+                                    n.append(frag);
+                                    Scaffolding.ContenteditableUtils.select(select);
+                                }
+                            }
+                            // #endregion
+                            else {
+                                document.execCommand(this.command, false, this.argument);
+                            }
+                        }
+                        resolve();
+                    });
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableExecCommandElement.prototype, "command", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableExecCommandElement.prototype, "argument", void 0);
+            PacemContenteditableExecCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-execcommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE
+                })
+            ], PacemContenteditableExecCommandElement);
+            Scaffolding.PacemContenteditableExecCommandElement = PacemContenteditableExecCommandElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="types.ts" />
+/// <reference path="utils.ts" />
+/// <reference path="../contenteditable.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            let PacemContenteditableHistoryCommandElement = class PacemContenteditableHistoryCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                exec() {
+                    return new Promise((resolve, _) => {
+                        var _a;
+                        const history = (_a = this.container) === null || _a === void 0 ? void 0 : _a.history;
+                        if (!Pacem.Utils.isNull(history)) {
+                            switch (this.command) {
+                                case 'redo':
+                                    if (history.canRedo) {
+                                        history.redo();
+                                        resolve();
+                                    }
+                                    break;
+                                default:
+                                    if (history.canUndo) {
+                                        history.undo();
+                                        resolve();
+                                    }
+                                    break;
+                            }
+                            this.contentElement.innerHTML = history.current;
+                        }
+                    });
+                }
+                isRelevant(_) {
+                    return false;
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'command':
+                            this.icon = this.icon || val;
+                            this.altText = val;
+                            this.keyboardShortcut = this.keyboardShortcut || ('Ctrl+' + (val === 'redo' ? 'Y' : 'Z'));
+                            break;
+                    }
+                }
+                containerPropertyChangedCallback(name, old, val, first) {
+                    super.containerPropertyChangedCallback(name, old, val, first);
+                    const c = this.container, h = c.history;
+                    if (name === 'range' || name === 'history') {
+                        // override 'active' state setting
+                        this.active = !Pacem.Utils.isNull(c.range) &&
+                            ((this.command === 'redo' && (h === null || h === void 0 ? void 0 : h.canRedo)) || (this.command !== 'redo' && (h === null || h === void 0 ? void 0 : h.canUndo)));
+                    }
+                }
+            };
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String, reflectBack: true })
+            ], PacemContenteditableHistoryCommandElement.prototype, "command", void 0);
+            PacemContenteditableHistoryCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-historycommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE
+                })
+            ], PacemContenteditableHistoryCommandElement);
+            Scaffolding.PacemContenteditableHistoryCommandElement = PacemContenteditableHistoryCommandElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../contenteditable.ts" />
+/// <reference path="utils.ts" />
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            //@CustomElement({ tagName: P + '-contenteditable-selectable' })
+            //export class PacemContenteditableSelectableBehaviorElement extends Pacem.Behaviors.PacemBehavior {
+            var _PacemContenteditableImageCommandElement_observer;
+            //    protected decorate(element: Element) {
+            //        if (element instanceof HTMLElement || element instanceof SVGElement) {
+            //            Utils.addClass(element, PCSS + '-contenteditable-selectable');
+            //        }
+            //    }
+            //    protected undecorate(element: Element) {
+            //        if (element instanceof HTMLElement || element instanceof SVGElement) {
+            //            Utils.removeClass(element, PCSS + '-contenteditable-selectable');
+            //        }
+            //    }
+            //}
+            function insertPicture(range, blob) {
+                return new Promise((resolve, reject) => {
+                    Pacem.Utils.blobToDataURL(blob)
+                        .then(Pacem.Utils.loadImage)
+                        .then(img => {
+                        const pic = document.createElement('picture');
+                        pic.setAttribute('contenteditable', 'false');
+                        img.tabIndex = 0;
+                        pic.appendChild(img);
+                        range.deleteContents();
+                        range.insertNode(pic);
+                        resolve(pic);
+                    });
+                });
+            }
+            let PacemContenteditableImageCommandElement = class PacemContenteditableImageCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                constructor() {
+                    super(...arguments);
+                    _PacemContenteditableImageCommandElement_observer.set(this, void 0);
+                    this._setBehaviorHandler = (evt) => {
+                        const img = evt.target, pic = img.parentElement;
+                        // this._rescale.register(pic);
+                        this.range = Scaffolding.ContenteditableUtils.select(pic);
+                    };
+                    this._disposeBehaviorHandler = (_) => {
+                    };
+                    // #endregion
+                }
+                pasteCallback(f) {
+                    if (f.type.startsWith('image')) {
+                        return insertPicture(this.range, f);
+                    }
+                    else {
+                        return Promise.reject();
+                    }
+                }
+                cleanUp(content) {
+                    content.querySelectorAll('picture[contenteditable=false]').forEach(pic => {
+                        const childCount = pic.childNodes.length;
+                        for (let j = childCount - 1; j > 0; j--) {
+                            // remove leftover rescale divs
+                            pic.childNodes.item(j).remove();
+                        }
+                    });
+                    // legacy leftovers
+                    content.querySelectorAll('div.' + Pacem.PCSS + '-rescale').forEach(i => i.remove());
+                }
+                isRelevant(range) {
+                    return false;
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    if (Pacem.Utils.isNullOrEmpty(this.altText)) {
+                        this.altText = 'insert image';
+                    }
+                    if (Pacem.Utils.isNullOrEmpty(this.icon)) {
+                        this.icon = 'insert_photo';
+                    }
+                    if (Pacem.Utils.isNullOrEmpty(this.keyboardShortcut)) {
+                        this.keyboardShortcut = 'Ctrl+Shift+I';
+                    }
+                    this._rescale.addEventListener('rescale', this._rescaleImg, false);
+                }
+                disconnectedCallback() {
+                    if (!Pacem.Utils.isNull(this._rescale)) {
+                        this._rescale.removeEventListener('rescale', this._rescaleImg, false);
+                        this._disposeContainer();
+                    }
+                    super.disconnectedCallback();
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    switch (name) {
+                        case 'disabled':
+                            if (!Pacem.Utils.isNull(this._rescale)) {
+                                this._rescale.disabled = val;
+                            }
+                            break;
+                        case 'contentElement':
+                            if (old) {
+                                this._disposeContainer(old);
+                            }
+                            if (val) {
+                                this._initContainer(val);
+                            }
+                            break;
+                        case 'range':
+                            this._rangeChangeCallback(old, val);
+                            break;
+                    }
+                }
+                exec() {
+                    return new Promise((resolve, reject) => {
+                        const file = this._file, range = this.range;
+                        file.onchange = (evt) => {
+                            const f = file.files[0];
+                            if (Pacem.Utils.isNull(f)) {
+                                resolve();
+                            }
+                            else {
+                                insertPicture(range, f)
+                                    .then(pic => {
+                                    file.value = '';
+                                    resolve();
+                                });
+                            }
+                        };
+                        file.click();
+                    });
+                }
+                // #region private
+                _rescaleImg(evt) {
+                    evt.preventDefault();
+                    const pic = evt.detail.element, rect = evt.detail.targetRect, img = pic.firstElementChild;
+                    img.style.width = rect.width + 'px';
+                    img.style.height = rect.height + 'px';
+                }
+                _rangeChangeCallback(old, val) {
+                    if (!Pacem.Utils.isNull(old)
+                        && !old.collapsed
+                        && old.commonAncestorContainer instanceof Element
+                        && old.commonAncestorContainer === old.startContainer
+                        && old.commonAncestorContainer === old.endContainer
+                        && old.startOffset === (old.endOffset - 1)) {
+                        const el = old.commonAncestorContainer.childNodes.item(old.startOffset);
+                        if (el instanceof HTMLPictureElement) {
+                            this._rescale.unregister(el);
+                        }
+                    }
+                    if (!Pacem.Utils.isNull(val)
+                        && !val.collapsed
+                        && val.commonAncestorContainer instanceof Element
+                        && val.commonAncestorContainer === val.startContainer
+                        && val.commonAncestorContainer === val.endContainer
+                        && val.startOffset === (val.endOffset - 1)) {
+                        const el = val.commonAncestorContainer.childNodes.item(val.startOffset);
+                        if (el instanceof HTMLPictureElement) {
+                            this._rescale.register(el);
+                        }
+                    }
+                }
+                _enhancePictureElement(pic) {
+                    if (pic.firstElementChild) {
+                        pic.firstElementChild.addEventListener('focus', this._setBehaviorHandler, false);
+                        pic.firstElementChild.addEventListener('blur', this._disposeBehaviorHandler, false);
+                    }
+                }
+                _downgradePictureElement(pic) {
+                    if (pic.firstElementChild) {
+                        // this._rescale.unregister(pic);
+                        pic.firstElementChild.removeEventListener('focus', this._setBehaviorHandler, false);
+                        pic.firstElementChild.removeEventListener('blur', this._disposeBehaviorHandler, false);
+                    }
+                }
+                _initContainer(contentElement = this.contentElement) {
+                    __classPrivateFieldSet(this, _PacemContenteditableImageCommandElement_observer, new Scaffolding.ContenteditableDOMObserver(contentElement, (pic, removed) => {
+                        if (pic instanceof HTMLPictureElement) {
+                            if (removed) {
+                                this._downgradePictureElement(pic);
+                            }
+                            else {
+                                this._enhancePictureElement(pic);
+                            }
+                        }
+                    }, 'picture'), "f");
+                }
+                _disposeContainer(_ = this.contentElement) {
+                    const observer = __classPrivateFieldGet(this, _PacemContenteditableImageCommandElement_observer, "f");
+                    if (!Pacem.Utils.isNull(observer)) {
+                        observer.dispose();
+                    }
+                }
+            };
+            _PacemContenteditableImageCommandElement_observer = new WeakMap();
+            __decorate([
+                Pacem.ViewChild('input[type=file]')
+            ], PacemContenteditableImageCommandElement.prototype, "_file", void 0);
+            __decorate([
+                Pacem.ViewChild(Pacem.P + "-rescale")
+            ], PacemContenteditableImageCommandElement.prototype, "_rescale", void 0);
+            PacemContenteditableImageCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-imagecommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<input type="file" accept="image/png, image/gif, image/jpeg, image/bmp, image/x-icon" class="${Pacem.PCSS}-trasparent ${Pacem.PCSS}-inert" pacem hidden>` +
+                        Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE + `<${Pacem.P}-rescale keep-proportions="true"></${Pacem.P}-rescale>`
+                })
+            ], PacemContenteditableImageCommandElement);
+            Scaffolding.PacemContenteditableImageCommandElement = PacemContenteditableImageCommandElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../contenteditable.ts" />
+/// <reference path="utils.ts" />
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            let PacemContenteditableLinkCommandElement = class PacemContenteditableLinkCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                isRelevant(range) {
+                    return !Pacem.Utils.isNull(Scaffolding.ContenteditableUtils.findSurroundingNode(range, HTMLAnchorElement));
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    if (Pacem.Utils.isNullOrEmpty(this.altText)) {
+                        this.altText = 'insert link';
+                    }
+                    if (Pacem.Utils.isNullOrEmpty(this.icon)) {
+                        this.icon = 'insert_link';
+                    }
+                    if (Pacem.Utils.isNullOrEmpty(this.keyboardShortcut)) {
+                        this.keyboardShortcut = 'Ctrl+H';
+                    }
+                }
+                exec(arg, target = this.target) {
+                    return new Promise((resolve, reject) => {
+                        var selection = this.range;
+                        var anchorNode = Scaffolding.ContenteditableUtils.findSurroundingNode(selection, HTMLAnchorElement);
+                        //console.log('selection: ' + selection);
+                        var current = "http://";
+                        var regex = /<a.*href=\"([^\"]*)/;
+                        if (anchorNode && regex.test(anchorNode.outerHTML)) {
+                            current = regex.exec(anchorNode.outerHTML)[1];
+                        }
+                        //console.log('link: ' + current);
+                        if (arg === 'current') {
+                            return current == 'http://' ? '' : current;
+                        }
+                        var link = arg || (arg === void 0 && window.prompt('link (empty to unlink):', current));
+                        if (!link) {
+                            document.execCommand('unlink');
+                        }
+                        else {
+                            document.execCommand('createLink', false, link);
+                            anchorNode = Scaffolding.ContenteditableUtils.findSurroundingNode(selection, HTMLAnchorElement);
+                            if (anchorNode) {
+                                anchorNode.setAttribute('target', target || '_blank');
+                            }
+                        }
+                        resolve();
+                    });
+                }
+            };
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableLinkCommandElement.prototype, "target", void 0);
+            PacemContenteditableLinkCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-linkcommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE
+                })
+            ], PacemContenteditableLinkCommandElement);
+            Scaffolding.PacemContenteditableLinkCommandElement = PacemContenteditableLinkCommandElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="../contenteditable.ts" />
+/// <reference path="utils.ts" />
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            var _PacemContenteditablePlaceholderElement_relevancy, _PacemContenteditablePlaceholderElement_normalizedDatasource, _PacemContenteditablePlaceholderElement_observer;
+            function insertPlaceholder(range, placeholder) {
+                const ins = document.createElement('ins');
+                ins.textContent = placeholder;
+                ins.setAttribute('contenteditable', 'false');
+                // not necessary:
+                // ins.style.display = 'inline-block';
+                ins.tabIndex = 0;
+                range.deleteContents();
+                range.insertNode(ins);
+                return ins;
+            }
+            function isPlaceholder(node) {
+                return node instanceof HTMLModElement && node.tagName === 'INS';
+            }
+            function isRelevant(range) {
+                const wraps = Scaffolding.ContenteditableUtils.testInertElementWrapping(range);
+                if (wraps.result && isPlaceholder(wraps.element)) {
+                    const element = wraps.element, placeholder = element.textContent;
+                    return { result: true, element, placeholder };
+                }
+                return { result: false };
+            }
+            let PacemContenteditablePlaceholderElement = class PacemContenteditablePlaceholderElement extends Scaffolding.PacemContenteditableCommandElement {
+                constructor() {
+                    super(...arguments);
+                    _PacemContenteditablePlaceholderElement_relevancy.set(this, void 0);
+                    _PacemContenteditablePlaceholderElement_normalizedDatasource.set(this, void 0);
+                    // #region mutation observer
+                    _PacemContenteditablePlaceholderElement_observer.set(this, void 0);
+                    this._focusHandler = (evt) => {
+                        const ins = evt.target;
+                        this.range = Scaffolding.ContenteditableUtils.select(ins);
+                    };
+                    // #endregion
+                }
+                cleanUp(content) {
+                    content.querySelectorAll('ins[contenteditable=false]').forEach(ins => {
+                        Pacem.Utils.removeClass(ins, 'placeholder-selected');
+                    });
+                }
+                exec(ph) {
+                    const el = insertPlaceholder(this.range, ph);
+                    const range = Scaffolding.ContenteditableUtils.select(el);
+                    range.collapse(false);
+                    return Promise.resolve(el);
+                }
+                isRelevant(_) {
+                    var _a, _b;
+                    return (_b = (_a = __classPrivateFieldGet(this, _PacemContenteditablePlaceholderElement_relevancy, "f")) === null || _a === void 0 ? void 0 : _a.result) !== null && _b !== void 0 ? _b : false;
+                }
+                viewActivatedCallback() {
+                    super.viewActivatedCallback();
+                    this._fillDropdown();
+                    this._initContainer();
+                }
+                propertyChangedCallback(name, old, val, first) {
+                    super.propertyChangedCallback(name, old, val, first);
+                    if (!first) {
+                        switch (name) {
+                            case 'datasource':
+                                this._fillDropdown();
+                                break;
+                            case 'contentElement':
+                                if (old) {
+                                    this._disposeContainer(old);
+                                }
+                                if (val) {
+                                    this._initContainer(val);
+                                }
+                                break;
+                            case 'range':
+                                this._changeRelevancy();
+                                break;
+                        }
+                    }
+                }
+                disconnectedCallback() {
+                    this._disposeContainer();
+                    super.disconnectedCallback();
+                }
+                _changeRelevancy(range = this.range) {
+                    const old = __classPrivateFieldGet(this, _PacemContenteditablePlaceholderElement_relevancy, "f");
+                    if (!Pacem.Utils.isNull(old === null || old === void 0 ? void 0 : old.element)) {
+                        Pacem.Utils.removeClass(old.element, 'placeholder-selected');
+                    }
+                    const val = __classPrivateFieldSet(this, _PacemContenteditablePlaceholderElement_relevancy, isRelevant(range), "f");
+                    if (!Pacem.Utils.isNull(val === null || val === void 0 ? void 0 : val.element)) {
+                        Pacem.Utils.addClass(val.element, 'placeholder-selected');
+                    }
+                    if (val.result) {
+                        this._dropdown.value = val.placeholder;
+                    }
+                    else {
+                        this._dropdown.popout();
+                        this._dropdown.value = void 0;
+                    }
+                }
+                _fillDropdown(datasource = this.datasource || []) {
+                    const ds = __classPrivateFieldSet(this, _PacemContenteditablePlaceholderElement_normalizedDatasource, datasource.map(i => { return typeof i === 'string' ? { placeholder: i, definition: i } : i; }), "f");
+                    const dd = this._dropdown;
+                    dd.textProperty =
+                        dd.valueProperty = 'placeholder';
+                    dd.datasource = ds;
+                }
+                _initContainer(contentElement = this.contentElement) {
+                    __classPrivateFieldSet(this, _PacemContenteditablePlaceholderElement_observer, new Scaffolding.ContenteditableDOMObserver(contentElement, (item, removed) => {
+                        if (isPlaceholder(item)) {
+                            if (removed) {
+                                this._downgradePlaceholderElement(item);
+                            }
+                            else {
+                                this._enhancePlaceholderElement(item);
+                            }
+                        }
+                    }, 'ins[contenteditable=false]'), "f");
+                }
+                _disposeContainer(_ = this.contentElement) {
+                    const observer = __classPrivateFieldGet(this, _PacemContenteditablePlaceholderElement_observer, "f");
+                    if (!Pacem.Utils.isNull(observer)) {
+                        observer.dispose();
+                    }
+                }
+                _enhancePlaceholderElement(ins) {
+                    ins.addEventListener('focus', this._focusHandler, false);
+                }
+                _downgradePlaceholderElement(ins) {
+                    ins.removeEventListener('focus', this._focusHandler, false);
+                }
+            };
+            _PacemContenteditablePlaceholderElement_relevancy = new WeakMap(), _PacemContenteditablePlaceholderElement_normalizedDatasource = new WeakMap(), _PacemContenteditablePlaceholderElement_observer = new WeakMap();
+            __decorate([
+                Pacem.ViewChild('template')
+            ], PacemContenteditablePlaceholderElement.prototype, "_itemtemplate", void 0);
+            __decorate([
+                Pacem.ViewChild(Pacem.P + '-suggest')
+            ], PacemContenteditablePlaceholderElement.prototype, "_dropdown", void 0);
+            __decorate([
+                Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Json })
+            ], PacemContenteditablePlaceholderElement.prototype, "datasource", void 0);
+            PacemContenteditablePlaceholderElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-placeholder', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: `<template>
+<${Pacem.P}-span text="{{ ^item.viewValue }}" class="text-tech"></${Pacem.P}-span>
+<${Pacem.P}-markdown hide="{{ $pacem.isNullOrEmpty(^item.data.definition) || ^item.viewValue === ^item.data.definition }}" class="${Pacem.PCSS}-margin margin-0 text-small" value="{{ ^item.data.definition }}"></${Pacem.P}-markdown>
+</template>
+<${Pacem.P}-suggest placeholder="Placeholder" class="pacem-button button" disabled="{{ $pacem.isNull(:host.range) }}"
+              on-change=":host.execCommand($this.value)"
+              css-class="{{ {'text-primary': :host.isRelevant(:host.range)} }}" 
+              compare-by="placeholder" text-property="placeholder" itemtemplate="{{ ::_itemtemplate }}" prevent-focus="true" allow-typing="false"></${Pacem.P}-suggest>`
+                })
+            ], PacemContenteditablePlaceholderElement);
+            Scaffolding.PacemContenteditablePlaceholderElement = PacemContenteditablePlaceholderElement;
+        })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="utils.ts" />
+/// <reference path="../contenteditable.ts" />
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var Scaffolding;
+        (function (Scaffolding) {
+            let PacemContenteditableWrapCommandElement = class PacemContenteditableWrapCommandElement extends Scaffolding.PacemContenteditableButtonCommandElement {
+                isRelevant(range) {
+                    return !Pacem.Utils.isNull(Scaffolding.ContenteditableUtils.findSurroundingNode(range, this.tagname));
+                }
+                exec() {
+                    return new Promise((resolve, _) => {
+                        const tagName = this.tagname;
+                        if (!Pacem.Utils.isNullOrEmpty(tagName)) {
+                            const range = this.range;
+                            const alreadyEl = Scaffolding.ContenteditableUtils.findSurroundingNode(range, tagName)
+                                || Scaffolding.ContenteditableUtils.findSurroundingNode(range.startContainer, tagName)
+                                || Scaffolding.ContenteditableUtils.findSurroundingNode(range.endContainer, tagName);
+                            if (Pacem.Utils.isNull(alreadyEl)) {
+                                // WRAP
+                                const elementsToWrap = Scaffolding.ContenteditableUtils.findSurroundingSiblingBlockElements(range);
+                                if (!Pacem.Utils.isNullOrEmpty(elementsToWrap)) {
+                                    const newChild = document.createElement(tagName);
+                                    if (elementsToWrap.length === 1) {
+                                        // replace
+                                        const repl = elementsToWrap[0];
+                                        range.setStart(repl, 0);
+                                        range.setEnd(repl, repl.childNodes.length);
+                                        const frag = range.extractContents();
+                                        newChild.append(frag);
+                                        Scaffolding.ContenteditableUtils.copyAttributes(newChild, repl);
+                                        repl.parentElement.insertBefore(newChild, repl);
+                                        repl.remove();
+                                    }
+                                    else {
+                                        // wrap
+                                        range.setStartBefore(elementsToWrap[0]);
+                                        range.setEndAfter(elementsToWrap[elementsToWrap.length - 1]);
+                                        const frag = range.extractContents();
+                                        newChild.append(frag);
+                                        range.insertNode(newChild);
+                                    }
+                                    const r = Scaffolding.ContenteditableUtils.select(newChild, true);
+                                    r.collapse();
+                                }
+                            }
+                            else {
+                                // UNWRAP
+                                range.setStart(alreadyEl, 0);
+                                range.setEnd(alreadyEl, alreadyEl.childNodes.length);
+                                // replace or unwrap
+                                let replace = false;
+                                const childNodes = alreadyEl.childNodes;
+                                for (let j = 0; j < childNodes.length; j++) {
+                                    const child = childNodes.item(j);
+                                    if (!Scaffolding.ContenteditableUtils.isBlockElement(child)) {
+                                        replace = true;
+                                        break;
+                                    }
+                                }
+                                if (replace) {
+                                    const p = document.createElement('p');
+                                    Scaffolding.ContenteditableUtils.copyAttributes(p, alreadyEl);
+                                    p.append(range.extractContents());
+                                    alreadyEl.parentNode.replaceChild(p, alreadyEl);
+                                    const r = Scaffolding.ContenteditableUtils.select(p, true);
+                                    r.collapse();
+                                }
+                                else {
+                                    // unwrap
+                                    alreadyEl.parentNode.replaceChild(range.extractContents(), alreadyEl);
+                                    const r = Scaffolding.ContenteditableUtils.select(range.endContainer, true);
+                                    r.collapse();
+                                }
+                            }
+                        }
+                        resolve();
+                    });
+                }
+            };
+            __decorate([
+                Pacem.Watch({ converter: Pacem.PropertyConverters.String })
+            ], PacemContenteditableWrapCommandElement.prototype, "tagname", void 0);
+            PacemContenteditableWrapCommandElement = __decorate([
+                Pacem.CustomElement({
+                    tagName: Pacem.P + '-contenteditable-wrapcommand', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
+                    template: Scaffolding.CONTENTELEMENT_BUTTONCOMMAND_TEMPLATE
+                })
+            ], PacemContenteditableWrapCommandElement);
+            Scaffolding.PacemContenteditableWrapCommandElement = PacemContenteditableWrapCommandElement;
         })(Scaffolding = Components.Scaffolding || (Components.Scaffolding = {}));
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
@@ -6080,19 +8311,17 @@ var Pacem;
         (function (OpenApi) {
             const ApiMethod = Pacem.Net.HttpMethod;
             class SwaggerParser {
-                load(url, headers) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        let resp = yield fetch(url, {
-                            mode: 'cors', credentials: 'omit', headers: headers
-                        });
-                        try {
-                            let json = yield resp.json();
-                            return this.parse(json, url);
-                        }
-                        catch (e) {
-                            return null;
-                        }
+                async load(url, headers) {
+                    let resp = await fetch(url, {
+                        mode: 'cors', credentials: 'omit', headers: headers
                     });
+                    try {
+                        let json = await resp.json();
+                        return this.parse(json, url);
+                    }
+                    catch (e) {
+                        return null;
+                    }
                 }
                 _findDefinitionName(definitionHashTag) {
                     var pattern = /#\/definitions\/(.+)/;

@@ -1,6 +1,6 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {

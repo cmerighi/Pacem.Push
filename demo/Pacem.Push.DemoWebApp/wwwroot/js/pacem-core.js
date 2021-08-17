@@ -1,29 +1,18 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -96,6 +85,9 @@ var Pacem;
                     }
                     else if (obj instanceof Date) {
                         return new Date(obj.valueOf());
+                    }
+                    else if (obj instanceof RegExp) {
+                        return new RegExp(obj);
                     }
                     else {
                         if (seen.has(obj)) {
@@ -173,14 +165,19 @@ var Pacem;
             let obj = JSON.parse(json, (key, value) => {
                 const elPattern = /^\$<#(.+)>$/, fnPattern = /^\$<fn:([^\x05]+)>$/, // <- Firefox workaround for missing 's' flag implementation
                 // fnPattern = /^\$<fn:(.+)>$/s,
-                fnRefPattern = /^\$<fn#(.+)>$/;
+                regexPattern = /^\$<regex:(.+)>$/, fnRefPattern = /^\$<fn#(.+)>$/;
                 let arr;
                 if (key === REF_ID) {
                     hasRefs = true;
                 }
                 else if (typeof value === 'string') {
+                    // regex?
+                    if ((arr = regexPattern.exec(value)) && arr.length > 1) {
+                        const regex = arr[1], lastPipe = regex.lastIndexOf('|');
+                        return new RegExp(regex.substr(0, lastPipe), regex.substr(lastPipe + 1));
+                    }
                     // element?
-                    if ((arr = elPattern.exec(value)) && arr.length > 1) {
+                    else if ((arr = elPattern.exec(value)) && arr.length > 1) {
                         return document.getElementById(arr[1]);
                     }
                     else 
@@ -210,6 +207,9 @@ var Pacem;
                     return;
                 }
                 return `$<#${obj.id}>`;
+            }
+            else if (obj instanceof RegExp) {
+                return `$<regex:${obj.source}|${obj.flags}>`;
             }
             else if (typeof obj === 'object' && obj != null && !(obj instanceof Date)) {
                 if (Array.isArray(obj)) {
@@ -295,7 +295,6 @@ Number.prototype.toBase36 = function () {
 /// <reference path="../../dist/js/pacem-foundation.d.ts" />
 var Pacem;
 (function (Pacem) {
-    const JSON_DATE_PATTERN = /^\/Date\([\d]+\)\/$/i;
     const PACEM_CORE_DEFAULT = 'pacem';
     const DEFAULT_DOWNLOAD_FILENAME = 'download';
     Pacem.stopPropagationHandler = (evt) => {
@@ -325,19 +324,7 @@ var Pacem;
             return seed.toBase62();
         }
         static parseDate(input) {
-            let d;
-            if (typeof input === 'string') {
-                if (JSON_DATE_PATTERN.test(input))
-                    d = parseInt(input.substring(6));
-                else
-                    d = Date.parse(input);
-                return new Date(d);
-            }
-            else if (typeof input === 'number') {
-                return new Date(input);
-            }
-            else
-                return input;
+            return Pacem.Dates.parse(input);
         }
         static copyToClipboard(input) {
             const deferred = Pacem.DeferPromise.defer();
@@ -409,10 +396,9 @@ var Pacem;
                 }
             });
         }
-        // thanks to @cuixiping: http://stackoverflow.com/questions/23150333
         static blobToDataURL(blob) {
             return new Promise((resolve, _) => {
-                var a = new FileReader();
+                const a = new FileReader();
                 a.onload = (e) => { resolve(e.target.result); };
                 a.readAsDataURL(blob);
             });
@@ -424,8 +410,19 @@ var Pacem;
             }
             return new Blob([u8arr], { type: mime });
         }
+        static blobToText(blob, encoding) {
+            return new Promise((resolve, reject) => {
+                blob.arrayBuffer().then(b => {
+                    const decoder = new TextDecoder(encoding);
+                    const output = decoder.decode(b);
+                    resolve(output);
+                });
+            });
+        }
         static textToBlob(content, type = 'text/plain') {
-            return new Blob([content], { type: type });
+            const encoder = new TextEncoder();
+            const byteArray = encoder.encode(content);
+            return new Blob([byteArray], { type: type });
         }
         /**
          * Resizes an image when exceeding the provided size constraints.
@@ -601,54 +598,52 @@ var Pacem;
                 img.src = url;
             });
         }
-        static download(arg0, arg1, mime = "application/download") {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (typeof arg0 === 'string') {
-                    const url = arg0;
-                    let options = {}, filename;
-                    if (!Utils.isNullOrEmpty(arg1)) {
-                        if (typeof arg1 === 'object') {
-                            options = { credentials: arg1.credentials, headers: arg1.headers };
-                            filename = arg1.filename || filename;
-                            mime = arg1.mime || mime;
-                        }
-                        else {
-                            filename = arg1;
-                        }
-                    }
-                    var response = yield fetch(url, options);
-                    if (response.ok) {
-                        if (Utils.isNullOrEmpty(filename)) {
-                            const headerName = 'Content-Disposition';
-                            if (response.headers.has(headerName)) {
-                                const header = response.headers.get(headerName), results = /^attachment; filename=([^;]+)(;|$)/.exec(header);
-                                if (results.length > 1) {
-                                    filename = results[1];
-                                }
-                            }
-                            else {
-                                filename = DEFAULT_DOWNLOAD_FILENAME;
-                            }
-                        }
-                        var blob = yield response.blob();
-                        const fn = filename.split(/[\\\/]/g).join('_');
-                        return Utils.download(blob, fn);
-                    }
-                }
-                else {
-                    const content = arg0, filename = (typeof arg1 === 'string' && arg1) || DEFAULT_DOWNLOAD_FILENAME, fanchor = document.createElement('a');
-                    fanchor.setAttribute('href', this._domURL.createObjectURL(content));
-                    fanchor.setAttribute('download', filename);
-                    if (document.createEvent) {
-                        var event = document.createEvent('MouseEvents');
-                        event.initEvent('click', true, true);
-                        fanchor.dispatchEvent(event);
+        static async download(arg0, arg1, mime = "application/download") {
+            if (typeof arg0 === 'string') {
+                const url = arg0;
+                let options = {}, filename;
+                if (!Utils.isNullOrEmpty(arg1)) {
+                    if (typeof arg1 === 'object') {
+                        options = { credentials: arg1.credentials, headers: arg1.headers };
+                        filename = arg1.filename || filename;
+                        mime = arg1.mime || mime;
                     }
                     else {
-                        fanchor.click();
+                        filename = arg1;
                     }
                 }
-            });
+                var response = await fetch(url, options);
+                if (response.ok) {
+                    if (Utils.isNullOrEmpty(filename)) {
+                        const headerName = 'Content-Disposition';
+                        if (response.headers.has(headerName)) {
+                            const header = response.headers.get(headerName), results = /^attachment; filename=([^;]+)(;|$)/.exec(header);
+                            if (results.length > 1) {
+                                filename = results[1];
+                            }
+                        }
+                        else {
+                            filename = DEFAULT_DOWNLOAD_FILENAME;
+                        }
+                    }
+                    var blob = await response.blob();
+                    const fn = filename.split(/[\\\/]/g).join('_');
+                    return Utils.download(blob, fn);
+                }
+            }
+            else {
+                const content = arg0, filename = (typeof arg1 === 'string' && arg1) || DEFAULT_DOWNLOAD_FILENAME, fanchor = document.createElement('a');
+                fanchor.setAttribute('href', this._domURL.createObjectURL(content));
+                fanchor.setAttribute('download', filename);
+                if (document.createEvent) {
+                    var event = document.createEvent('MouseEvents');
+                    event.initEvent('click', true, true);
+                    fanchor.dispatchEvent(event);
+                }
+                else {
+                    fanchor.click();
+                }
+            }
         }
         // #endregion
         // #region DOM
@@ -716,7 +711,7 @@ var Pacem;
                 return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
         }
         static isVisible(el) {
-            return getComputedStyle(el).visibility !== 'hidden' && (el.clientWidth > 0 || el.clientWidth > 0);
+            return getComputedStyle(el).visibility !== 'hidden' && (el.clientWidth > 0 || el.clientHeight > 0);
         }
         static addClass(el, className) {
             const css = className.trim();
@@ -847,28 +842,17 @@ var Pacem;
         // #endregion
         // #region other
         static isEmpty(obj) {
-            if (Utils.Dates.isDate(obj))
-                return false;
-            if (Utils.isArray(obj)) {
-                return obj.length === 0;
-            }
-            for (var _ in obj)
-                return false;
-            try {
-                return JSON.stringify({}) === Utils.Json.stringify(obj);
-            }
-            catch (e) {
-                return false;
-            }
+            return Pacem.NullChecker.isEmpty(obj) && !(obj instanceof Node);
         }
-        static isNull(val) {
-            return val === null || val === undefined;
+        static isNull(obj) {
+            return Pacem.NullChecker.isNull(obj);
         }
+        // legacy
         static isArray(val) {
             return Array.isArray(val);
         }
         static isNullOrEmpty(val) {
-            return Utils.isNull(val) || val === '' || (Utils.isArray(val) && val.length == 0) || (typeof val === 'object' && Utils.isEmpty(val));
+            return Utils.isNull(val) || Utils.isEmpty(val);
         }
         /**
          * It is a `valueOf()` based comparison.
@@ -913,73 +897,25 @@ var Pacem;
             }
             return json;
         }
-        //#endregion
-        /**
-         * Returns a formatted HTML string coherent with the provided input string (might be inline-svg, font-awesome class, image url (.png, .jpg) or material-icon ligature.
-         * @param icon
-         */
-        static renderHtmlIcon(icon) {
-            const SVG = /^\s*<svg\s/;
-            const FA = /^fa[brs]?\s+fa-/;
-            const URL = /^(https?:\/\/|\/\/)?.+\.(png|jpe?g)$/;
-            // svg?
-            if (SVG.test(icon)) {
-                return icon;
-            }
-            // font-awesome?
-            if (FA.test(icon)) {
-                return `<i class="${icon}"></i>`;
-            }
-            // image url?
-            if (URL.test(icon)) {
-                return `<img src="${icon}" />`;
-            }
-            // assume material icon as default
-            const parts = icon.trim().split(' ');
-            const ligature = parts[0];
-            const css = parts.length > 1 ? ' ' + parts.slice(1).join(' ') : '';
-            return `<i class="${Pacem.PCSS}-icon${css}">${ligature}</i>`;
-        }
     }
     // json-dedicated
     Utils.Json = {
         stringify: Pacem.Json.serialize,
         parse: Pacem.Json.deserialize
     };
-    // dates-dedicated
+    // dates-dedicated (moved to foundations, kept for backwards compat)
     Utils.Dates = {
         parse: Utils.parseDate,
-        isLeapYear: function (year) {
-            return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
-        },
-        daysInMonth: function (year, month) {
-            return [31, (Utils.Dates.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
-        },
+        isLeapYear: Pacem.Dates.isLeapYear,
+        daysInMonth: Pacem.Dates.daysInMonth,
         /**
          * Gets whether a date is an `Invalid Date` or not.
          * @param date
          */
-        isDate: function (date) {
-            return !isNaN(date && date.valueOf());
-        },
-        dateOnly: function (datetime) {
-            return new Date(datetime.getFullYear(), datetime.getMonth(), datetime.getDate());
-        },
-        addMonths: function (input, value) {
-            let n = input.getDate(), i = new Date(input), month = i.getMonth() + value, years = 0;
-            while (month < 0) {
-                month += 12;
-                years--;
-            }
-            i.setDate(1);
-            i.setMonth(month % 12);
-            i.setFullYear(i.getFullYear() + years + Math.floor(month / 12));
-            i.setDate(Math.min(n, Utils.Dates.daysInMonth(i.getFullYear(), i.getMonth())));
-            return i;
-        },
-        addDays: function (input, value) {
-            return new Date(input.valueOf() + value * 86400000);
-        }
+        isDate: Pacem.Dates.isDate,
+        dateOnly: Pacem.Dates.dateOnly,
+        addMonths: Pacem.Dates.addMonths,
+        addDays: Pacem.Dates.addDays
     };
     // css-dedicated
     Utils.Css = {
@@ -990,6 +926,23 @@ var Pacem;
         },
         setVariable(name, value) {
             getComputedStyle(document.documentElement).setProperty(name, value);
+        },
+        /**
+         * Naive O(n^2) implementation for an actual css class presence (definition) in the current DOM.
+         * @param name CSS class name
+         */
+        isClassDefined(name) {
+            const pattern = new RegExp('\.' + name + '($|[\s\.,])');
+            for (let j = 0; j < document.styleSheets.length; j++) {
+                const sheet = document.styleSheets.item(j), rules = sheet.rules;
+                for (let i = 0; i < rules.length; i++) {
+                    const rule = sheet.cssRules.item(i);
+                    if (pattern.test(rule.selectorText)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     };
     /** Alias for Object.assign */
@@ -1192,7 +1145,12 @@ var Pacem;
                         else if (melem.startsWith('::')) {
                             let melem0 = melem.substr(2, melem.length - 2);
                             let host = args[cmpRef] = args[cmpRef] || Pacem.CustomElementUtils.findHostContext(element);
-                            el = host[melem0];
+                            if (!Pacem.Utils.isNull(host)) {
+                                el = host[melem0];
+                            }
+                            else {
+                                el = null;
+                            }
                             retval = `${CONTEXT_PREFIX}.${cmpRef}.${melem0}`;
                         }
                         else if (melem.startsWith('#')) {
@@ -1205,8 +1163,9 @@ var Pacem;
                             // && it is not a direct method call (which means that the 'prop' isn't in fact a 'func')
                             && typeof el[prop] !== 'function' //!isMethodCall 
                             // && does not already exist as a dependency
-                            && dependencies.find(d => d.element === el && d.property == prop) == null)
+                            && dependencies.find(d => d.element === el && d.property == prop) == null) {
                             dependencies.push({ element: el, property: prop, path: path, twowayAllowed: false });
+                        }
                         // return value
                         return mstart + retval;
                     });
@@ -1282,14 +1241,6 @@ var Pacem;
                 return m[1].toUpperCase();
             });
         }
-        static importjs(src, integrity = null, crossorigin = false) {
-            var attrs = { 'type': 'text\/javascript', 'src': src };
-            if (!Pacem.Utils.isNullOrEmpty(integrity))
-                Pacem.Utils.extend(attrs, { integrity: integrity });
-            if (crossorigin)
-                Pacem.Utils.extend(attrs, { 'crossorigin': '' });
-            return CustomElementUtils.import(src, 'script', attrs, (document.head || document.getElementsByTagName("head")[0]));
-        }
         static getWatchedProperties(target, includeInherited = true) {
             var properties = [];
             var chain = target instanceof HTMLElement ? target.constructor : target;
@@ -1303,35 +1254,50 @@ var Pacem;
         static getWatchedProperty(target, name) {
             return this.getWatchedProperties(target, true).find(p => p.name === name);
         }
+        static importjs(src, integrity = null, crossorigin = false) {
+            var attrs = { 'type': 'text\/javascript', 'src': src };
+            if (!Pacem.Utils.isNullOrEmpty(integrity))
+                Pacem.Utils.extend(attrs, { integrity: integrity });
+            if (crossorigin)
+                Pacem.Utils.extend(attrs, { 'crossorigin': '' });
+            return CustomElementUtils.import(src, 'script', attrs, (document.head || document.getElementsByTagName("head")[0]));
+        }
         static importcss(src, integrity = null, crossorigin = false) {
             var attrs = { 'rel': 'stylesheet', 'href': src };
             if (!Pacem.Utils.isNullOrEmpty(integrity))
                 Pacem.Utils.extend(attrs, { integrity: integrity });
             if (crossorigin)
-                Pacem.Utils.extend(attrs, { 'crossorigin': '' });
+                Pacem.Utils.extend(attrs, { 'crossorigin': 'anonymous' });
             return CustomElementUtils.import(src, 'link', attrs, (document.head || document.getElementsByTagName("head")[0]));
         }
         static import(key, tagName, attrs, appendTo = document.body) {
-            var deferred = Pacem.DeferPromise.defer();
             const _p = Pacem.Utils.core;
-            var _imports = _p['imports'] = _p['imports'] || {}, script;
-            if (script = _imports[key]) {
-                deferred.resolve(script);
-            }
-            else {
-                script = document.createElement(tagName);
-                script.onerror = e => {
-                    deferred.reject(e);
-                };
-                script.onload = () => {
-                    deferred.resolve(_imports[key] = script);
-                };
-                appendTo.appendChild(script);
-                for (var attr in (attrs || {})) {
-                    script.setAttribute(attr, attrs[attr]);
+            var _imports = _p['imports'] = _p['imports'] || {};
+            return _imports[key] = _imports[key] || new Promise((resolve, reject) => {
+                // try to find the equivalent element in the DOM
+                var selector = tagName;
+                for (let attr in attrs || {}) {
+                    selector += `[${attr}="${attrs[attr]}"]`;
                 }
-            }
-            return deferred.promise;
+                var script = document.querySelector(selector);
+                if (!Pacem.Utils.isNull(script)) {
+                    // best guess: since element was already there, it is hopefully fully loaded
+                    resolve(script);
+                }
+                else {
+                    script = document.createElement(tagName);
+                    script.onerror = e => {
+                        reject(e);
+                    };
+                    script.onload = () => {
+                        resolve(script);
+                    };
+                    appendTo.appendChild(script);
+                    for (var attr in (attrs || {})) {
+                        script.setAttribute(attr, attrs[attr]);
+                    }
+                }
+            });
         }
         static setAttachedPropertyValue(target, name, value) {
             /*(target[PACEM_BAG] = target[PACEM_BAG] || {})[name] = value;*/
@@ -1441,9 +1407,10 @@ var Pacem;
             return retval;
         }
         static findAncestor(element, predicate) {
+            var _a;
             let el = element;
             let retval;
-            while (el && (el = el.parentNode) != null) {
+            while (el && (el = el.parentNode || ((_a = el.getRootNode()) === null || _a === void 0 ? void 0 : _a.host)) != null) {
                 if (el['host'] instanceof HTMLElement)
                     el = el['host'];
                 if (predicate.apply(el, [el])) {
@@ -1459,15 +1426,23 @@ var Pacem;
         static findAncestorOfType(element, ctor) {
             return CustomElementUtils.findAncestor(element, el => el instanceof ctor);
         }
-        static findDescendants(element, predicate) {
+        static findDescendants(element, predicate, firstOnly = false) {
             const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT);
             var retval = [];
             while (walker.nextNode()) {
                 let n = walker.currentNode;
-                if (predicate(n) === true)
+                if (predicate(n) === true) {
                     retval.push(n);
+                    if (firstOnly) {
+                        return retval;
+                    }
+                }
             }
             return retval;
+        }
+        static findFirstDescendant(element, predicate) {
+            const any = CustomElementUtils.findDescendants(element, predicate, true);
+            return Pacem.Utils.isNullOrEmpty(any) ? void 0 : any[0];
         }
         static findAll(selector = '[pacem]', filter = (e) => true) {
             const retval = [];
@@ -1531,18 +1506,24 @@ var Pacem;
             return retval;
         }
         static assignHostContext(host, template) {
+            // navigate through the DOM hierarchy
             const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT + /* traverse templates' content */ NodeFilter.SHOW_DOCUMENT_FRAGMENT);
             while (walker.nextNode()) {
                 var node = walker.currentNode;
                 /*if (node instanceof HTMLTemplateElement)
                     CustomElementUtils.assignHostContext(host, node);
-                else*/ if (Pacem.Utils.isNull(CustomElementUtils.getAttachedPropertyValue(node, Pacem.INSTANCE_HOST_VAR)))
+                else*/ if (Pacem.Utils.isNull(CustomElementUtils.getAttachedPropertyValue(node, Pacem.INSTANCE_HOST_VAR))) {
                     CustomElementUtils.setAttachedPropertyValue(node, Pacem.INSTANCE_HOST_VAR, host);
+                }
             }
         }
         static findHostContext(element) {
             let el = element;
             let retval;
+            // not connected to the DOM? then exit and return undefined
+            if (!el.isConnected) {
+                return retval;
+            }
             while (el != null) {
                 retval = CustomElementUtils.getAttachedPropertyValue(el, Pacem.INSTANCE_HOST_VAR);
                 if (retval instanceof HTMLElement)
@@ -1573,31 +1554,33 @@ var Pacem;
             else*/
             return bindingPattern.test(attr);
         }
-        static parseBindingAttribute(attr, element) {
+        static extractBindingAttributeExpression(attr) {
             if (CustomElementUtils.isBindingAttribute(attr)) {
-                // loose syntax {{ ... }}
-                let expression = attr.substr(2, attr.length - 4);
-                const arr = /,\s*(twoway|once)\s*$/.exec(expression), mode = arr && arr.length > 1 && arr[1];
-                if (!Pacem.Utils.isNullOrEmpty(mode)) {
-                    expression = expression.substr(0, expression.lastIndexOf(','));
-                }
-                var expr = Pacem.Expression.parse(expression, element);
-                (expr && expr.dependencies).forEach(d => {
-                    switch (mode) {
-                        case 'twoway':
-                            d.mode = (d.twowayAllowed && expr.dependencies.length == 1) ? 'twoway' : undefined;
-                            break;
-                        case 'once':
-                            d.mode = mode;
-                            break;
-                    }
-                });
-                return expr;
+                return attr.substr(2, attr.length - 4);
             }
             else {
                 throw `Invalid attribute: incorrect binding syntax.`;
-                //return new Function(`return ${attr};`).apply(element);
             }
+        }
+        static parseBindingAttribute(attr, element) {
+            // loose syntax {{ ... }}
+            let expression = CustomElementUtils.extractBindingAttributeExpression(attr);
+            const arr = /,\s*(twoway|once)\s*$/.exec(expression), mode = arr && arr.length > 1 && arr[1];
+            if (!Pacem.Utils.isNullOrEmpty(mode)) {
+                expression = expression.substr(0, expression.lastIndexOf(','));
+            }
+            var expr = Pacem.Expression.parse(expression, element);
+            (expr && expr.dependencies).forEach(d => {
+                switch (mode) {
+                    case 'twoway':
+                        d.mode = (d.twowayAllowed && expr.dependencies.length == 1) ? 'twoway' : undefined;
+                        break;
+                    case 'once':
+                        d.mode = mode;
+                        break;
+                }
+            });
+            return expr;
         }
         static ensureMember(o, name, attributes) {
             let original = Object.getOwnPropertyDescriptor(o, name);
@@ -1766,7 +1749,7 @@ var Pacem;
 /// <reference path="utils-customevent.ts" />
 var Pacem;
 (function (Pacem) {
-    var _originalEvent, _modifiers, _coords;
+    var _CustomUIEvent_originalEvent, _CustomUIEvent_modifiers, _CustomUIEvent_coords;
     class CustomTypedEvent extends CustomEvent /* new in TypeScript v2.7.1 -> */ {
         constructor(type, detail, eventInit) {
             super(type, Pacem.Utils.extend({ detail: detail }, eventInit || {}));
@@ -1790,68 +1773,68 @@ var Pacem;
     class CustomUIEvent extends CustomEvent {
         constructor(type, detail, eventInit, orig) {
             super(type, Pacem.Utils.extend((isEventInit(detail) ? detail : { detail: detail }), (!(eventInit instanceof Event) && eventInit) || {}));
-            _originalEvent.set(this, void 0);
-            _modifiers.set(this, void 0);
-            _coords.set(this, void 0);
+            _CustomUIEvent_originalEvent.set(this, void 0);
+            _CustomUIEvent_modifiers.set(this, void 0);
+            _CustomUIEvent_coords.set(this, void 0);
             const originalEvent = orig || eventInit;
             if (originalEvent instanceof Event) {
-                __classPrivateFieldSet(this, _originalEvent, originalEvent);
-                __classPrivateFieldSet(this, _modifiers, Pacem.CustomEventUtils.getEventKeyModifiers(originalEvent));
+                __classPrivateFieldSet(this, _CustomUIEvent_originalEvent, originalEvent, "f");
+                __classPrivateFieldSet(this, _CustomUIEvent_modifiers, Pacem.CustomEventUtils.getEventKeyModifiers(originalEvent), "f");
                 if (originalEvent instanceof MouseEvent || originalEvent instanceof TouchEvent) {
-                    __classPrivateFieldSet(this, _coords, Pacem.CustomEventUtils.getEventCoordinates(originalEvent));
+                    __classPrivateFieldSet(this, _CustomUIEvent_coords, Pacem.CustomEventUtils.getEventCoordinates(originalEvent), "f");
                 }
             }
             Pacem.CustomEventUtils.fixEdgeCustomEventSubClassInstance(this, this.constructor);
         }
         get originalEvent() {
-            return __classPrivateFieldGet(this, _originalEvent);
+            return __classPrivateFieldGet(this, _CustomUIEvent_originalEvent, "f");
         }
         get which() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _modifiers)) === null || _a === void 0 ? void 0 : _a.which;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_modifiers, "f")) === null || _a === void 0 ? void 0 : _a.which;
         }
         get altKey() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _modifiers)) === null || _a === void 0 ? void 0 : _a.altKey;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_modifiers, "f")) === null || _a === void 0 ? void 0 : _a.altKey;
         }
         get shiftKey() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _modifiers)) === null || _a === void 0 ? void 0 : _a.shiftKey;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_modifiers, "f")) === null || _a === void 0 ? void 0 : _a.shiftKey;
         }
         get ctrlKey() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _modifiers)) === null || _a === void 0 ? void 0 : _a.ctrlKey;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_modifiers, "f")) === null || _a === void 0 ? void 0 : _a.ctrlKey;
         }
         get metaKey() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _modifiers)) === null || _a === void 0 ? void 0 : _a.metaKey;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_modifiers, "f")) === null || _a === void 0 ? void 0 : _a.metaKey;
         }
         get pageX() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.page.x;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.page.x;
         }
         get pageY() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.page.y;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.page.y;
         }
         get clientX() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.client.x;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.client.x;
         }
         get clientY() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.client.y;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.client.y;
         }
         get screenX() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.screen.x;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.screen.x;
         }
         get screenY() {
             var _a;
-            return (_a = __classPrivateFieldGet(this, _coords)) === null || _a === void 0 ? void 0 : _a.screen.y;
+            return (_a = __classPrivateFieldGet(this, _CustomUIEvent_coords, "f")) === null || _a === void 0 ? void 0 : _a.screen.y;
         }
     }
-    _originalEvent = new WeakMap(), _modifiers = new WeakMap(), _coords = new WeakMap();
+    _CustomUIEvent_originalEvent = new WeakMap(), _CustomUIEvent_modifiers = new WeakMap(), _CustomUIEvent_coords = new WeakMap();
     Pacem.CustomUIEvent = CustomUIEvent;
     Pacem.AttributeChangeEventName = 'attributechange';
     class AttributeChangeEvent extends CustomTypedEvent {
@@ -1882,6 +1865,9 @@ var Pacem;
         None: { convert: (attr) => undefined },
         String: {
             convert: (attr) => attr, convertBack: (prop) => prop
+        },
+        StringArray: {
+            convert: (attr) => attr && attr.trim().split(/[ ,]+/), convertBack: (prop) => Pacem.Utils.isArray(prop) && prop.join(' ') || ''
         },
         Number: {
             convert: (attr) => parseFloat(attr), convertBack: (prop) => prop.toString()
@@ -1983,8 +1969,7 @@ var Pacem;
                 const mapped = value.dependencies.map(d => {
                     // gather changes and evaluate at `next frame` (?)
                     var retval = {
-                        dep: d,
-                        callback: function (evt) {
+                        dep: d, callback: function (evt) {
                             if (evt.detail.propertyName === d.property) {
                                 //cancelAnimationFrame(_this[handleName]);
                                 //_this[handleName] = requestAnimationFrame(() => {
@@ -2011,12 +1996,14 @@ var Pacem;
     function retrieveTemplateAndWaitForDOMReady(config) {
         var deferred = Pacem.DeferPromise.defer();
         const on_load = (tmpl) => {
-            if (Pacem.Utils.isDOMReady())
+            if (Pacem.Utils.isDOMReady()) {
                 deferred.resolve(tmpl);
-            else
+            }
+            else {
                 Pacem.Utils.onDOMReady((evt) => {
                     deferred.resolve(tmpl);
                 });
+            }
         };
         //
         if (config.template) {
@@ -2033,8 +2020,9 @@ var Pacem;
                 on_load(null);
             });
         }
-        else
+        else {
             on_load(null);
+        }
         //
         return deferred.promise;
     }
@@ -2149,8 +2137,9 @@ var Pacem;
                                 if (config.shadow) {
                                     root = element.attachShadow({ mode: 'open' });
                                 }
-                                else
+                                else {
                                     root = element;
+                                }
                                 var currentChildren = currentContent.content.children;
                                 //for (var j = currentChildren.length - 1; j >= 0; j--) {
                                 //    root.insertBefore(currentChildren.item(j), root.firstElementChild);
@@ -2215,10 +2204,9 @@ var Pacem;
                             // fire original viewActivatedCallback
                             // when all the descendant templated elements have already fired
                             Promise.all(promises)
-                                .then(f => fireViewActivated());
+                                .then(_ => fireViewActivated());
                         });
-                    },
-                    configurable: true, enumerable: true
+                    }, configurable: true, enumerable: true
                 });
                 // disconnectedCallback override
                 const originalDisconnectedCallback = Object.getOwnPropertyDescriptor(proto, 'disconnectedCallback') || proto.disconnectedCallback;
@@ -2237,8 +2225,7 @@ var Pacem;
                         bindings.forEach(attrName => {
                             processBinding(_this, Pacem.CustomElementUtils.kebabToCamel(attrName) /*, expr*/);
                         });
-                    },
-                    configurable: true, enumerable: true
+                    }, configurable: true, enumerable: true
                 });
                 // watchify attributes
                 const originalAttributeChangedCallback = Object.getOwnPropertyDescriptor(proto, 'attributeChangedCallback') || proto.attributeChangedCallback;
@@ -2289,8 +2276,7 @@ var Pacem;
                                 _this[prop] = property.config.converter.convert(val, _this);
                             }
                         }
-                    },
-                    configurable: true, enumerable: true
+                    }, configurable: true, enumerable: true
                 });
                 // watchify properties
                 const originalPropertyChangedCallback = Object.getOwnPropertyDescriptor(proto, 'propertyChangedCallback') || proto.propertyChangedCallback;
@@ -2355,8 +2341,7 @@ var Pacem;
                             var todos = GET_VAL(_this, INSTANCE_ONREADY_VAR, []);
                             todos.push(todo);
                         }
-                    },
-                    configurable: true, enumerable: true
+                    }, configurable: true, enumerable: true
                 });
             }
             Pacem.Utils.customElements.define(config.tagName, target, config.options);
@@ -2929,14 +2914,18 @@ var Pacem;
 /// <reference path="decorators.ts" />
 var Pacem;
 (function (Pacem) {
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
     class Transforms {
         static highlight(src, query, css = Pacem.PCSS + '-highlight') {
             if (!query || !src)
                 return src;
             let output = src.substr(0);
-            var trunks = query.substr(0).split(' ');
+            const trunks = query.substr(0).split(' ');
             for (var j = 0; j < trunks.length; j++) {
-                var regex = new RegExp('(?![^<>]*>)' + trunks[j], 'gi');
+                const trunk = escapeRegExp(trunks[j]);
+                const regex = new RegExp('(?![^<>]*>)' + trunk, 'gi');
                 output = output.replace(regex, function (piece, index, whole) {
                     var startTagNdx, endTagIndex;
                     if ((startTagNdx = whole.indexOf('<', index)) != (endTagIndex = whole.indexOf('</', index)) || startTagNdx == -1)
@@ -3541,26 +3530,28 @@ var Pacem;
 (function (Pacem) {
     var Behaviors;
     (function (Behaviors) {
+        var _PacemBehavior_items;
         class PacemBehavior extends Pacem.Components.PacemEventTarget {
             constructor() {
                 super(...arguments);
-                this._container = [];
+                _PacemBehavior_items.set(this, []);
             }
             register(element) {
-                var container = this._container;
+                var container = __classPrivateFieldGet(this, _PacemBehavior_items, "f");
                 if (container.indexOf(element) === -1) {
                     container.push(element);
                     this.decorate(element);
                 }
             }
             unregister(element) {
-                var container = this._container, ndx;
+                var container = __classPrivateFieldGet(this, _PacemBehavior_items, "f"), ndx;
                 if ((ndx = container.indexOf(element)) !== -1) {
                     this.undecorate(element);
                     container.splice(ndx, 1);
                 }
             }
         }
+        _PacemBehavior_items = new WeakMap();
         Behaviors.PacemBehavior = PacemBehavior;
     })(Behaviors = Pacem.Behaviors || (Pacem.Behaviors = {}));
 })(Pacem || (Pacem = {}));
@@ -4234,9 +4225,11 @@ var Pacem;
                     case "hide":
                         if (val) {
                             this.setAttribute('hidden', '');
+                            this.aria.attributes.set('hidden', 'true');
                         }
                         else {
                             this.removeAttribute('hidden');
+                            this.aria.attributes.remove('hidden');
                         }
                         break;
                     case 'tooltip':
@@ -4245,8 +4238,9 @@ var Pacem;
                         break;
                     case 'tabOrder':
                         this._tabIndex = val;
-                        if (!this.disabled)
+                        if (!this.disabled) {
                             this.tabIndex = val;
+                        }
                         break;
                     case 'behaviors':
                         if (!Pacem.Utils.isNullOrEmpty(old)) {
@@ -4358,12 +4352,6 @@ var Pacem;
 (function (Pacem) {
     var Components;
     (function (Components) {
-        const handlesConverter = {
-            convert: attr => {
-                return attr && attr.trim().split(' ');
-            },
-            convertBack: prop => (prop && prop.join(' ')) || ''
-        };
         class RescaleElementDelegate {
             constructor(_element, _type, _rescaler, _logFn) {
                 this._element = _element;
@@ -4525,6 +4513,8 @@ var Pacem;
                     if (initEvent.defaultPrevented) {
                         return;
                     }
+                    // stop evt propagation (may cause page reload on touch/mobile devices)
+                    Pacem.avoidHandler(evt);
                     SET_VAL(target, MOUSE_DOWN, origin);
                     SET_VAL(target, DELEGATE, new RescaleElementDelegate(target, type, this, 
                     /* logging */ (level, message, category) => this.log.apply(this, [level, message, category])));
@@ -4597,7 +4587,7 @@ var Pacem;
             }
         };
         __decorate([
-            Pacem.Watch({ emit: false, converter: handlesConverter })
+            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.StringArray })
         ], PacemRescaleElement.prototype, "handles", void 0);
         __decorate([
             Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Number })
@@ -4992,6 +4982,233 @@ var Pacem;
         Components.PacemAnnihilatorElement = PacemAnnihilatorElement;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    class RouterNavigateEvent extends Pacem.CustomTypedEvent {
+        constructor(path) {
+            super('navigate', path, { cancelable: false, bubbles: false });
+        }
+    }
+    Pacem.RouterNavigateEvent = RouterNavigateEvent;
+    class RouterNavigatingEvent extends Pacem.CustomTypedEvent {
+        constructor(path) {
+            super('navigating', path, { cancelable: true, bubbles: false });
+        }
+    }
+    Pacem.RouterNavigatingEvent = RouterNavigatingEvent;
+})(Pacem || (Pacem = {}));
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        var _PacemRouterElement_cancelingNavigation;
+        const CHECK_PATTERN = /^([\w\.]:)?\/\/[^\/]+/;
+        const URL_PATTERN = /^((https?:)?\/\/[^\/]+)?([^\?#]+)(\?[^#]*)?(#[^#]*)?$/;
+        let PacemRouterElement = class PacemRouterElement extends Components.PacemEventTarget {
+            constructor() {
+                super(...arguments);
+                _PacemRouterElement_cancelingNavigation.set(this, void 0);
+                this._onPopState = (evt) => {
+                    if (!Pacem.Utils.isNull(evt.state) && !__classPrivateFieldGet(this, _PacemRouterElement_cancelingNavigation, "f")) {
+                        this.path = evt.state.$path;
+                    }
+                };
+            }
+            navigate(path, title) {
+                if (this.disabled) {
+                    return;
+                }
+                if (path != this.path) {
+                    this.path = path;
+                    return;
+                }
+                const l = document.location;
+                if (CHECK_PATTERN.test(path)) {
+                    if (!path.startsWith(l.protocol + '//' + l.host)) {
+                        throw `Only same-origin navigation is currently supported. "${path}" is not a valid path.`;
+                    }
+                }
+                if (!__classPrivateFieldGet(this, _PacemRouterElement_cancelingNavigation, "f")) {
+                    // coming from path...
+                    const from = this.state && this.state.$path || void 0;
+                    // processing new segments and state
+                    const segments = this._segmentateUrl(path), state = this._parseState(segments.path + segments.query + segments.hash, segments.path, segments.query, segments.hash);
+                    // popping state? aka history.back()/.forward()/.go(...)?
+                    // means that the URL is already in the target fashion
+                    const poppingState = (l.pathname + l.search + l.hash) === segments.path + segments.query + segments.hash;
+                    const evt = new Pacem.RouterNavigatingEvent(path);
+                    window.dispatchEvent(evt);
+                    if (__classPrivateFieldSet(this, _PacemRouterElement_cancelingNavigation, evt.defaultPrevented, "f")) {
+                        // this will cut the history stack, no better option tho...
+                        if (poppingState) {
+                            // re-push current state
+                            window.history.pushState(this.state, title, from);
+                        }
+                        this.path = from;
+                        // exiting
+                        return;
+                    }
+                    // this one actually does trigger the navigation in the outer world
+                    this.state = state;
+                    if (poppingState) {
+                        window.history.scrollRestoration = 'manual';
+                        window.history.replaceState(state, title);
+                    }
+                    else {
+                        window.history.pushState(state, title, path);
+                    }
+                    if (!Pacem.Utils.isNullOrEmpty(title)) {
+                        document.title = title;
+                    }
+                    window.dispatchEvent(new Pacem.RouterNavigateEvent(path));
+                }
+                __classPrivateFieldSet(this, _PacemRouterElement_cancelingNavigation, false, "f");
+            }
+            propertyChangedCallback(name, old, val, first) {
+                super.propertyChangedCallback(name, old, val, first);
+                if (name === 'path') {
+                    this.navigate(val);
+                }
+            }
+            connectedCallback() {
+                super.connectedCallback();
+                window.addEventListener('popstate', this._onPopState, false);
+            }
+            disconnectedCallback() {
+                window.removeEventListener('popstate', this._onPopState, false);
+                super.disconnectedCallback();
+            }
+            _parseTemplate() {
+                const trunks = [];
+                let tmpl = this.template;
+                if (!Pacem.Utils.isNullOrEmpty(tmpl)) {
+                    let res;
+                    while ((res = /\/\{([a-z\$_][\w]*)\??\}/g.exec(tmpl)) != null) {
+                        const prop = res[1], item = res[0];
+                        trunks.push({ name: prop, optional: item.charAt(item.length - 2) === '?' });
+                        tmpl = tmpl.substr(res.index + item.length);
+                    }
+                }
+                return trunks;
+            }
+            _segmentateUrl(url) {
+                const regArr = URL_PATTERN.exec(url);
+                if (!regArr || regArr.length <= 3) {
+                    return null;
+                }
+                return { path: regArr[3], query: regArr[4] || '', hash: regArr[5] || '' };
+            }
+            _parseState(fullPath, path, query, hash) {
+                var obj = {
+                    $path: fullPath,
+                    $querystring: query.length > 0 ? query.substr(1) : query,
+                    $query: this._parseQuery(query),
+                    $hash: this._parseHash(hash)
+                }, i = 0;
+                const tmpl = this._parseTemplate();
+                if (!Pacem.Utils.isNullOrEmpty(tmpl)) {
+                    let res;
+                    while ((res = /\/[a-zA-Z0-9\$_-]+/g.exec(path)) != null) {
+                        const v = res[0];
+                        if (i >= tmpl.length) {
+                            throw `Length mismatch: cannot compare provided path with current template.`;
+                        }
+                        const prop = tmpl[i];
+                        Object.defineProperty(obj, prop.name, { enumerable: true, value: v.substr(1) });
+                        i++;
+                        path = path.substr(res.index + v.length);
+                    }
+                }
+                for (let k = i; k < tmpl.length; k++) {
+                    if (!tmpl[k].optional) {
+                        throw `Must provide "${tmpl[k].name}" route value.`;
+                    }
+                }
+                return obj;
+            }
+            _parseHash(hash) {
+                const ndx = hash.indexOf('#');
+                if (ndx !== 0) {
+                    return null;
+                }
+                return hash.substr(ndx + 1);
+            }
+            _parseQuery(search) {
+                const obj = {};
+                const ndx = search.indexOf('?');
+                if (ndx === 0) {
+                    search.substr(ndx + 1).split('&').forEach(pair => {
+                        const kvp = pair.split('=');
+                        if (kvp.length == 2 && !Pacem.Utils.isNullOrEmpty(kvp[1])) {
+                            Object.defineProperty(obj, decodeURIComponent(kvp[0]), { enumerable: true, value: decodeURIComponent(kvp[1]) });
+                        }
+                    });
+                }
+                return obj;
+            }
+        };
+        _PacemRouterElement_cancelingNavigation = new WeakMap();
+        __decorate([
+            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+        ], PacemRouterElement.prototype, "template", void 0);
+        __decorate([
+            Pacem.Watch({ converter: Pacem.PropertyConverters.Eval })
+        ], PacemRouterElement.prototype, "state", void 0);
+        __decorate([
+            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+        ], PacemRouterElement.prototype, "path", void 0);
+        PacemRouterElement = __decorate([
+            Pacem.CustomElement({ tagName: Pacem.P + '-router' })
+        ], PacemRouterElement);
+        Components.PacemRouterElement = PacemRouterElement;
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="./types.ts" />
+/// <reference path="router.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        let PacemBeforeunloadElement = class PacemBeforeunloadElement extends Components.PacemEventTarget {
+            constructor() {
+                super(...arguments);
+                this._unloadingHandler = (evt) => {
+                    const msg = this.message;
+                    if (!this.active || this.disabled) {
+                        return;
+                    }
+                    if (evt.type === 'beforeunload') {
+                        evt.preventDefault();
+                        evt.returnValue = msg || '';
+                    }
+                    else if (!confirm(msg || 'Leave page?')) {
+                        evt.preventDefault();
+                    }
+                };
+            }
+            viewActivatedCallback() {
+                super.viewActivatedCallback();
+                window.addEventListener('navigating', this._unloadingHandler, false);
+                window.addEventListener('beforeunload', this._unloadingHandler, false);
+            }
+            disconnectedCallback() {
+                window.removeEventListener('navigating', this._unloadingHandler, false);
+                window.removeEventListener('beforeunload', this._unloadingHandler, false);
+                super.disconnectedCallback();
+            }
+        };
+        __decorate([
+            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
+        ], PacemBeforeunloadElement.prototype, "message", void 0);
+        __decorate([
+            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Boolean })
+        ], PacemBeforeunloadElement.prototype, "active", void 0);
+        PacemBeforeunloadElement = __decorate([
+            Pacem.CustomElement({ tagName: Pacem.P + '-beforeunload' })
+        ], PacemBeforeunloadElement);
+        Components.PacemBeforeunloadElement = PacemBeforeunloadElement;
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
 /// <reference path="../../core/decorators.ts" />
 var Pacem;
 (function (Pacem) {
@@ -5335,12 +5552,14 @@ var Pacem;
 (function (Pacem) {
     var Components;
     (function (Components) {
+        var _PacemFetchElement_aborter;
         let PacemFetchElement = class PacemFetchElement extends Components.PacemEventTarget {
             constructor() {
                 super();
                 /** Gets or sets whether to trigger a fetch whenever a significant property has changed (default: true). */
                 this.autofetch = true;
                 this.debounce = 100;
+                _PacemFetchElement_aborter.set(this, void 0);
             }
             viewActivatedCallback() {
                 super.viewActivatedCallback();
@@ -5350,9 +5569,6 @@ var Pacem;
                 super.propertyChangedCallback(name, old, val, first);
                 // parameters/headers -> in order to avoid unnecessary fetches don't compare byref but term by term in the json
                 switch (name) {
-                    case 'result':
-                        this.dispatchEvent(new CustomEvent(Pacem.Net.FetchResultEventName, { detail: val }));
-                        break;
                     case 'url':
                     case 'method':
                     case 'type':
@@ -5384,9 +5600,9 @@ var Pacem;
                 }
             }
             /** Returns a promise to a request with an already-used body. */
-            // @Concurrent()
             fetch() {
                 return new Promise((resolve, reject) => {
+                    var _a;
                     var url = this.url;
                     // any reason to exit now?
                     if (!this.isReady || Pacem.Utils.isNullOrEmpty(url) || this.disabled) {
@@ -5411,7 +5627,7 @@ var Pacem;
                         credentials: _me.credentials || 'same-origin',
                         cache: _me.cache || 'default'
                     };
-                    const parameters = Pacem.Utils.clone(_me.parameters || {});
+                    const parameters = Pacem.Utils.clone((_a = _me.parameters) !== null && _a !== void 0 ? _a : {});
                     // complete a templated url, just in case (and remove params)
                     // Note:    templated urls might sound pleonastic where you can simply concatenate pieces of string.
                     //          They become handly in non-controllable autogenerated scenarios (e.g. autogenerated forms) where REST templated urls are involved.
@@ -5443,6 +5659,13 @@ var Pacem;
                         resolve(null);
                         return;
                     }
+                    if (this.throttle) {
+                        if (__classPrivateFieldGet(this, _PacemFetchElement_aborter, "f")) {
+                            __classPrivateFieldGet(this, _PacemFetchElement_aborter, "f").abort();
+                        }
+                        const { signal } = __classPrivateFieldSet(this, _PacemFetchElement_aborter, new AbortController(), "f");
+                        options.signal = signal;
+                    }
                     fetch(url, options).then(r => {
                         _me.fetching = false;
                         if (r.ok) {
@@ -5453,10 +5676,11 @@ var Pacem;
                                     r.blob().then(b => {
                                         if (_me.as === 'image')
                                             Pacem.Utils.blobToDataURL(b).then(i => {
-                                                _me.result = i;
+                                                _me._acceptFetchResult(i);
                                             });
-                                        else
-                                            _me.result = b;
+                                        else {
+                                            _me._acceptFetchResult(b);
+                                        }
                                         resolve(r);
                                     }, _ => {
                                         this.log(Pacem.Logging.LogLevel.Warn, `Couldn't parse a ${_me.as}. ${_}`);
@@ -5465,19 +5689,20 @@ var Pacem;
                                     break;
                                 case 'text':
                                     r.text().then(t => {
-                                        _me.result = t;
+                                        _me._acceptFetchResult(t);
                                         resolve(r);
                                     });
                                     break;
                                 default:
                                     if (r.headers.get("Content-Length") == "0") {
-                                        // empty object
+                                        // empty object (!?)
+                                        // write tests about
                                         _me.result = {};
                                         resolve(r);
                                     }
                                     else {
                                         r.json().then(j => {
-                                            _me.result = j;
+                                            _me._acceptFetchResult(j);
                                             resolve(r);
                                         }, _ => {
                                             this.log(Pacem.Logging.LogLevel.Warn, `Couldn't parse a ${_me.as}. ${_}`);
@@ -5494,7 +5719,12 @@ var Pacem;
                     });
                 });
             }
+            _acceptFetchResult(val) {
+                this.dispatchEvent(new CustomEvent(Pacem.Net.FetchResultEventName, { detail: val }));
+                this.result = val;
+            }
         };
+        _PacemFetchElement_aborter = new WeakMap();
         __decorate([
             Pacem.Watch({ emit: false, reflectBack: true, converter: Pacem.PropertyConverters.String })
         ], PacemFetchElement.prototype, "url", void 0);
@@ -5531,6 +5761,9 @@ var Pacem;
         __decorate([
             Pacem.Watch({ reflectBack: true, converter: Pacem.PropertyConverters.Number })
         ], PacemFetchElement.prototype, "debounce", void 0);
+        __decorate([
+            Pacem.Watch({ emit: false, reflectBack: true, converter: Pacem.PropertyConverters.Number })
+        ], PacemFetchElement.prototype, "throttle", void 0);
         __decorate([
             Pacem.Watch({ emit: false, reflectBack: true, converter: Pacem.PropertyConverters.Boolean })
         ], PacemFetchElement.prototype, "diffByValues", void 0);
@@ -5589,268 +5822,6 @@ var Pacem;
             })
         ], PacemHtmlProxyElement);
         Components.PacemHtmlProxyElement = PacemHtmlProxyElement;
-    })(Components = Pacem.Components || (Pacem.Components = {}));
-})(Pacem || (Pacem = {}));
-/// <reference path="types.ts" />
-var Pacem;
-(function (Pacem) {
-    var Components;
-    (function (Components) {
-        class PacemItemElement extends Components.PacemElement {
-            get container() {
-                return this._container;
-            }
-            /** @overridable */
-            findContainer() {
-                return Pacem.CustomElementUtils.findAncestor(this, n => n instanceof PacemItemsContainerElement);
-            }
-            viewActivatedCallback() {
-                super.viewActivatedCallback();
-                let iter = this._container = this.findContainer();
-                if (!Pacem.Utils.isNull(iter))
-                    iter.register(this);
-            }
-            disconnectedCallback() {
-                if (!Pacem.Utils.isNull(this._container))
-                    this._container.unregister(this);
-                super.disconnectedCallback();
-            }
-        }
-        Components.PacemItemElement = PacemItemElement;
-        function isItemsContainer(object) {
-            return 'items' in object
-                && (Pacem.Utils.isNull(object.items) || Pacem.Utils.isArray(object.items))
-                && typeof object.register === 'function'
-                && typeof object.unregister === 'function';
-        }
-        Components.isItemsContainer = isItemsContainer;
-        Components.ItemRegisterEventName = "itemregister";
-        Components.ItemUnregisterEventName = "itemunregister";
-        class ItemRegisterEvent extends Pacem.CustomTypedEvent {
-            constructor(item, eventInit) {
-                super(Components.ItemRegisterEventName, item, eventInit);
-            }
-        }
-        Components.ItemRegisterEvent = ItemRegisterEvent;
-        class ItemUnregisterEvent extends Pacem.CustomTypedEvent {
-            constructor(item, eventInit) {
-                super(Components.ItemUnregisterEventName, item, eventInit);
-            }
-        }
-        Components.ItemUnregisterEvent = ItemUnregisterEvent;
-        class ItemsContainerRegistrar {
-            constructor(_container) {
-                this._container = _container;
-                if (_container == null || !(_container instanceof PacemItemsContainerElement || _container instanceof PacemCrossItemsContainerElement)) {
-                    throw `Must provide a valid itemscontainer.`;
-                }
-            }
-            register(item) {
-                const container = this._container;
-                var retval = false;
-                if (!container.validate(item)) {
-                    container.logger && container.logger.log(Pacem.Logging.LogLevel.Debug, `${(item && item.localName)} element couldn't be registered in a ${container.localName} element.`);
-                }
-                else {
-                    if (Pacem.Utils.isNull(container.items)) {
-                        container.items = [item];
-                        retval = true;
-                    }
-                    else if (container.items.indexOf(item) === -1) {
-                        container.items.push(item);
-                        retval = true;
-                    }
-                }
-                if (retval) {
-                    container.dispatchEvent(new ItemRegisterEvent(item));
-                }
-                return retval;
-            }
-            unregister(item) {
-                const container = this._container;
-                const ndx = !Pacem.Utils.isNull(container.items) && container.items.indexOf(item);
-                if (ndx >= 0) {
-                    let item = container.items.splice(ndx, 1);
-                    container.dispatchEvent(new ItemUnregisterEvent(item[0]));
-                    return true;
-                }
-                return false;
-            }
-        }
-        /** Element that can be used both as ItemElement and ItemsContainer. */
-        class PacemCrossItemsContainerElement extends PacemItemElement {
-            constructor(role, aria) {
-                super(role, aria);
-                this._registrar = new ItemsContainerRegistrar(this);
-            }
-            /**
-             * Registers a new item among the items.
-             * @param item {TItem} Item to be enrolled
-             */
-            register(item) {
-                return this._registrar.register(item);
-            }
-            /**
-             * Removes an existing element from the items.
-             * @param item {TItem} Item to be removed
-             */
-            unregister(item) {
-                return this._registrar.unregister(item);
-            }
-        }
-        __decorate([
-            Pacem.Watch( /* can only be databound or assigned at runtime */)
-        ], PacemCrossItemsContainerElement.prototype, "items", void 0);
-        Components.PacemCrossItemsContainerElement = PacemCrossItemsContainerElement;
-        class PacemItemsContainerElement extends Components.PacemElement {
-            constructor(role, aria) {
-                super(role, aria);
-                this._registrar = new ItemsContainerRegistrar(this);
-            }
-            /**
-             * Registers a new item among the items.
-             * @param item {TItem} Item to be enrolled
-             */
-            register(item) {
-                return this._registrar.register(item);
-            }
-            /**
-             * Removes an existing element from the items.
-             * @param item {TItem} Item to be removed
-             */
-            unregister(item) {
-                return this._registrar.unregister(item);
-            }
-        }
-        __decorate([
-            Pacem.Watch( /* can only be databound or assigned at runtime */)
-        ], PacemItemsContainerElement.prototype, "items", void 0);
-        Components.PacemItemsContainerElement = PacemItemsContainerElement;
-    })(Components = Pacem.Components || (Pacem.Components = {}));
-})(Pacem || (Pacem = {}));
-/// <reference path="items-container.ts" />
-/// <reference path="types.ts" />
-var Pacem;
-(function (Pacem) {
-    var Components;
-    (function (Components) {
-        let PacemHubListener = class PacemHubListener extends Components.PacemItemElement {
-            constructor() {
-                super(...arguments);
-                this.onreceive = (...args) => {
-                    this.dispatchEvent(new CustomEvent('receive', { detail: Array.from(args) }));
-                };
-            }
-            propertyChangedCallback(name, old, val, first) {
-                super.propertyChangedCallback(name, old, val, first);
-                if (this.container instanceof PacemHubProxy && !Pacem.Utils.isNull(this.container.connection)) {
-                    const conn = this.container.connection;
-                    switch (name) {
-                        case 'method':
-                            if (!Pacem.Utils.isNullOrEmpty(old))
-                                conn.off(old, this.onreceive);
-                            if (!Pacem.Utils.isNullOrEmpty(val))
-                                conn.on(val, this.onreceive);
-                            break;
-                        case 'disabled':
-                            if (!Pacem.Utils.isNullOrEmpty(this.method)) {
-                                let onoff = val ? conn.off : conn.on;
-                                onoff(this.method, this.onreceive);
-                            }
-                            break;
-                    }
-                }
-            }
-        };
-        __decorate([
-            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
-        ], PacemHubListener.prototype, "method", void 0);
-        PacemHubListener = __decorate([
-            Pacem.CustomElement({ tagName: Pacem.P + '-hub-listener' })
-        ], PacemHubListener);
-        Components.PacemHubListener = PacemHubListener;
-        let PacemHubProxy = class PacemHubProxy extends Components.PacemItemsContainerElement {
-            validate(item) {
-                return item instanceof PacemHubListener;
-            }
-            get connection() {
-                return this._hub;
-            }
-            invoke(method, ...args) {
-                if (this.connected)
-                    return this._hub.invoke.apply(this._hub, arguments);
-                throw 'Hub is not connected. Cannot call `invoke` method.';
-            }
-            send(method, ...args) {
-                if (this.connected)
-                    return this._hub.send.apply(this._hub, arguments);
-                throw 'Hub is not connected. Cannot call `send` method.';
-            }
-            start() {
-                this._resetProxy();
-            }
-            propertyChangedCallback(name, old, val, first) {
-                super.propertyChangedCallback(name, old, val, first);
-                //
-                if (name === 'url' || name === 'disabled' || name === 'accesstoken') {
-                    this._resetProxy();
-                }
-            }
-            disconnectedCallback() {
-                if (this.connected) {
-                    this._hub.stop();
-                }
-                super.disconnectedCallback();
-            }
-            _resetProxy() {
-                return __awaiter(this, void 0, void 0, function* () {
-                    if (!Pacem.Utils.isNull(this._hub)) {
-                        yield this._hub.stop();
-                        this.connected = false;
-                        this._setupProxy();
-                    }
-                    else {
-                        this._setupProxy();
-                    }
-                });
-            }
-            _setupProxy() {
-                return __awaiter(this, void 0, void 0, function* () {
-                    if (!this.disabled && !Pacem.Utils.isNullOrEmpty(this.url)) {
-                        const connBuilder = new signalR.HubConnectionBuilder();
-                        connBuilder.withUrl(this.url, {
-                            accessTokenFactory: () => this.accesstoken
-                        });
-                        const h = this._hub = connBuilder.build();
-                        h.onclose(() => {
-                            this.connected = false;
-                            this._hub = null;
-                        });
-                        yield h.start();
-                        this.connected = true;
-                        // on(...)
-                        for (var item of this.items) {
-                            if (item.disabled || Pacem.Utils.isNullOrEmpty(item.method))
-                                continue;
-                            h.on(item.method, item.onreceive);
-                        }
-                    }
-                });
-            }
-        };
-        __decorate([
-            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
-        ], PacemHubProxy.prototype, "url", void 0);
-        __decorate([
-            Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.String })
-        ], PacemHubProxy.prototype, "accesstoken", void 0);
-        __decorate([
-            Pacem.Watch({ converter: Pacem.PropertyConverters.Boolean })
-        ], PacemHubProxy.prototype, "connected", void 0);
-        PacemHubProxy = __decorate([
-            Pacem.CustomElement({ tagName: Pacem.P + '-hub-proxy' })
-        ], PacemHubProxy);
-        Components.PacemHubProxy = PacemHubProxy;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
 /// <reference path="../../core/decorators.ts" />
@@ -6085,7 +6056,6 @@ var Pacem;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
 /// <reference path="../../core/decorators.ts" />
-/// <reference path="../../../dist/js/resize-observer.d.ts" />
 /// <reference path="types.ts" />
 var Pacem;
 (function (Pacem) {
@@ -6333,8 +6303,8 @@ var Pacem;
         Components.PacemPositionElement = PacemPositionElement;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
-/// <reference path="../../core/decorators.ts" />
-/// <reference path="types.ts" />
+/// <reference path="../../../core/decorators.ts" />
+/// <reference path="../types.ts" />
 var Pacem;
 (function (Pacem) {
     var Components;
@@ -6459,7 +6429,19 @@ var Pacem;
 (function (Pacem) {
     var Components;
     (function (Components) {
-        let PacemTemplateProxyElement = class PacemTemplateProxyElement extends Pacem.TemplateElement {
+        let PacemTemplateProxyElement = class PacemTemplateProxyElement extends /*PacemEventTarget*/ Pacem.TemplateElement {
+            propertyChangedCallback(name, old, val, first) {
+                // super.propertyChangedCallback(name, old, val, first);
+                if (name === 'target') {
+                    this.dispatchEvent(new Event('templatechange'));
+                }
+            }
+            addEventListener(type, listener, options) {
+                super.addEventListener(type, listener, options);
+            }
+            removeEventListener(type, listener, options) {
+                super.removeEventListener(type, listener, options);
+            }
         };
         __decorate([
             Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Element })
@@ -6530,6 +6512,11 @@ var Pacem;
                     // ...THEN the item entity itself.
                     item.item = entity;
                 };
+                this._refreshItemTemplateHandler = (evt) => {
+                    const proxy = evt.target;
+                    this._itemTemplate = proxy.target;
+                    this._databind();
+                };
             }
             removeItem(index) {
                 this._removeItems(index, index);
@@ -6546,6 +6533,7 @@ var Pacem;
                 else {
                     _item = items[index];
                     this._setupItem(_item, index, item);
+                    _item.redrawEventually(this._itemTemplate, frag);
                 }
                 this.dispatchEvent(new Components.RepeaterItemCreateEvent(_item));
             }
@@ -6561,11 +6549,17 @@ var Pacem;
             databind() {
                 this._databind();
             }
+            // @Debounce(true)
             _databind() {
+                // not connected to the DOM? exit
+                if (!this.isConnected) {
+                    return;
+                }
                 // no template? fail.
                 let tmpl = this._itemTemplate, holder = this._childTemplatePlaceholder;
-                if (tmpl == null)
+                if (tmpl == null) {
                     throw `Missing template element in ${PacemRepeaterElement_1.name}.`;
+                }
                 // fill up
                 let items = this._childItems, index = 0;
                 try {
@@ -6595,36 +6589,47 @@ var Pacem;
                 // custom 'item<cmd>' event fires next
                 this.dispatchEvent(new CustomItemCommandEvent(/* 'originalEvent' */ evt));
             }
+            _buildupItemTemplate() {
+                let tmpl = Pacem.CustomElementUtils.findFirstDescendant(this, n => n instanceof HTMLTemplateElement || n instanceof Components.PacemTemplateProxyElement);
+                if (tmpl instanceof Components.PacemTemplateProxyElement) {
+                    tmpl.addEventListener('templatechange', this._refreshItemTemplateHandler, false);
+                    this._childTemplatePlaceholder = tmpl;
+                    return this._itemTemplate = tmpl.target;
+                }
+                else {
+                    return this._itemTemplate = this._childTemplatePlaceholder = tmpl;
+                }
+            }
             viewActivatedCallback() {
                 super.viewActivatedCallback();
                 this.addEventListener(Pacem.CommandEventName, this._onCommand, false);
-                let proxy = this.querySelector(Pacem.P + '-template-proxy');
-                if (!Pacem.Utils.isNull(proxy)) {
-                    this._childTemplatePlaceholder = proxy;
-                    this._itemTemplate = proxy.target;
+                if (this._buildupItemTemplate()) {
+                    this._databind();
                 }
-                else {
-                    this._itemTemplate = this._childTemplatePlaceholder = this.querySelector('template');
-                }
-                this._databind();
             }
             disconnectedCallback() {
+                const oldPlaceholder = this._childTemplatePlaceholder;
+                if (!Pacem.Utils.isNull(oldPlaceholder) && oldPlaceholder instanceof Components.PacemTemplateProxyElement) {
+                    oldPlaceholder.removeEventListener('templatechange', this._refreshItemTemplateHandler, false);
+                }
                 this.removeEventListener(Pacem.CommandEventName, this._onCommand, false);
                 this.datasource = [];
                 super.disconnectedCallback();
             }
             propertyChangedCallback(name, old, val, first) {
                 super.propertyChangedCallback(name, old, val, first);
-                if (name === 'datasource' && this._itemTemplate != null)
-                    this._databind();
+                switch (name) {
+                    case 'datasource':
+                        if (!Pacem.Utils.isNull(this._itemTemplate)) {
+                            this._databind();
+                        }
+                        break;
+                }
             }
         };
         __decorate([
             Pacem.Watch({ emit: false, converter: Pacem.PropertyConverters.Eval })
         ], PacemRepeaterElement.prototype, "datasource", void 0);
-        __decorate([
-            Pacem.Debounce(true)
-        ], PacemRepeaterElement.prototype, "_databind", null);
         PacemRepeaterElement = PacemRepeaterElement_1 = __decorate([
             Pacem.CustomElement({ tagName: Pacem.P + '-repeater' })
         ], PacemRepeaterElement);
@@ -6656,8 +6661,7 @@ var Pacem;
                         },
                         set: function (v) {
                             _setScopeValue.apply(placeholder, ['item', v]);
-                        },
-                        configurable: true
+                        }, configurable: true
                     },
                     'index': {
                         get: function () {
@@ -6666,22 +6670,35 @@ var Pacem;
                         },
                         set: function (v) {
                             _setScopeValue.apply(placeholder, ['index', v]);
-                        },
-                        configurable: true
+                        }, configurable: true
                     }
                 });
             }
             /** @internal */
             append() {
-                let tmplRef = this._template, tmplParent = this._fragment;
+                const tmplRef = this._template, tmplParent = this._fragment;
                 this._alterEgos.push(tmplParent.appendChild(this.placeholder));
                 const clonedTmpl = tmplRef.cloneNode(true);
                 var host;
-                if (!Pacem.Utils.isNull(host = GET_VAL(this._repeater, Pacem.INSTANCE_HOST_VAR)))
+                if (!Pacem.Utils.isNull(host = GET_VAL(this._repeater, Pacem.INSTANCE_HOST_VAR))) {
                     Pacem.CustomElementUtils.assignHostContext(host, clonedTmpl);
+                }
                 var dom = clonedTmpl.content. /*children*/childNodes;
                 Array.prototype.push.apply(this._alterEgos, dom);
                 tmplParent.appendChild(clonedTmpl.content);
+            }
+            /** @internal */
+            redrawEventually(tmpl, frag) {
+                if (tmpl === this._template) {
+                    return;
+                }
+                this._fragment = frag;
+                this._template = tmpl;
+                const tmplParent = this._holder.parentElement, dom = this._alterEgos;
+                while (dom.length > 0) {
+                    tmplParent.removeChild(dom.pop());
+                }
+                this.append();
             }
             get dom() {
                 return this._alterEgos.filter(n => !(n instanceof Comment || n instanceof Text));
@@ -6712,6 +6729,143 @@ var Pacem;
             }
         }
         Components.RepeaterItem = RepeaterItem;
+    })(Components = Pacem.Components || (Pacem.Components = {}));
+})(Pacem || (Pacem = {}));
+/// <reference path="types.ts" />
+var Pacem;
+(function (Pacem) {
+    var Components;
+    (function (Components) {
+        class PacemItemElement extends Components.PacemElement {
+            get container() {
+                return this._container;
+            }
+            /** @overridable */
+            findContainer() {
+                return Pacem.CustomElementUtils.findAncestor(this, n => n instanceof PacemItemsContainerElement);
+            }
+            viewActivatedCallback() {
+                super.viewActivatedCallback();
+                let iter = this._container = this.findContainer();
+                if (!Pacem.Utils.isNull(iter))
+                    iter.register(this);
+            }
+            disconnectedCallback() {
+                if (!Pacem.Utils.isNull(this._container))
+                    this._container.unregister(this);
+                super.disconnectedCallback();
+            }
+        }
+        Components.PacemItemElement = PacemItemElement;
+        function isItemsContainer(object) {
+            return 'items' in object
+                && (Pacem.Utils.isNull(object.items) || Pacem.Utils.isArray(object.items))
+                && typeof object.register === 'function'
+                && typeof object.unregister === 'function';
+        }
+        Components.isItemsContainer = isItemsContainer;
+        Components.ItemRegisterEventName = "itemregister";
+        Components.ItemUnregisterEventName = "itemunregister";
+        class ItemRegisterEvent extends Pacem.CustomTypedEvent {
+            constructor(item, eventInit) {
+                super(Components.ItemRegisterEventName, item, eventInit);
+            }
+        }
+        Components.ItemRegisterEvent = ItemRegisterEvent;
+        class ItemUnregisterEvent extends Pacem.CustomTypedEvent {
+            constructor(item, eventInit) {
+                super(Components.ItemUnregisterEventName, item, eventInit);
+            }
+        }
+        Components.ItemUnregisterEvent = ItemUnregisterEvent;
+        class ItemsContainerRegistrar {
+            constructor(_container) {
+                this._container = _container;
+                if (_container == null || !(_container instanceof PacemItemsContainerElement || _container instanceof PacemCrossItemsContainerElement)) {
+                    throw `Must provide a valid itemscontainer.`;
+                }
+            }
+            register(item) {
+                const container = this._container;
+                var retval = false;
+                if (!container.validate(item)) {
+                    container.logger && container.logger.log(Pacem.Logging.LogLevel.Debug, `${(item && item.localName)} element couldn't be registered in a ${container.localName} element.`);
+                }
+                else {
+                    if (Pacem.Utils.isNull(container.items)) {
+                        container.items = [item];
+                        retval = true;
+                    }
+                    else if (container.items.indexOf(item) === -1) {
+                        container.items.push(item);
+                        retval = true;
+                    }
+                }
+                if (retval) {
+                    container.dispatchEvent(new ItemRegisterEvent(item));
+                }
+                return retval;
+            }
+            unregister(item) {
+                const container = this._container;
+                const ndx = !Pacem.Utils.isNull(container.items) && container.items.indexOf(item);
+                if (ndx >= 0) {
+                    let item = container.items.splice(ndx, 1);
+                    container.dispatchEvent(new ItemUnregisterEvent(item[0]));
+                    return true;
+                }
+                return false;
+            }
+        }
+        /** Element that can be used both as ItemElement and ItemsContainer. */
+        class PacemCrossItemsContainerElement extends PacemItemElement {
+            constructor(role, aria) {
+                super(role, aria);
+                this._registrar = new ItemsContainerRegistrar(this);
+            }
+            /**
+             * Registers a new item among the items.
+             * @param item {TItem} Item to be enrolled
+             */
+            register(item) {
+                return this._registrar.register(item);
+            }
+            /**
+             * Removes an existing element from the items.
+             * @param item {TItem} Item to be removed
+             */
+            unregister(item) {
+                return this._registrar.unregister(item);
+            }
+        }
+        __decorate([
+            Pacem.Watch( /* can only be databound or assigned at runtime */)
+        ], PacemCrossItemsContainerElement.prototype, "items", void 0);
+        Components.PacemCrossItemsContainerElement = PacemCrossItemsContainerElement;
+        class PacemItemsContainerElement extends Components.PacemElement {
+            constructor(role, aria) {
+                super(role, aria);
+                this._registrar = new ItemsContainerRegistrar(this);
+            }
+            /**
+             * Registers a new item among the items.
+             * @param item {TItem} Item to be enrolled
+             */
+            register(item) {
+                return this._registrar.register(item);
+            }
+            /**
+             * Removes an existing element from the items.
+             * @param item {TItem} Item to be removed
+             */
+            unregister(item) {
+                return this._registrar.unregister(item);
+            }
+        }
+        __decorate([
+            Pacem.Watch( /* can only be databound or assigned at runtime */)
+        ], PacemItemsContainerElement.prototype, "items", void 0);
+        Components.PacemItemsContainerElement = PacemItemsContainerElement;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
 /// <reference path="types.ts" />
@@ -6783,7 +6937,7 @@ var Pacem;
 /// <reference path="viewport-aware.ts" />
 /// <reference path="resize.ts" />
 /// <reference path="position.ts" />
-/// <reference path="overlay.ts" />
+/// <reference path="_deprecated/overlay.ts" />
 /// <reference path="fetcher.ts" />
 /// <reference path="panel.ts" />
 /// <reference path="span.ts" />
@@ -6937,148 +7091,6 @@ var Pacem;
             Pacem.CustomElement({ tagName: Pacem.P + '-online-status' })
         ], PacemOnlineStatusElement);
         Components.PacemOnlineStatusElement = PacemOnlineStatusElement;
-    })(Components = Pacem.Components || (Pacem.Components = {}));
-})(Pacem || (Pacem = {}));
-/// <reference path="types.ts" />
-var Pacem;
-(function (Pacem) {
-    class RouterNavigateEvent extends Pacem.CustomTypedEvent {
-        constructor(path) {
-            super('navigate', path, { cancelable: false, bubbles: false });
-        }
-    }
-    Pacem.RouterNavigateEvent = RouterNavigateEvent;
-})(Pacem || (Pacem = {}));
-(function (Pacem) {
-    var Components;
-    (function (Components) {
-        const CHECK_PATTERN = /^([\w\.]:)?\/\/[^\/]+/;
-        const URL_PATTERN = /^((https?:)?\/\/[^\/]+)?([^\?#]+)(\?[^#]*)?(#[^#]*)?$/;
-        let PacemRouterElement = class PacemRouterElement extends Components.PacemEventTarget {
-            constructor() {
-                super(...arguments);
-                this._onPopState = (evt) => {
-                    if (!Pacem.Utils.isNull(evt.state)) {
-                        this.path = evt.state.$path;
-                    }
-                };
-            }
-            navigate(path, title) {
-                const l = document.location;
-                if (CHECK_PATTERN.test(path)) {
-                    if (!path.startsWith(l.protocol + '//' + l.host)) {
-                        throw `Only same-origin navigation is currently supported. "${path}" is not a valid path.`;
-                    }
-                }
-                const segments = this._segmentateUrl(path), state = this.state = this._parseState(segments.path + segments.query + segments.hash, segments.path, segments.query, segments.hash);
-                var poppingState = (l.pathname + l.search + l.hash) === segments.path + segments.query + segments.hash;
-                if (poppingState) {
-                    window.history.replaceState(state, title);
-                }
-                else {
-                    window.history.pushState(state, title, path);
-                }
-                if (!Pacem.Utils.isNullOrEmpty(title)) {
-                    document.title = title;
-                }
-            }
-            propertyChangedCallback(name, old, val, first) {
-                super.propertyChangedCallback(name, old, val, first);
-                if (name === 'path') {
-                    this.navigate(val);
-                    window.dispatchEvent(new Pacem.RouterNavigateEvent(val));
-                }
-            }
-            connectedCallback() {
-                super.connectedCallback();
-                window.addEventListener('popstate', this._onPopState, false);
-            }
-            disconnectedCallback() {
-                window.removeEventListener('popstate', this._onPopState, false);
-                super.disconnectedCallback();
-            }
-            _parseTemplate() {
-                const trunks = [];
-                let tmpl = this.template;
-                if (!Pacem.Utils.isNullOrEmpty(tmpl)) {
-                    let res;
-                    while ((res = /\/\{([a-z\$_][\w]*)\??\}/g.exec(tmpl)) != null) {
-                        const prop = res[1], item = res[0];
-                        trunks.push({ name: prop, optional: item.charAt(item.length - 2) === '?' });
-                        tmpl = tmpl.substr(res.index + item.length);
-                    }
-                }
-                return trunks;
-            }
-            _segmentateUrl(url) {
-                const regArr = URL_PATTERN.exec(url);
-                if (!regArr || regArr.length <= 3) {
-                    return null;
-                }
-                return { path: regArr[3], query: regArr[4] || '', hash: regArr[5] || '' };
-            }
-            _parseState(fullPath, path, query, hash) {
-                var obj = {
-                    $path: fullPath,
-                    $querystring: query.length > 0 ? query.substr(1) : query,
-                    $query: this._parseQuery(query),
-                    $hash: this._parseHash(hash)
-                }, i = 0;
-                const tmpl = this._parseTemplate();
-                if (!Pacem.Utils.isNullOrEmpty(tmpl)) {
-                    let res;
-                    while ((res = /\/[a-zA-Z0-9\$_-]+/g.exec(path)) != null) {
-                        const v = res[0];
-                        if (i >= tmpl.length) {
-                            throw `Length mismatch: cannot compare provided path with current template.`;
-                        }
-                        const prop = tmpl[i];
-                        Object.defineProperty(obj, prop.name, { enumerable: true, value: v.substr(1) });
-                        i++;
-                        path = path.substr(res.index + v.length);
-                    }
-                }
-                for (let k = i; k < tmpl.length; k++) {
-                    if (!tmpl[k].optional) {
-                        throw `Must provide "${tmpl[k].name}" route value.`;
-                    }
-                }
-                return obj;
-            }
-            _parseHash(hash) {
-                const ndx = hash.indexOf('#');
-                if (ndx !== 0) {
-                    return null;
-                }
-                return hash.substr(ndx + 1);
-            }
-            _parseQuery(search) {
-                const obj = {};
-                const ndx = search.indexOf('?');
-                if (ndx === 0) {
-                    search.substr(ndx + 1).split('&').forEach(pair => {
-                        const kvp = pair.split('=');
-                        if (kvp.length == 2 && !Pacem.Utils.isNullOrEmpty(kvp[1])) {
-                            Object.defineProperty(obj, decodeURIComponent(kvp[0]), { enumerable: true, value: decodeURIComponent(kvp[1]) });
-                        }
-                    });
-                }
-                return obj;
-            }
-        };
-        __decorate([
-            Pacem.Watch({ converter: Pacem.PropertyConverters.String })
-        ], PacemRouterElement.prototype, "template", void 0);
-        __decorate([
-            Pacem.Watch({ converter: Pacem.PropertyConverters.Eval })
-        ], PacemRouterElement.prototype, "state", void 0);
-        __decorate([
-            Pacem.Watch({ converter: Pacem.PropertyConverters.String })
-        ], PacemRouterElement.prototype, "path", void 0);
-        PacemRouterElement = __decorate([
-            Pacem.CustomElement({ tagName: Pacem.P + '-router' })
-        ], PacemRouterElement);
-        Components.PacemRouterElement = PacemRouterElement;
     })(Components = Pacem.Components || (Pacem.Components = {}));
 })(Pacem || (Pacem = {}));
 /// <reference path="types.ts" />
@@ -7273,7 +7285,7 @@ var Pacem;
                 };
             }
             viewActivatedCallback() {
-                super.connectedCallback();
+                super.viewActivatedCallback();
                 this._addHandler();
             }
             propertyChangedCallback(name, old, val, first) {

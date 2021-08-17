@@ -1,6 +1,6 @@
 /**
- * pacem v0.10.0 (https://js.pacem.it)
- * Copyright 2020 Pacem (https://pacem.it)
+ * pacem v0.20.0-alexandria (https://js.pacem.it)
+ * Copyright 2021 Pacem (https://pacem.it)
  * Licensed under MIT
  */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -9,27 +9,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 /// <reference path="../../../dist/js/pacem-core.d.ts" />
 /// <reference path="../../../dist/js/pacem-ui.d.ts" />
@@ -175,17 +164,7 @@ var Pacem;
                 }
                 viewActivatedCallback() {
                     super.viewActivatedCallback();
-                    this._renderButton();
                     this._balloon.addEventListener(Pacem.CommandEventName, this._dispatchCommand, false);
-                }
-                propertyChangedCallback(name, old, val, first) {
-                    super.propertyChangedCallback(name, old, val, first);
-                    if (name === 'icon' && this._btn) {
-                        this._renderButton(val);
-                    }
-                }
-                _renderButton(val = this.icon) {
-                    this._btn.innerHTML = val ? Pacem.Utils.renderHtmlIcon(val) : `<i class="${Pacem.PCSS}-icon">more_horiz</i>`;
                 }
                 disconnectedCallback() {
                     if (!Pacem.Utils.isNull(this._balloon)) {
@@ -229,7 +208,7 @@ var Pacem;
             PacemContextMenuElement = __decorate([
                 Pacem.CustomElement({
                     tagName: Pacem.P + '-context-menu', shadow: Pacem.Defaults.USE_SHADOW_ROOT,
-                    template: `<${Pacem.P}-button class="button-flat ${Pacem.PCSS}-margin margin-0"></${Pacem.P}-button>
+                    template: `<${Pacem.P}-button class="button-flat ${Pacem.PCSS}-margin margin-0"><${Pacem.P}-icon icon="{{ :host.icon || 'more_horiz' }}"></${Pacem.P}-icon></${Pacem.P}-button>
 <${Pacem.P}-content></${Pacem.P}-content>
 <${Pacem.P}-shell-proxy>
         <${Pacem.P}-balloon target="{{ :host._btn }}" class="${Pacem.PCSS}-contextmenu" options="{{ { trigger: 'click', position: 'x', align: 'auto' } }}">
@@ -241,7 +220,7 @@ var Pacem;
                                  confirmation-message="{{ ^item.confirmationMessage }}" confirmation-dialog="{{ ^item.confirmationDialog }}"
                                  command-name="{{ ^item.commandName }}"><${Pacem.P}-text text="{{ ^item.caption }}"></${Pacem.P}-text></${Pacem.P}-button>
                 </${Pacem.P}-if>
-                <${Pacem.P}-if match="{{ ^item.localName === '${Pacem.P}-context-menuitem-separator' }}">
+                <${Pacem.P}-if match="{{ ^item.localName === '${Pacem.P}-context-menuitem-separator' && !^item.hide }}">
                     <hr />
                 </${Pacem.P}-if>
             </template>
@@ -602,35 +581,33 @@ var Pacem;
                 get adapter() {
                     return this._adapter;
                 }
-                _heroAnimate(fromEl, src) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        if (!Pacem.Utils.isNull(fromEl)) {
-                            let pImg = document.createElement(Pacem.P + '-img');
-                            let goalEl = this._heroPlaceholderProxy.dom[0];
-                            const TRANSITION = 300;
-                            pImg.src = src || /* assuming an img-ish element */ fromEl['src'];
-                            pImg.adapt = 'contain';
-                            let goal = Pacem.Utils.offset(goalEl), from = Pacem.Utils.offset(fromEl), style = pImg.style;
-                            const cfrStyle = getComputedStyle(goalEl);
-                            style.border = cfrStyle.border;
-                            style.width = goalEl.clientWidth + 'px';
-                            style.height = goalEl.clientHeight + 'px';
-                            style.position = 'absolute';
-                            style.zIndex = cfrStyle.zIndex;
-                            style.top = goal.top + 'px';
-                            style.left = goal.left + 'px';
-                            const scaleX = fromEl.clientWidth / goalEl.clientWidth, scaleY = fromEl.clientHeight / goalEl.clientHeight, translateX = (from.left - goal.left) + 'px', translateY = (from.top - goal.top) + 'px';
-                            style.transformOrigin = '0 0';
-                            style.transition = `transform cubic-bezier(0.445, 0.05, 0.55, 0.95) ${TRANSITION}ms, opacity ${TRANSITION}ms`;
-                            style.transform = `translate(${translateX}, ${translateY}) scale(${scaleX}, ${scaleY})`;
-                            document.body.appendChild(pImg);
-                            requestAnimationFrame(() => {
-                                pImg.style.transform = '';
-                            });
-                            yield Pacem.Utils.waitForAnimationEnd(pImg, TRANSITION);
-                            pImg.remove();
-                        }
-                    });
+                async _heroAnimate(fromEl, src) {
+                    if (!Pacem.Utils.isNull(fromEl)) {
+                        let pImg = document.createElement(Pacem.P + '-img');
+                        let goalEl = this._heroPlaceholderProxy.dom[0];
+                        const TRANSITION = 300;
+                        pImg.src = src || /* assuming an img-ish element */ fromEl['src'];
+                        pImg.adapt = 'contain';
+                        let goal = Pacem.Utils.offset(goalEl), from = Pacem.Utils.offset(fromEl), style = pImg.style;
+                        const cfrStyle = getComputedStyle(goalEl);
+                        style.border = cfrStyle.border;
+                        style.width = goalEl.clientWidth + 'px';
+                        style.height = goalEl.clientHeight + 'px';
+                        style.position = 'absolute';
+                        style.zIndex = cfrStyle.zIndex;
+                        style.top = goal.top + 'px';
+                        style.left = goal.left + 'px';
+                        const scaleX = fromEl.clientWidth / goalEl.clientWidth, scaleY = fromEl.clientHeight / goalEl.clientHeight, translateX = (from.left - goal.left) + 'px', translateY = (from.top - goal.top) + 'px';
+                        style.transformOrigin = '0 0';
+                        style.transition = `transform cubic-bezier(0.445, 0.05, 0.55, 0.95) ${TRANSITION}ms, opacity ${TRANSITION}ms`;
+                        style.transform = `translate(${translateX}, ${translateY}) scale(${scaleX}, ${scaleY})`;
+                        document.body.appendChild(pImg);
+                        requestAnimationFrame(() => {
+                            pImg.style.transform = '';
+                        });
+                        await Pacem.Utils.waitForAnimationEnd(pImg, TRANSITION);
+                        pImg.remove();
+                    }
                 }
                 open(startIndex, heroFrom, src) {
                     this._poppingUp = true;
@@ -695,14 +672,14 @@ var Pacem;
     (function (Components) {
         var Plus;
         (function (Plus) {
-            var _keepStateOnCommit;
+            var _PacemModalFormElement_keepStateOnCommit;
             var PacemModalFormElement_1;
             // TODO: use onewaytosource as a binding mode
             let PacemModalFormElement = PacemModalFormElement_1 = class PacemModalFormElement extends Components.UI.PacemDialogBase {
                 constructor() {
                     super();
                     this.method = Pacem.Net.HttpMethod.Post;
-                    _keepStateOnCommit.set(this, false);
+                    _PacemModalFormElement_keepStateOnCommit.set(this, false);
                     this._emitter = new Pacem.Components.Scaffolding.FormEventEmitter(this);
                 }
                 viewActivatedCallback() {
@@ -742,18 +719,20 @@ var Pacem;
                     // ...just handle it using the eventual listeners:
                     this.emit(evt);
                 }
-                open(state, keepStateOnCommit) {
+                open(state, keepStateOnCommit, setAsPristine = true) {
                     if (Pacem.Utils.isNull(state)) {
                         throw `The state of a ${PacemModalFormElement_1} cannot be null.`;
                     }
-                    __classPrivateFieldSet(this, _keepStateOnCommit, keepStateOnCommit);
+                    __classPrivateFieldSet(this, _PacemModalFormElement_keepStateOnCommit, keepStateOnCommit, "f");
                     var retval = super.open(state);
-                    this._form.setPristine();
+                    if (setAsPristine) {
+                        this._form.setPristine();
+                    }
                     return retval;
                 }
                 commit(btn, evt) {
                     super.commit(btn, evt);
-                    if (!__classPrivateFieldGet(this, _keepStateOnCommit)) {
+                    if (!__classPrivateFieldGet(this, _PacemModalFormElement_keepStateOnCommit, "f")) {
                         Pacem.Utils.waitForAnimationEnd(this, 500).then(_ => {
                             // BREAKING change (v0.8.37): state destroyed when dialog committed
                             // TODO: consider 'if' and 'how' to avoid this.
@@ -777,7 +756,7 @@ var Pacem;
                     };
                 }
             };
-            _keepStateOnCommit = new WeakMap();
+            _PacemModalFormElement_keepStateOnCommit = new WeakMap();
             __decorate([
                 Pacem.Watch({ reflectBack: true, converter: Pacem.PropertyConverters.String })
             ], PacemModalFormElement.prototype, "okCaption", void 0);
