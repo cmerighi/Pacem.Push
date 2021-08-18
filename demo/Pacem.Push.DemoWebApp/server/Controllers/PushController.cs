@@ -28,7 +28,7 @@ namespace Pacem.Push.DemoWebApp.Controllers
         [HttpGet("vapidpublic")]
         public async Task<ActionResult<string>> VapidPublicKey()
         {
-            var request = CloneRequest(Request, "api/push/vapidpublickey");
+            var request = CloneRequest(Request, "api/v1/push/vapidpublickey");
             var response = await GetAuthorizedClient().SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -44,7 +44,7 @@ namespace Pacem.Push.DemoWebApp.Controllers
         [HttpPost("subscribe")]
         public async Task<ActionResult> SubscribeAsync()
         {
-            var request = CloneRequest(Request, "api/push/subscribe");
+            var request = CloneRequest(Request, "api/v1/push/subscribe");
             var response = await GetAuthorizedClient().SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -60,7 +60,7 @@ namespace Pacem.Push.DemoWebApp.Controllers
         [HttpPost("unsubscribe")]
         public async Task<ActionResult> UnsubscribeAsync()
         {
-            var request = CloneRequest(Request, "api/push/unsubscribe");
+            var request = CloneRequest(Request, "api/v1/push/unsubscribe");
             var response = await GetAuthorizedClient().SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -75,7 +75,7 @@ namespace Pacem.Push.DemoWebApp.Controllers
         [HttpPost("send/{userId}")]
         public Task PushNotification(string userId)
         {
-            return GetAuthorizedClient().PostAsync("api/push/send/" + userId, new
+            return GetAuthorizedClient().PostAsync("api/v1/push/send/" + userId, new
             {
                 title = "Demo App Notification!"
             });

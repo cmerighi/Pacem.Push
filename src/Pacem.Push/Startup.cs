@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Pacem.Push.Data;
 
 namespace Pacem.Push
@@ -81,6 +82,54 @@ namespace Pacem.Push
                     cors.AllowAnyHeader();
                 });
             });
+
+            // Open API
+
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Pacem Push Api", Version = "v1" });
+                options.DocumentFilter<Pacem.Push.Filters.OpenApiDocumentFilter>();
+                // options.ResolveConflictingActions(a => a.FirstOrDefault());
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+
+                // auth
+                string authority = Configuration.GetValue<string>("OAuth2:Authority").EnsureTrailingSlash();
+                var bearerSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    In = ParameterLocation.Header,
+                    OpenIdConnectUrl = new Uri(authority),
+                    Reference = new OpenApiReference
+                    {
+                        Id = "OAuth2Auth",
+                        Type = ReferenceType.SecurityScheme,
+                    },
+                    Scheme = "oauth2",
+                    Name = "OAuth2",
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        ClientCredentials = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(authority + "connect/authorize"),
+                            TokenUrl = new Uri(authority + "connect/token"),
+                            Scopes = new Dictionary<string, string>
+                            {
+                                { "pacem.push.api", "Pacem Push Api" }
+                            }
+                        }
+                    }
+                };
+                options.AddSecurityDefinition(bearerSecurityScheme.Reference.Id, bearerSecurityScheme);
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { bearerSecurityScheme, Array.Empty<string>() }
+                });
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,12 +147,28 @@ namespace Pacem.Push
 
             app.UseCors();
 
-            app.UseAuthentication();
-
             app.UseDefaultFiles().UseStaticFiles();
+
+            #region OpenAPI/Swagger
+
+            app.UseSwagger(options =>
+            {
+                options.RouteTemplate = "openapi/{documentName}/pacem-push.json";
+            });
+            app.UseSwaggerUI(options =>
+            {
+                options.InjectStylesheet("/css/openapi.css");
+                options.InjectJavascript("/js/openapi.js");
+                options.DefaultModelsExpandDepth(-1);
+                options.SwaggerEndpoint("/openapi/v1/pacem-push.json", "Pacem Push Api V1");
+                options.RoutePrefix = "openapi";
+            });
+
+            #endregion
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

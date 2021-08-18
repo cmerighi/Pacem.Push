@@ -29,7 +29,7 @@ namespace Pacem.Push.Tests
 
                 using (var client = server.CreateClient())
                 {
-                    var response = await client.GetAsync("/api/push/vapidpublickey");
+                    var response = await client.GetAsync("/api/v1/push/vapidpublickey");
                     response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
                     string publicKey = await response.Content.ReadAsStringAsync();
                     publicKey.Should().Be(Utils.DEFAULT_VAPID_PUBLIC_KEY);

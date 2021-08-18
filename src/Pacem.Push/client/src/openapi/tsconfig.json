@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": false,
+    "target": "es6",
+    "lib": [ "es2015", "dom" ],
+    "moduleResolution": "node",
+    "outFile": "../../../wwwroot/js/openapi.js",
+    "declaration": false,
+    "experimentalDecorators": true
+  },
+  "compileOnSave": false,
+  "exclude": [
+  ]
+}
