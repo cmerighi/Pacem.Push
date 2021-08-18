@@ -349,3 +349,5 @@ Properties/
 demo/Pacem.Push.DemoWebApp/wwwroot/sw.js
 demo/Pacem.Push.DemoWebApp/wwwroot/js/
 demo/Pacem.Push.DemoWebApp/wwwroot/css/
+src/Pacem.Push/wwwroot/js/
+src/Pacem.Push/wwwroot/css/

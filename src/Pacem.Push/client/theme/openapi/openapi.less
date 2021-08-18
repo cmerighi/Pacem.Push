@@ -1,0 +1,84 @@
+﻿@import "../theme";
+
+.swagger-ui {
+
+    .topbar{
+        background-color: @color_default;
+    }
+
+    .topbar-wrapper {
+        > a {
+            height: 73px;
+            line-height: $height;
+            display: inline-block;
+
+            &::before {
+                content: 'Pacem Push';
+            }
+
+            > img {
+                display: none;
+            }
+        }
+    }
+}
+
+.swagger-ui .topbar .download-url-wrapper .select-label select,
+.swagger-ui .response-control-media-type--accept-controller select {
+    border-color: @color_primary;
+}
+
+.swagger-ui .info .title
+small.version-stamp {
+    background-color: @color_primary;
+}
+
+.swagger-ui {
+    color: @color_default;
+
+    .info {
+        a {
+            color: @color_disabled;
+
+            &:hover {
+                color: @color_default;
+            }
+        }
+    }
+}
+
+.swagger-ui label {
+    font-weight: 400;
+}
+
+.swagger-ui,
+.swagger-ui label,
+.swagger-ui .info .title,
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .opblock-external-docs-wrapper p,
+.swagger-ui .opblock-title_normal p {
+    font-family: @font_std;
+}
+
+.swagger-ui .opblock .opblock-summary-operation-id,
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-path__deprecated {
+    font-family: @font_tech;
+}
+
+.swagger-ui table tbody tr.response td.response-col_status:first-of-type {
+    padding-top: 16px;
+}
+
+.swagger-ui table tbody tr.response td.response-col_description {
+    padding-top: 0;
+
+    > .response-col_description__inner {
+        font-style: italic;
+        font-family: @font_main;
+        font-size: 14px;
+        padding-top: 2px;
+    }
+}
+
+@import "markdown";

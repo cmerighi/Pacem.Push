@@ -6,11 +6,11 @@ using Pacem.Push.Entities;
 using Pacem.Push.Services;
 using System.Threading.Tasks;
 
-namespace Pacem.Push.Controllers
+namespace Pacem.Push.Controllers.V1
 {
     [Authorize] // <- OAuth2 introspection
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/push")]
     public class PushController : ControllerBase
     {
         private readonly ILogger<PushController> _logger;
