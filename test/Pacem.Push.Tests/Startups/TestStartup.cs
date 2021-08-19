@@ -31,7 +31,7 @@ namespace Pacem.Push.Tests
             services.AddDbContext<PushDbContext>(options =>
             {
                 options.UseInMemoryDatabase("PushDatabase");
-            }, ServiceLifetime.Singleton);
+            }, ServiceLifetime.Transient);
             services.AddScoped<IPushService, SqlServerPushService>();
             services.AddScoped<IVapidDetailsStore, SqlServerVapidDetailStore>();
 
