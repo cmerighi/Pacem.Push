@@ -83,6 +83,12 @@ namespace Pacem.Push
                 });
             });
 
+            // Let's encrypt auto renew capabilities
+            services.AddPacemAcmeHttpChallenge(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("AcmeStorage");
+            });
+
             // Open API
 
             services.AddSwaggerGen(options =>
@@ -135,6 +141,9 @@ namespace Pacem.Push
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // letsencrypt validation (put it here, before the https redirection in prod)
+            app.UsePacemAcmeHttpChallenge();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -143,7 +152,6 @@ namespace Pacem.Push
             {
                 app.UseHttpsRedirection();
             }
-
 
             app.UseCors();
 
