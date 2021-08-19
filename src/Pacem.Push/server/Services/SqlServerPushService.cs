@@ -38,6 +38,7 @@ namespace Pacem.Push.Services
             }
 
             var subscriptions = await _db.SubscriptionSet
+                .AsNoTracking()
                 .Where(s =>
                     s.ClientId == clientId
                     && s.Client.IsEnabled
