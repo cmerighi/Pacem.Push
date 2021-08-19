@@ -16,6 +16,7 @@
 		<PackageReference Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="5.1.0" />
 		<PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+		<PackageReference Include="Pacem.Mvc.Acme" Version="0.6.0" />
 	</ItemGroup>
 
 	<ItemGroup>
