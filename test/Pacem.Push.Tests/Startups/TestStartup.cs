@@ -31,11 +31,11 @@ namespace Pacem.Push.Tests
             services.AddDbContext<PushDbContext>(options =>
             {
                 options.UseInMemoryDatabase("PushDatabase");
-            });
+            }, ServiceLifetime.Singleton);
             services.AddScoped<IPushService, SqlServerPushService>();
             services.AddScoped<IVapidDetailsStore, SqlServerVapidDetailStore>();
 
-            var testedAssembly = typeof(Push.Controllers.PushController).Assembly;
+            var testedAssembly = typeof(Push.Controllers.V1.PushController).Assembly;
 
             services.AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
